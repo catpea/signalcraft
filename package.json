@@ -1,7 +1,7 @@
 {
   "name": "signalcraft",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tiny visual programming language.",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,6 @@
   },
   "keywords": [],
   "author": "",
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/catpea/signalcraft.git"
@@ -19,6 +18,5 @@
     "url": "https://github.com/catpea/signalcraft/issues"
   },
   "homepage": "https://github.com/catpea/signalcraft#readme",
-
   "license": "ISC"
 }
