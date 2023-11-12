@@ -1,0 +1,24 @@
+{
+  "name": "signalcraft",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A tiny visual programming language.",
+  "main": "index.js",
+  "scripts": {
+    "save": "git add .; git commit -m 'New Release'; git push; npm version patch; npm publish; git push;",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/catpea/signalcraft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/catpea/signalcraft/issues"
+  },
+  "homepage": "https://github.com/catpea/signalcraft#readme",
+
+  "license": "ISC"
+}
