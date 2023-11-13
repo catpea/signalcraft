@@ -18,5 +18,8 @@
     "url": "https://github.com/catpea/signalcraft/issues"
   },
   "homepage": "https://github.com/catpea/signalcraft#readme",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^5.3.2"
+  }
 }

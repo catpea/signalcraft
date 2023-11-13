@@ -1,62 +1,50 @@
 #!/usr/bin/env node
 
-import NodeTree from "./src/NodeTree.js";
-import Node from "./src/Node.js";
-import Link from "./src/Link.js";
+import NodeTree from './src/NodeTree.js';
 
-// Example usage
+// Configuring The System
 const nodeTree = new NodeTree();
 
-// const node1 = nodeTree.newNode("Data Node 1", (sum, input)=>{ console.log(`got ${sum} and ${input}.`); return 2}, 100, 100);
-// const node3 = nodeTree.newNode("Node 3", (sum, input)=>{ console.log(`got ${sum} and ${input}.`); return 7}, 200, 200);
+// What ports are supported in this program:
+const port0 = nodeTree.registerPort( 'Note',     {value: ''}, ['String'] );
+const port1 = nodeTree.registerPort( 'Number',   {value: 0}, ['Number'] );
+const port2 = nodeTree.registerPort( 'Color',    {value: 'red'}, ['Number', 'Object'] );
+const port3 = nodeTree.registerPort( 'Code',     {value: 'function(in){return in;}'}, ['String'] );
 
-const type0 = nodeTree.newType(
-  {
-    name: "JavaScript Value",
-    value: -7,
-  },
-  instance => instance.data
-);
-const type1 = nodeTree.newType(
-  {
-    name: "Addition Node",
-  },
-  instance => (sum, data) sum + data,
-);
+// What node types are available.
+const type0 = nodeTree.registerType( 'Data', 'Value', ['Number'], (instance) => instance.value );
+const type1 = nodeTree.registerType( 'Math', 'Addition Node', ['Note'], (dependencies, data) => dependencies.reduce((sum,val)=>sum+val,0), );
+const type2 = nodeTree.registerType( 'Math', 'Multiplication Node', ['Note'], (dependencies, data) => dependencies.reduce((sum,val)=>sum*val,0), );
+const type3 = nodeTree.registerType( 'Demo', 'Kitchen Sink', ['Number', 'Color', 'Code'], (instance) => instance.number );
 
-const type2 = nodeTree.newType(
-  {
-    name: "Multiplication Node",
-  },
-  instance => (sum, data) sum * data,
-);
-
-const type3 = nodeTree.newType(
-  {
-    name: "Kitchen Sink",
-    value: 2,
-    color: "red",
-    weight: 5,
-  },
-  instance => instance.number
-);
-
-// const node1 = nodeTree.newNode("Data Node 1", 2, 100, 100);
+console.log('Library', nodeTree.dumpLibrary());
 
 
-const node1 = nodeTree.newNode("Node 1", "Kitchen Sink",     {weight: 1});
-const node2 = nodeTree.newNode("Node 2", "JavaScript Value", {value: 5});
-const node3 = nodeTree.newNode("Node 3", "Addition Node");
-const node4 = nodeTree.newNode("Node 4", "JavaScript Value", {value: 5});
-const node5 = nodeTree.newNode("Node 5", "Multiplication Node");
 
-nodeTree.createLink("Node 1", "Node 3");
-nodeTree.createLink("Node 2", "Node 3");
-nodeTree.createLink("Node 3", "Node 5");
-nodeTree.createLink("Node 4", "Node 5");
+// Building a program.
 
-//
-// console.log(node1.dump());
 
-nodeTree.setActiveNode(node5);
-console.log("Evaluation Result:", nodeTree.evaluate());
+const node1 = nodeTree.createNode('Node 1', 'Kitchen Sink',     {weight: 1});
+const node2 = nodeTree.createNode('Node 2', 'JavaScript Value', {value: 5});
+const node3 = nodeTree.createNode('Node 3', 'Addition Node');
+const node4 = nodeTree.createNode('Node 4', 'JavaScript Value', {value: 5});
+const node5 = nodeTree.createNode('Node 5', 'Multiplication Node');
+
+console.log('Created Nodes', nodeTree.dumpNodes().map(o=>`${o.name} (${o.type.name})`));
+
+nodeTree.linkPorts('Node 1', 'out', 'Node 3', 'in');
+nodeTree.linkPorts('Node 2', 'out', 'Node 3', 'in');
+nodeTree.linkPorts('Node 3', 'out', 'Node 5', 'in');
+nodeTree.linkPorts('Node 4', 'out', 'Node 5', 'in');
+
+nodeTree.setPrimaryNode(node5);
+nodeTree.subscribe( output => console.log(output) );
+nodeTree.start();
+
+let testValue = 1;
+setInterval(function(){
+  node1.send('in', testValue);
+  testValue++;
+}, 1_000);
+
+// console.log('Evaluation Result:', nodeTree.evaluate());

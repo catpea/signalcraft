@@ -1,19 +1,18 @@
 export default class Node {
   #name;
+  #type;
+  #data;
   #operation;
-  #x;
-  #y;
   #inputs;
   #outputs;
   #subscribers;
 
-  constructor(name, operation, x, y) {
+  constructor(name, type, data) {
+
     this.#name = name;
     this.#type = type;
     this.#data = data;
 
-    this.#x = x;
-    this.#y = y;
 
     this.#inputs = [];
     this.#outputs = [];
@@ -21,17 +20,7 @@ export default class Node {
     this.#subscribers = [];
   }
 
-  dump(){
-    return {
-      name: this.#name,
-      operation: this.#operation,
-      x: this.#x,
-      y: this.#y,
-      inputs: this.#inputs,
-      outputs: this.#outputs,
-      subscribers: this.#subscribers,
-    }
-  }
+
 
   get inputs() {
     return this.#inputs;
@@ -52,7 +41,7 @@ export default class Node {
     this.notifySubscribers("type", value);
   }
 
-  
+
 
   get name() {
     return this.#name;
@@ -63,23 +52,7 @@ export default class Node {
     this.notifySubscribers("name", value);
   }
 
-  get x() {
-    return this.#x;
-  }
 
-  set x(value) {
-    this.#x = value;
-    this.notifySubscribers("x", value);
-  }
-
-  get y() {
-    return this.#y;
-  }
-
-  set y(value) {
-    this.#y = value;
-    this.notifySubscribers("y", value);
-  }
 
 
 
@@ -105,6 +78,15 @@ export default class Node {
     console.log(`evaluate() called on ${this.#name} which has ${this.#inputs.length} dependencies (${this.#inputs.map(i=>i.name).join(', ')}) that will be evaluated first.`);
       let result = null;
 
+      // prefetch data out of all inputs linked to this node.
+      const dependenciesInput = [];
+      for (const dependency of this.#inputs) {
+        dependenciesInput.push(dependency.evaluate());
+      }
+
+      this.#type.evaluate(dependenciesInput, this.#data);
+
+
      // Basic arithmetic operations for demonstration
      if (typeof this.#operation === "function") {
        result = this.#inputs.reduce((sum, input) => this.#operation(sum, input.evaluate()), 0);
@@ -122,5 +104,13 @@ export default class Node {
    }
 
 
-
+   dump(){
+     return {
+       name: this.#name,
+       operation: this.#operation,
+       inputs: this.#inputs,
+       outputs: this.#outputs,
+       subscribers: this.#subscribers,
+     }
+   }
 }
