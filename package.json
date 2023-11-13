@@ -1,7 +1,7 @@
 {
   "name": "signalcraft",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A tiny visual programming language.",
   "main": "index.js",
   "scripts": {
