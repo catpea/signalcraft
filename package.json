@@ -5,6 +5,7 @@
   "description": "A tiny visual programming language.",
   "main": "index.js",
   "scripts": {
+    "serve": "./build-and-watch.js",
     "save": "git add .; git commit -m 'New Release'; git push; npm version patch; npm publish; git push;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,6 +21,14 @@
   "homepage": "https://github.com/catpea/signalcraft#readme",
   "license": "ISC",
   "dependencies": {
-    "bootstrap": "^5.3.2"
+    "bootstrap": "^5.3.2",
+    "h": "^1.0.0",
+    "jsx-dom": "^8.1.1",
+    "rxdb": "^14.17.1",
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.19.6"
   }
 }

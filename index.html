@@ -1,76 +1,81 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bootstrap demo</title>
-    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./styles.css" rel="stylesheet">
-    <script type="module" src="./src/ui/NodeLibrary.js"></script>
+    <link
+      href="./node_modules/bootstrap/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="./styles.css" rel="stylesheet" />
+
+    <script type="module" src="./dist/signalcraft-data.js"></script>
+    <script type="module" src="./dist/signalcraft-view.js"></script>
   </head>
   <body class="py-3 me-3">
-
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-3">
-          <!-- Library Pane -->
-          <node-library name="Library"></node-library>
+      <div class="row mb-3">
+        <div class="col">
+          <sc-view></sc-view>
         </div>
-        <div class="col bg-secondary rounded">
-          Pan+Zoom Canvas
-        </div>
-
       </div>
     </div>
 
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-3">
+          <!-- Library Pane -->
+          <!-- <node-library name="Library"></node-library> -->
+        </div>
+        <div class="col">
+          <!-- <sc-view></sc-view> -->
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-3">
+          <nav class="nav flex-column">
+            <a class="nav-link active" aria-current="page" href="#"
+              >Node Configuration</a
+            >
+            <a class="nav-link" href="#">Property Manager</a>
+            <a class="nav-link" href="#">Output Functions</a>
+          </nav>
+        </div>
+        <div class="col">
+          <div class="border border-darker rounded" style="min-height: 8rem;">
+            Code Area, function(){} for StandardOutput function
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Dropdown button
+      </button>
+      <ul class="dropdown-menu" style="">
+        <li><a class="dropdown-item" href="#">Action</a></li>
+        <li><a class="dropdown-item" href="#">Another action</a></li>
+        <li><a class="dropdown-item" href="#">Something else here</a></li>
+      </ul>
+    </div>
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+      new EventSource("/esbuild").addEventListener("change", () => location.reload() );
+      console.log("EventSource LiveReload Activated");
     </script>
 
     <script type="module">
-
-      import NodeTree from './src/api/NodeTree.js';
-
-      const nodeLibrary = document.querySelector('node-library');
-
-      const nodeTree = new NodeTree();
-
-      nodeTree.subscribe((property, value)=>{
-        if(property === 'library') nodeLibrary.dataLibrary = value; // when library changes, update the dataLibrary value;
-      })
-
-      const shelf0 = nodeTree.registerShelf( 'Data', 'Data sources.' );
-      const shelf1 = nodeTree.registerShelf( 'Math', 'Mathematical Operations' );
-      const shelf2 = nodeTree.registerShelf( 'Demo', 'Amazing Nodes' );
-
-      // What ports are supported in this program:
-      const port0 = nodeTree.registerPort( 'Note',     {value: ''}, ['String'] );
-      const port1 = nodeTree.registerPort( 'Number',   {value: 0}, ['Number'] );
-      const port2 = nodeTree.registerPort( 'Color',    {value: 'red'}, ['Number', 'Object'] );
-      const port3 = nodeTree.registerPort( 'Code',     {value: 'function(in){return in;}'}, ['String'] );
-
-      // What node types are available.
-      const type0 = nodeTree.registerType( 'Data', 'Value', ['Number'], (instance) => instance.value );
-      const type1 = nodeTree.registerType( 'Math', 'Addition Node', ['Note'], (dependencies, data) => dependencies.reduce((sum,val)=>sum+val,0), );
-      const type2 = nodeTree.registerType( 'Math', 'Multiplication Node', ['Note'], (dependencies, data) => dependencies.reduce((sum,val)=>sum*val,0), );
-      const type3 = nodeTree.registerType( 'Demo', 'Kitchen Sink', ['Number', 'Color', 'Code'], (instance) => instance.number );
-
-
-
-
-
-        let testValue = 1;
-        setInterval(function(){
-          testValue++;
-          // document.querySelector('node-library').setAttribute('name', `Library ${testValue}`);
-        }, 1_000);
-
-
-        NodeTree
-
+      //... import NodeTree from './src/api/NodeTree.js';
     </script>
-
-</body>
+  </body>
 </html>
