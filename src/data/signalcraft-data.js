@@ -1,4 +1,4 @@
-import ReactiveArray from './lib/ReactiveArray.js';
+import ReactiveArray from '../lib/ReactiveArray.js';
 
 globalThis.signalcraftDatabase = new Promise(async (resolve, reject) => {
 

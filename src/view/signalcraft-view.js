@@ -9,28 +9,70 @@ class BasicNode {
   w = 200;
   x = 0;
   y = 0;
+
   colors = [];
+
   constructor(){
     this.colors = (new Array(5).fill(0,0,5)) .map(o=>`hsl(${Math.random() * 360}, 20%, 35%)`);
     console.log(this.colors);
   }
+
+  #h = 0;
+  get h(){return this.#h}
+  set h(v){this.#h = v}
 }
 
-class Node extends BasicNode {
+
+class NodeProperties extends BasicNode {
+  #properties = [];
+
+  constructor(){
+    super()
+  }
+
+  addProperty(v){
+    this.#properties.push(v)
+  }
+
+
+}
+
+class Node extends NodeProperties {
   id = null;
   name = "Holla!";
+
   constructor(){
     super()
     this.id = uuid();
     this.x = Math.random() * 11_000;
     this.y = Math.random() * 8_000;
+
+    this.addProperty()
+
   }
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class View extends HTMLElement {
   #rootElement;
   #svgElement;
+  #svgDefs;
 
   #viewBox;
   #pan;
@@ -64,6 +106,7 @@ class View extends HTMLElement {
 
     this.#rootElement = this.shadowRootX.firstChild;
     this.#svgElement = this.shadowRootX.querySelector("svg");
+    this.#svgDefs = this.#svgElement.querySelector("defs");
   }
 
   async #installPanAndZoom() {
@@ -128,6 +171,25 @@ class View extends HTMLElement {
   async #monitorDatabase() {
     console.log("Awaiting db... ... ...");
     const db = await globalThis.signalcraftDatabase;
+
+    // this.#svgDefs.appendChild(
+    //   <g id="basic">
+    //      <rect class="interactive" width="222" height="80" ry="5" fill="red"/>
+    //      <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial">Geometry</text>
+    //      <circle class="interactive" cx="0" cy="50" r="5" fill="cyan"/>
+    //      <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial">Geometry</text>
+    //      <circle class="interactive" cx="222" cy="50" r="5" fill="magenta"/>
+    //    </g>
+    // );
+
+    // const updateNode = (o) => {};
+
+    // const appendNode = (o) => {
+      // this.#svgElement.appendChild(
+      //   <use x={o.x} y={o.y} href="#basic"/>
+      // );
+     // };
+
 
     const updateNode = (o) => {};
 

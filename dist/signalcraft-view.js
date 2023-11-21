@@ -509,7 +509,7 @@
   var v4_default = v4;
 
   // src/view/template.html
-  var template_default = '<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">\n\n<div class="bg-secondary rounded" style="overflow: hidden;">\n  Yup!\n  <slot></slot>\n  <svg xmlns="http://www.w3.org/2000/svg" style="border: 1px solid gold;">\n\n\n    <rect x="0" y="0" width="11000" height="8000" fill="silver"/>\n    <circle cx="150" cy="150" r="50" />\n    <circle cx="250" cy="250" r="50" />\n\n    <g id="myNode"   transform="translate(10,10)">\n       <!-- Node Body -->\n       <rect class="interactive" width="180" height="80" ry="5" fill="#555"/>\n\n       <!-- Node Title -->\n       <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial">Geometry</text>\n\n       <!-- Input Connector -->\n       <circle class="interactive" cx="0" cy="50" r="5" fill="cyan"/>\n       <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial">Geometry</text>\n\n       <!-- Output Connector -->\n       <circle class="interactive" cx="180" cy="50" r="5" fill="magenta"/>\n\n       <!-- <foreignObject   x="0" y="60" width="180" height="160">\n \n     In the context of SVG embedded in an HTML document, the XHTML\n     namespace could be omitted, but it is mandatory in the\n     context of an SVG document\n\n   <div class="interactive m-1" xmlns="http://www.w3.org/1999/xhtml">\n\n\n    <div class="dropdown">\n       <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">\n         Dropdown\n       </button>\n       <ul class="dropdown-menu">\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n       </ul>\n     </div>\n\n       <label for="customRange1" class="form-label interactive">Example range</label>\n       <input type="range" class="form-range  " id="customRange1">\n\n\n     </div>\n\n\n </foreignObject> -->\n     </g>\n\n  </svg>\n</div>\n';
+  var template_default = '<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">\n\n<div class="bg-secondary rounded" style="overflow: hidden;">\n  Yup!\n  <slot></slot>\n  <svg xmlns="http://www.w3.org/2000/svg" style="border: 1px solid gold;">\n    <defs>\n    </defs>\n\n\n    <rect x="0" y="0" width="11000" height="8000" fill="silver"/>\n    <circle cx="150" cy="150" r="50" />\n    <circle cx="250" cy="250" r="50" />\n\n    <g id="myNode"   transform="translate(10,10)">\n       <!-- Node Body -->\n       <rect class="interactive" width="180" height="80" ry="5" fill="#555"/>\n\n       <!-- Node Title -->\n       <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial">Geometry</text>\n\n       <!-- Input Connector -->\n       <circle class="interactive" cx="0" cy="50" r="5" fill="cyan"/>\n       <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial">Geometry</text>\n\n       <!-- Output Connector -->\n       <circle class="interactive" cx="180" cy="50" r="5" fill="magenta"/>\n\n       <!-- <foreignObject   x="0" y="60" width="180" height="160">\n\n     In the context of SVG embedded in an HTML document, the XHTML\n     namespace could be omitted, but it is mandatory in the\n     context of an SVG document\n\n   <div class="interactive m-1" xmlns="http://www.w3.org/1999/xhtml">\n\n\n    <div class="dropdown">\n       <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">\n         Dropdown\n       </button>\n       <ul class="dropdown-menu">\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n       </ul>\n     </div>\n\n       <label for="customRange1" class="form-label interactive">Example range</label>\n       <input type="range" class="form-range  " id="customRange1">\n\n\n     </div>\n\n\n </foreignObject> -->\n     </g>\n\n  </svg>\n</div>\n';
 
   // src/view/signalcraft-view.js
   var BasicNode = class {
@@ -522,8 +522,24 @@
       this.colors = new Array(5).fill(0, 0, 5).map((o) => `hsl(${Math.random() * 360}, 20%, 35%)`);
       console.log(this.colors);
     }
+    #h = 0;
+    get h() {
+      return this.#h;
+    }
+    set h(v) {
+      this.#h = v;
+    }
   };
-  var Node = class extends BasicNode {
+  var NodeProperties = class extends BasicNode {
+    #properties = [];
+    constructor() {
+      super();
+    }
+    addProperty(v) {
+      this.#properties.push(v);
+    }
+  };
+  var Node = class extends NodeProperties {
     id = null;
     name = "Holla!";
     constructor() {
@@ -531,11 +547,13 @@
       this.id = v4_default();
       this.x = Math.random() * 11e3;
       this.y = Math.random() * 8e3;
+      this.addProperty();
     }
   };
   var View = class extends HTMLElement {
     #rootElement;
     #svgElement;
+    #svgDefs;
     #viewBox;
     #pan;
     constructor() {
@@ -560,6 +578,7 @@
       );
       this.#rootElement = this.shadowRootX.firstChild;
       this.#svgElement = this.shadowRootX.querySelector("svg");
+      this.#svgDefs = this.#svgElement.querySelector("defs");
     }
     async #installPanAndZoom() {
       this.#svgElement.setAttribute("viewBox", `0 0 555 555`);
