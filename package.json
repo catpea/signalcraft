@@ -5,7 +5,7 @@
   "description": "A tiny visual programming language.",
   "main": "index.js",
   "scripts": {
-    "serve": "./build-and-watch.js",
+    "start": "./start.js",
     "save": "git add .; git commit -m 'New Release'; git push; npm version patch; npm publish; git push;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

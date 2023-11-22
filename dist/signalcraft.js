@@ -1,4 +1,237 @@
 (() => {
+  // src/library/ReactiveArray.js
+  var ReactiveArray = class {
+    #paused = false;
+    #array = [];
+    #listeners = [];
+    // methods that mutate array
+    push(...items) {
+      const result = this.#array.push(...items);
+      this.#notify();
+      return result;
+    }
+    pop() {
+      const item = this.#array.pop();
+      this.#notify();
+      return item;
+    }
+    reverse() {
+      this.#array = [...this.#array.reverse()];
+      this.#notify();
+      return this.#array;
+    }
+    shift() {
+      const result = this.#array.shift();
+      this.#notify();
+      return result;
+    }
+    unshift(...items) {
+      const result = this.#array.unshift(...items);
+      this.#notify();
+      return result;
+    }
+    splice(start, deleteCount, ...items) {
+      const result = this.#array.splice(start, deleteCount, ...items);
+      this.#notify();
+      return result;
+    }
+    sort(compareFunction) {
+      const result = this.#array.sort(compareFunction);
+      this.#notify();
+      return result;
+    }
+    fill(value, start, end) {
+      const result = this.#array.fill(value, start, end);
+      this.#notify();
+      return result;
+    }
+    copyWithin(target, start, end) {
+      const result = this.#array.copyWithin(target, start, end);
+      this.#notify();
+      return result;
+    }
+    // methods that do not mutate array
+    at(index2) {
+      return this.#array.at(index2);
+    }
+    concat(...args) {
+      return this.#array.concat(...args);
+    }
+    join(separator) {
+      return this.#array.join(separator);
+    }
+    slice(start, end) {
+      return this.#array.slice(start, end);
+    }
+    toLocaleString() {
+      return this.#array.toLocaleString();
+    }
+    toString() {
+      return this.#array.toString();
+    }
+    includes(valueToFind, fromIndex) {
+      return this.#array.includes(valueToFind, fromIndex);
+    }
+    indexOf(searchElement, fromIndex) {
+      return this.#array.indexOf(searchElement, fromIndex);
+    }
+    lastIndexOf(searchElement, fromIndex) {
+      return this.#array.lastIndexOf(searchElement, fromIndex);
+    }
+    map(callbackfn, thisArg) {
+      return this.#array.map(callbackfn, thisArg);
+    }
+    reduce(callbackfn, initialValue) {
+      return this.#array.reduce(callbackfn, initialValue);
+    }
+    reduceRight(callbackfn, initialValue) {
+      return this.#array.reduceRight(callbackfn, initialValue);
+    }
+    forEach(callbackfn, thisArg) {
+      return this.#array.forEach(callbackfn, thisArg);
+    }
+    filter(callbackfn, thisArg) {
+      return this.#array.filter(callbackfn, thisArg);
+    }
+    some(callbackfn, thisArg) {
+      return this.#array.some(callbackfn, thisArg);
+    }
+    every(callbackfn, thisArg) {
+      return this.#array.every(callbackfn, thisArg);
+    }
+    flat(depth) {
+      return this.#array.flat(depth);
+    }
+    flatMap(callbackfn, thisArg) {
+      return this.#array.flatMap(callbackfn, thisArg);
+    }
+    entries() {
+      return this.#array.entries();
+    }
+    keys() {
+      return this.#array.keys();
+    }
+    values() {
+      return this.#array.values();
+    }
+    // helpers
+    length() {
+      return this.#array.length;
+    }
+    isEmpty() {
+      return this.#array.length === 0;
+    }
+    isNotEmpty() {
+      return !this.isEmpty();
+    }
+    first() {
+      return this.#array[0];
+    }
+    last() {
+      return this.#array[this.length() - 1];
+    }
+    toArray() {
+      return [...this.#array];
+    }
+    dump() {
+      console.log(`Array`, this.#array);
+    }
+    printDebug() {
+      console.log(`Array: ${this.#array}`);
+      console.log(`Listeners: ${this.#listeners.length}`);
+    }
+    // subscriptions
+    #notify() {
+      if (this.#paused)
+        return;
+      this.#listeners.forEach((callback) => callback(this.#array));
+    }
+    subscribe(callback) {
+      if (typeof callback !== "function") {
+        throw new Error("callback should be a function");
+      }
+      this.#listeners.push(callback);
+      return () => this.unsubscribe(callback);
+    }
+    unsubscribe(callback) {
+      this.#listeners = this.#listeners.filter((cb) => cb !== callback);
+    }
+    // batch subscriptions
+    pauseSubscriptions() {
+      this.#paused = true;
+    }
+    resumeSubscriptions() {
+      this.#paused = false;
+      this.#notify();
+    }
+    // advanced extras
+    clearSubscriptions() {
+      this.#listeners = [];
+    }
+  };
+
+  // src/library/ReactiveObject.js
+  var ReactiveObject = class {
+    #observers = {};
+    constructor(obj) {
+      if (typeof obj !== "object")
+        throw new TypeError("Argument must be an object.");
+      Object.entries(obj).forEach(([key, val]) => this.#defineReactiveProperty(key, val));
+    }
+    #defineReactiveProperty(key, val) {
+      Object.defineProperty(this, key, {
+        get: () => val,
+        set: (newValue) => {
+          if (newValue === val)
+            return;
+          val = newValue;
+          this.#notifyObservers(key, newValue);
+        }
+      });
+    }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
+    }
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      observer(this[key]);
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
+    }
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
+    }
+  };
+
+  // src/class/Signalcraft.js
+  var Signalcraft = class {
+    nodes = new ReactiveArray();
+    edges = new ReactiveArray();
+    setup = new ReactiveObject({
+      backgroundColor: "green"
+    });
+    constructor() {
+    }
+    async ready() {
+    }
+    async start() {
+    }
+    async stop() {
+    }
+    addNode() {
+    }
+    removeNode() {
+    }
+    linkNodes() {
+    }
+  };
+
   // node_modules/jsx-dom/index.js
   var keys = Object.keys;
   function isBoolean(val) {
@@ -460,114 +693,36 @@
     ShadowRoot
   };
 
-  // node_modules/uuid/dist/esm-browser/rng.js
-  var getRandomValues;
-  var rnds8 = new Uint8Array(16);
-  function rng() {
-    if (!getRandomValues) {
-      getRandomValues = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
-      if (!getRandomValues) {
-        throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
-      }
-    }
-    return getRandomValues(rnds8);
-  }
+  // src/element/signalcraft-view/template.html
+  var template_default = '<div class="bg-secondary rounded" style="overflow: hidden;">\n\n</div>\n';
 
-  // node_modules/uuid/dist/esm-browser/stringify.js
-  var byteToHex = [];
-  for (let i = 0; i < 256; ++i) {
-    byteToHex.push((i + 256).toString(16).slice(1));
-  }
-  function unsafeStringify(arr, offset = 0) {
-    return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
-  }
-
-  // node_modules/uuid/dist/esm-browser/native.js
-  var randomUUID = typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto);
-  var native_default = {
-    randomUUID
-  };
-
-  // node_modules/uuid/dist/esm-browser/v4.js
-  function v4(options, buf, offset) {
-    if (native_default.randomUUID && !buf && !options) {
-      return native_default.randomUUID();
-    }
-    options = options || {};
-    const rnds = options.random || (options.rng || rng)();
-    rnds[6] = rnds[6] & 15 | 64;
-    rnds[8] = rnds[8] & 63 | 128;
-    if (buf) {
-      offset = offset || 0;
-      for (let i = 0; i < 16; ++i) {
-        buf[offset + i] = rnds[i];
-      }
-      return buf;
-    }
-    return unsafeStringify(rnds);
-  }
-  var v4_default = v4;
-
-  // src/view/template.html
-  var template_default = '<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">\n\n<div class="bg-secondary rounded" style="overflow: hidden;">\n  Yup!\n  <slot></slot>\n  <svg xmlns="http://www.w3.org/2000/svg" style="border: 1px solid gold;">\n    <defs>\n    </defs>\n\n\n    <rect x="0" y="0" width="11000" height="8000" fill="silver"/>\n    <circle cx="150" cy="150" r="50" />\n    <circle cx="250" cy="250" r="50" />\n\n    <g id="myNode"   transform="translate(10,10)">\n       <!-- Node Body -->\n       <rect class="interactive" width="180" height="80" ry="5" fill="#555"/>\n\n       <!-- Node Title -->\n       <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial">Geometry</text>\n\n       <!-- Input Connector -->\n       <circle class="interactive" cx="0" cy="50" r="5" fill="cyan"/>\n       <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial">Geometry</text>\n\n       <!-- Output Connector -->\n       <circle class="interactive" cx="180" cy="50" r="5" fill="magenta"/>\n\n       <!-- <foreignObject   x="0" y="60" width="180" height="160">\n\n     In the context of SVG embedded in an HTML document, the XHTML\n     namespace could be omitted, but it is mandatory in the\n     context of an SVG document\n\n   <div class="interactive m-1" xmlns="http://www.w3.org/1999/xhtml">\n\n\n    <div class="dropdown">\n       <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">\n         Dropdown\n       </button>\n       <ul class="dropdown-menu">\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n         <li><button class="dropdown-item btn btn-sm" type="button">Dropdown item</button></li>\n       </ul>\n     </div>\n\n       <label for="customRange1" class="form-label interactive">Example range</label>\n       <input type="range" class="form-range  " id="customRange1">\n\n\n     </div>\n\n\n </foreignObject> -->\n     </g>\n\n  </svg>\n</div>\n';
-
-  // src/view/signalcraft-view.js
-  var BasicNode = class {
-    type = "basic";
-    w = 200;
-    x = 0;
-    y = 0;
-    colors = [];
-    constructor() {
-      this.colors = new Array(5).fill(0, 0, 5).map((o) => `hsl(${Math.random() * 360}, 20%, 35%)`);
-      console.log(this.colors);
-    }
-    #h = 0;
-    get h() {
-      return this.#h;
-    }
-    set h(v) {
-      this.#h = v;
-    }
-  };
-  var NodeProperties = class extends BasicNode {
-    #properties = [];
-    constructor() {
-      super();
-    }
-    addProperty(v) {
-      this.#properties.push(v);
-    }
-  };
-  var Node = class extends NodeProperties {
-    id = null;
-    name = "Holla!";
-    constructor() {
-      super();
-      this.id = v4_default();
-      this.x = Math.random() * 11e3;
-      this.y = Math.random() * 8e3;
-      this.addProperty();
-    }
-  };
-  var View = class extends HTMLElement {
+  // src/element/signalcraft-view/index.js
+  var SignalcraftViewElement = class extends HTMLElement {
+    #unsubscribe = [];
     #rootElement;
     #svgElement;
     #svgDefs;
     #viewBox;
     #pan;
+    #signalcraft;
     constructor() {
       super();
+      this.#signalcraft = globalThis.signalcraft;
       const div1 = document.createElement("div");
       this.shadowRootX = this.appendChild(div1);
     }
     connectedCallback() {
       this.#setup();
     }
+    destroy() {
+      this.#unsubscribe.map((o) => o());
+    }
+    #sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
     async #setup() {
       await this.#templateInitialization();
       await this.#installPanAndZoom();
-      await this.#injectNodes();
       await this.#monitorDatabase();
     }
     async #templateInitialization() {
@@ -577,24 +732,44 @@
         template.content.cloneNode(true)
       );
       this.#rootElement = this.shadowRootX.firstChild;
-      this.#svgElement = this.shadowRootX.querySelector("svg");
-      this.#svgDefs = this.#svgElement.querySelector("defs");
+      this.#svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      this.#svgElement.setAttributeNS(null, "style", "border: 1px solid gold;");
+      this.#svgElement.setAttributeNS(null, "viewBox", `0 0 555 555`);
+      this.#svgElement.setAttributeNS(null, "width", "555");
+      this.#svgElement.setAttributeNS(null, "height", "555");
+      this.#rootElement.appendChild(this.#svgElement);
+      const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect2.setAttributeNS(null, "class", "background");
+      rect2.setAttributeNS(null, "x", "0");
+      rect2.setAttributeNS(null, "y", "0");
+      rect2.setAttributeNS(null, "width", "11000");
+      rect2.setAttributeNS(null, "height", "8000");
+      rect2.setAttributeNS(null, "fill", "red");
+      this.#svgElement.appendChild(rect2);
+      const circle3 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle3.setAttributeNS(null, "cx", "150");
+      circle3.setAttributeNS(null, "cy", "150");
+      circle3.setAttributeNS(null, "r", "50");
+      this.#svgElement.appendChild(circle3);
+      const circle4 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle4.setAttributeNS(null, "cx", "250");
+      circle4.setAttributeNS(null, "cy", "250");
+      circle4.setAttributeNS(null, "r", "50");
+      this.#svgElement.appendChild(circle4);
     }
     async #installPanAndZoom() {
-      this.#svgElement.setAttribute("viewBox", `0 0 555 555`);
       const aspectRatio = this.#svgElement.width.baseVal.value / this.#svgElement.height.baseVal.value;
       this.#viewBox = { x: 0, y: 0, width: 555, height: 555 / aspectRatio };
       this.#pan = { enabled: false, start: { x: 0, y: 0 } };
       this.#svgElement.addEventListener("mousedown", (event2) => {
-        const isInteractive = event2.target.classList.contains("interactive");
-        console.log(event2.target, { isInteractive });
-        if (isInteractive)
+        const isBackground = event2.target.classList.contains("background");
+        if (!isBackground)
           return;
         this.#pan.enabled = true;
         this.#pan.start.x = event2.clientX;
         this.#pan.start.y = event2.clientY;
       });
-      this.#svgElement.addEventListener("mousemove", (event2) => {
+      window.addEventListener("mousemove", (event2) => {
         if (!this.#pan.enabled)
           return;
         var scaleX = this.#viewBox.width / this.#svgElement.clientWidth;
@@ -603,10 +778,7 @@
         this.#viewBox.y += (this.#pan.start.y - event2.clientY) * scaleY;
         this.#pan.start.x = event2.clientX;
         this.#pan.start.y = event2.clientY;
-        this.#svgElement.setAttribute(
-          "viewBox",
-          `${this.#viewBox.x} ${this.#viewBox.y} ${this.#viewBox.width} ${this.#viewBox.height}`
-        );
+        this.#svgElement.setAttribute("viewBox", `${this.#viewBox.x} ${this.#viewBox.y} ${this.#viewBox.width} ${this.#viewBox.height}`);
       });
       this.#svgElement.addEventListener("mouseup", (event2) => {
         this.#pan.enabled = false;
@@ -623,35 +795,41 @@
       });
     }
     async #monitorDatabase() {
-      console.log("Awaiting db... ... ...");
-      const db = await globalThis.signalcraftDatabase;
       const updateNode = (o) => {
       };
       const appendNode = (o) => {
         this.#svgElement.appendChild(
-          /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: o.colors[0] }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, "Geometry"), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, "Geometry"), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
+          /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: o.colors[0] }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
         );
       };
-      db.todos.subscribe((list) => {
-        const newItems = list.filter(
-          (o) => !this.#svgElement.getElementById(o.id)
-        );
-        const oldItems = list.filter(
-          (o) => this.#svgElement.getElementById(o.id)
-        );
-        console.log(
-          "Currently have " + newItems.length + " new items and " + oldItems.length + " old ones."
-        );
-        newItems.forEach((item) => appendNode(item));
-        oldItems.forEach((item) => updateNode(item));
-      });
-      let counter = 0;
-      let intervalID = setInterval(() => {
-        db.todos.push(new Node());
-        if (counter > 1e3)
-          clearInterval(intervalID);
-        counter++;
-      }, 1);
+      this.#unsubscribe.push(
+        this.#signalcraft.setup.subscribe(
+          "backgroundColor",
+          (backgroundColor) => {
+            const node = this.#svgElement.querySelector(".background");
+            node.setAttribute("fill", backgroundColor);
+          }
+        )
+      );
+      this.#unsubscribe.push(
+        this.#signalcraft.edges.subscribe((list) => {
+        })
+      );
+      this.#unsubscribe.push(
+        this.#signalcraft.nodes.subscribe((list) => {
+          const newItems = list.filter(
+            (o) => !this.#svgElement.getElementById(o.id)
+          );
+          const oldItems = list.filter(
+            (o) => this.#svgElement.getElementById(o.id)
+          );
+          console.log(
+            "Currently have " + newItems.length + " new items and " + oldItems.length + " old ones."
+          );
+          newItems.forEach((item) => appendNode(item));
+          oldItems.forEach((item) => updateNode(item));
+        })
+      );
     }
     async #injectNodes() {
       var node = this.#svgElement.getElementById("myNode");
@@ -687,5 +865,10 @@
       });
     }
   };
-  customElements.define("sc-view", View);
+
+  // src/signalcraft.js
+  var signalcraft = new Signalcraft();
+  globalThis.signalcraft = signalcraft;
+  signalcraft.start();
+  customElements.define("signalcraft-view", SignalcraftViewElement);
 })();

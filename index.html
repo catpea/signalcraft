@@ -4,20 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bootstrap demo</title>
-    <link
-      href="./node_modules/bootstrap/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="./styles.css" rel="stylesheet" />
 
-    <script type="module" src="./dist/signalcraft-data.js"></script>
-    <script type="module" src="./dist/signalcraft-view.js"></script>
+    <script type="module" src="./dist/signalcraft.js"></script>
+
   </head>
   <body class="py-3 me-3">
     <div class="container-fluid">
       <div class="row mb-3">
         <div class="col">
-          <sc-view></sc-view>
+          <signalcraft-view></signalcraft-view>
         </div>
       </div>
     </div>
@@ -29,7 +26,7 @@
           <!-- <node-library name="Library"></node-library> -->
         </div>
         <div class="col">
-          <!-- <sc-view></sc-view> -->
+          <!-- <signalcraft-view></signalcraft-view> -->
         </div>
       </div>
 
@@ -70,8 +67,10 @@
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+
       new EventSource("/esbuild").addEventListener("change", () => location.reload() );
       console.log("EventSource LiveReload Activated");
+
     </script>
 
     <script type="module">
