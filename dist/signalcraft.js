@@ -1544,6 +1544,7 @@
     #z = 0;
     #h = 100;
     #w = 300;
+    #bg = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
     constructor() {
     }
     #subscribers = {};
@@ -1575,6 +1576,14 @@
     }
     get name() {
       return this.#name;
+    }
+    set bg(v) {
+      this.#bg = v;
+      this.version++;
+      this.notify("updated", "bg", v);
+    }
+    get bg() {
+      return this.#bg;
     }
     set version(noop) {
       this.#version++;
@@ -1815,7 +1824,7 @@
     }
   };
 
-  // src/SignalcraftCore.js
+  // src/Core.js
   var SignalcraftCore = class {
     #nodes = new NodeCollection();
     // #edges = new EdgeCollection();
@@ -2432,7 +2441,7 @@
     #appendNode({ node: o }) {
       console.log(`appendNode appendNode appendNode x=${o.x}`, o);
       this.#svgScene.appendChild(
-        /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: "teal" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
+        /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: o.bg }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
       );
     }
     async #installPanAndZoom() {
@@ -2480,11 +2489,11 @@
   };
 
   // src/signalcraft.js
-  var signalcraft = new SignalcraftCore();
-  globalThis.signalcraft = signalcraft;
+  var core = new SignalcraftCore();
+  globalThis.signalcraft = core;
   signalcraft.start();
   customElements.define("signalcraft-view", SignalcraftViewElement);
-  for (let i = 0; i < 123; i++) {
+  for (let i = 0; i < 666; i++) {
     signalcraft.createNode("color");
   }
   signalcraft.createNode("text");

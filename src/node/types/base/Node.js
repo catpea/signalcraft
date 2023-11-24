@@ -15,6 +15,7 @@ export default class Node {
   #z = 0;
   #h = 100;
   #w = 300;
+  #bg = `hsl(${ parseInt(Math.random() * 360) }, 40%, 35%)`;
 
   constructor() {}
 
@@ -43,6 +44,8 @@ export default class Node {
     return this.#id;
   }
 
+
+
   set name(v) {
     this.#name = v;
     this.version++;
@@ -51,6 +54,17 @@ export default class Node {
   get name() {
     return this.#name;
   }
+
+  set bg(v) {
+    this.#bg = v;
+    this.version++;
+    this.notify("updated", "bg", v);
+  }
+  get bg() {
+    return this.#bg;
+  }
+
+
 
   set version(noop) {
     // silent update

@@ -125,7 +125,7 @@ export default class SignalcraftViewElement extends HTMLElement {
     this.#svgScene.appendChild(
 
       <g id={o.id} transform={`translate(${o.x},${o.y})`}>
-        <rect class="interactive" width={o.w} height="80" ry="5" fill="teal" />
+        <rect class="interactive" width={o.w} height="80" ry="5" fill={o.bg} />
         <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial" > Geometry </text>
         <circle class="interactive" cx="0" cy="50" r="5" fill="cyan" />
         <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial" > Geometry </text>
