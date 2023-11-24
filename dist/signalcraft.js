@@ -1776,51 +1776,42 @@
     }
   };
 
-  // src/library/ReactiveObjects.js
-  var ReactiveObjects = class {
-    #content = [];
-    #subscribers = {};
-    constructor() {
+  // src/library/ReactiveObject.js
+  var ReactiveObject = class {
+    #observers = {};
+    constructor(obj) {
+      if (typeof obj !== "object")
+        throw new TypeError("Argument must be an object.");
+      Object.entries(obj).forEach(([key, val]) => this.#defineReactiveProperty(key, val));
     }
-    create(obj) {
-      const id = "id" + Math.random().toString(36).substring(2);
-      const version = 1;
-      const operation = "id" + Math.random().toString(36).substring(2);
-      const deleted = false;
-      const newObj = { id, version, operation, deleted, ...obj };
-      this.#content.push(newObj);
-      this.#notify("created", { ...newObj });
-      return newObj;
+    #defineReactiveProperty(key, val) {
+      Object.defineProperty(this, key, {
+        get: () => val,
+        set: (newValue) => {
+          if (newValue === val)
+            return;
+          val = newValue;
+          this.#notifyObservers(key, newValue);
+        }
+      });
     }
-    remove(id) {
-      const obj = this.#content.find((obj2) => obj2.id === id);
-      if (obj) {
-        obj.deleted = true;
-        this.#notify("removed", { ...obj });
-      }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
     }
-    removeDeleted(id) {
-      this.#content = this.#content.filter((obj) => !obj.deleted);
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      observer(this[key]);
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
     }
-    update(id, property, value) {
-      const obj = this.#content.find((obj2) => obj2.id === id);
-      if (obj && obj[property] !== value) {
-        obj.version = obj.version + 1;
-        obj.operation = "id" + Math.random().toString(36).substring(2);
-        obj[property] = value;
-        this.#notify("updated", { ...obj });
-      }
-    }
-    #notify(type, data) {
-      Object.values(this.#subscribers).forEach((callback) => callback(type, data));
-    }
-    subscribe(callback) {
-      const id = Math.random().toString(36).substring(2);
-      this.#subscribers[id] = callback;
-      return () => this.unsubscribe(id);
-    }
-    unsubscribe(id) {
-      delete this.#subscribers[id];
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
     }
   };
 
@@ -1828,8 +1819,12 @@
   var SignalcraftCore = class {
     #nodes = new NodeCollection();
     // #edges = new EdgeCollection();
-    #setup = new ReactiveObjects({ fgColor: "blue", bgColor: "green" });
+    #setup = new ReactiveObject({ fgColor: "blue", bgColor: "green" });
     constructor() {
+      let intervalID = setInterval(() => {
+        this.#setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
+        console.log(this.#setup.bgColor);
+      }, 1e3);
     }
     async ready() {
     }

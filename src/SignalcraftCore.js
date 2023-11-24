@@ -1,6 +1,6 @@
 import NodeCollection from "./node/NodeCollection.js";
 // import EdgeCollection from "./node/EdgeCollection.js";
-import ReactiveObject from "./library/ReactiveObjects.js";
+import ReactiveObject from "./library/ReactiveObject.js";
 
 export default class SignalcraftCore {
   #nodes = new NodeCollection();
@@ -8,10 +8,10 @@ export default class SignalcraftCore {
   #setup = new ReactiveObject({ fgColor: "blue", bgColor: "green" });
 
   constructor() {
-    // let intervalID = setInterval(() => {
-    //   this.#setup.bgColor = `hsl(${ parseInt(Math.random() * 360) }, 20%, 35%)`;
-    //   console.log(this.#setup.bgColor);
-    // }, 1_000);
+    let intervalID = setInterval(() => {
+      this.#setup.bgColor = `hsl(${ parseInt(Math.random() * 360) }, 20%, 35%)`;
+      console.log(this.#setup.bgColor);
+    }, 1_000);
 
   }
 
