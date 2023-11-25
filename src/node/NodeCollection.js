@@ -14,6 +14,11 @@ export default class NodeCollection {
     this.#registry.register("function", FunctionNode);
   }
 
+  forEach(callback){
+    this.#content.forEach(callback);
+  }
+
+
   create(...arg) {
     const node = this.#registry.create(...arg);
     this.#content.push(node);

@@ -15,17 +15,25 @@ export default class Node {
   #z = 0;
   #h = 100;
   #w = 300;
-  #bg = `hsl(${ parseInt(Math.random() * 360) }, 40%, 35%)`;
 
-  constructor() {}
+  // Theme
+  #bg = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
+
+  constructor() {
+    let intervalID = setInterval(() => {
+      this.x = Math.random() > 0.5 ? this.x + 50 : this.x - 50;
+      this.y = Math.random() > 0.5 ? this.y + 50 : this.y - 50;
+    }, 5_000*Math.random());
+  }
 
   #subscribers = {};
 
-  notify(type, property, value) {
+  notify({type, name, oldVal, newVal}) {
     Object.values(this.#subscribers).forEach((callback) =>
-      callback(type, property, value)
+      callback({ type, name, oldVal, newVal, node:this })
     );
   }
+
   subscribe(callback) {
     const id = Math.random().toString(36).substring(2);
     this.#subscribers[id] = callback;
@@ -35,87 +43,89 @@ export default class Node {
     delete this.#subscribers[id];
   }
 
-  set id(v) {
-    this.#id = v;
+  set id(newVal) {
+    const oldVal = this.#id;
+    this.#id = newVal;
     this.version++;
-    this.notify("updated", "id", v);
+    this.notify({ type: "updated", name: "id", newVal, oldVal });
   }
   get id() {
     return this.#id;
   }
 
-
-
-  set name(v) {
-    this.#name = v;
+  set name(newVal) {
+    const oldVal = this.#name;
+    this.#name = newVal;
     this.version++;
-    this.notify("updated", "name", v);
+    this.notify({ type: "updated", name: "name", newVal, oldVal });
   }
   get name() {
     return this.#name;
   }
 
-  set bg(v) {
-    this.#bg = v;
+  set bg(newVal) {
+    const oldVal = this.#bg;
+    this.#bg = newVal;
     this.version++;
-    this.notify("updated", "bg", v);
+    this.notify({ type: "updated", name: "bg", newVal, oldVal });
   }
   get bg() {
     return this.#bg;
   }
 
-
-
-  set version(noop) {
-    // silent update
+  set version(newVal) {
     this.#version++;
   }
+
   get version() {
     return this.#version;
   }
 
-
-
-  set x(v) {
-    this.#x = v;
+  set x(newVal) {
+    const oldVal = this.#x;
+    this.#x = newVal;
     this.version++;
-    this.notify("updated", "x", v);
+    this.notify({ type: "updated", name: "x", newVal, oldVal });
   }
   get x() {
     return this.#x;
   }
 
-  set y(v) {
-    this.#y = v;
+  set y(newVal) {
+    const oldVal = this.#y;
+    this.#y = newVal;
     this.version++;
-    this.notify("updated", "y", v);
+    this.notify({ type: "updated", name: "y", newVal, oldVal });
   }
   get y() {
     return this.#y;
   }
 
-  set z(v) {
-    this.#z = v;
+  set z(newVal) {
+    const oldVal = this.#z;
+    this.#z = newVal;
     this.version++;
-    this.notify("updated", "z", v);
+    this.notify({ type: "updated", name: "z", newVal, oldVal });
   }
   get z() {
     return this.#z;
   }
 
-  set h(v) {
-    this.#h = v;
+  set h(newVal) {
+    const oldVal = this.#h;
+    this.#h = newVal;
     this.version++;
-    this.notify("updated", "h", v);
+    this.notify({ type: "updated", name: "h", newVal, oldVal });
   }
   get h() {
     return this.#h;
   }
 
-  set w(v) {
-    this.#w = v;
+  set w(newVal) {
+    const oldVal = this.#w;
+    this.#w = newVal;
     this.version++;
-    this.notify("updated", "w", v);
+    this.notify({ type: "updated", name: "w", newVal, oldVal });
   }
   get w() {
     return this.#w;

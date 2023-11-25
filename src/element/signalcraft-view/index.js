@@ -21,12 +21,17 @@ export default class SignalcraftViewElement extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.#templateInitialization();
 
+
+    this.#signalcraft.nodes.forEach(node=>{
+      this.#createNode(node);
+    })
+
+
     const grandCentral = {
 
       'setup bgColor':   v => this.#svgElement.querySelector(".background").setAttribute("fill", v),
-      'nodes created ...': this.#appendNode,
-      'nodes updated ...': v=>({/*...*/}),
-      'nodes deleted ...': v=>({/*...*/}),
+      'nodes created ...': this.#createNode,
+      'nodes deleted ...': this.#deleteNode,
 
       // 'setup .backgroundColor 2': v => this.#svgElement.getElementById("backgroundColor").setAttribute("fill", v),
       // 'click .button.edit':   this.#something,
@@ -71,6 +76,17 @@ export default class SignalcraftViewElement extends HTMLElement {
     this.#svgElement.setAttributeNS(null, 'width', '100%'); //TODO: %
     this.#svgElement.setAttributeNS(null, 'height', '666');
     this.#rootElement.appendChild(this.#svgElement);
+
+    this.#svgElement.appendChild(
+      <defs>
+          <linearGradient id="Gradient2">
+          <stop offset="0%" stop-color="#1d2b3a" />
+          <stop offset="100%" stop-color="#1c293b" />
+        </linearGradient>
+      </defs>
+
+    );
+
 
     this.#svgScene = document.createElementNS("http://www.w3.org/2000/svg", 'g');
     this.#svgScene.setAttributeNS(null, 'id', 'scene');
@@ -120,12 +136,17 @@ export default class SignalcraftViewElement extends HTMLElement {
 
 
 
-  #appendNode({node:o}) {
-    console.log(`appendNode appendNode appendNode x=${o.x}`, o);
-    this.#svgScene.appendChild(
+  #deleteNode({node:o}) {
+    const node = this.#svgElement.getElementById(o.id);
+    node.remove();
+  }
 
+  #createNode({node:o}) {
+    this.#unsubscribe.push( o.subscribe( o=>this.#updateNode(o) ) );
+
+    this.#svgScene.appendChild(
       <g id={o.id} transform={`translate(${o.x},${o.y})`}>
-        <rect class="interactive" width={o.w} height="80" ry="5" fill={o.bg} />
+        <rect class="interactive" width={o.w} height="80" ry="5" fill={o.bg} dfill="url(#Gradient2)"/>
         <text class="interactive" x="90" y="25" font-size="12px" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Arial" > Geometry </text>
         <circle class="interactive" cx="0" cy="50" r="5" fill="cyan" />
         <text class="interactive" x="10" y="55" font-size="10px" fill="#fff" font-family="Arial" > Geometry </text>
@@ -133,6 +154,14 @@ export default class SignalcraftViewElement extends HTMLElement {
       </g>
 
     );
+  }
+
+  #updateNode({ type, name, oldVal, newVal, node:o }) {
+
+    // console.log(type, name, oldVal, newVal, o);
+    const node = this.#svgElement.getElementById(o.id);
+    node.setAttributeNS(null, 'transform', `translate(${o.x},${o.y})`);
+
   }
 
   async #installPanAndZoom() {

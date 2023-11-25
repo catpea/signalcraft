@@ -1460,6 +1460,45 @@
     }
   });
 
+  // src/library/ReactiveObject.js
+  var ReactiveObject = class {
+    #observers = {};
+    constructor(obj) {
+      if (typeof obj !== "object")
+        throw new TypeError("Argument must be an object.");
+      Object.entries(obj).forEach(([key, val]) => this.#defineReactiveProperty(key, val));
+    }
+    #defineReactiveProperty(key, val) {
+      Object.defineProperty(this, key, {
+        get: () => val,
+        set: (newValue) => {
+          if (newValue === val)
+            return;
+          val = newValue;
+          this.#notifyObservers(key, newValue);
+        }
+      });
+    }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
+    }
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      observer(this[key]);
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
+    }
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
+    }
+  };
+
   // src/node/helper/NodeRegistry.js
   var NodeRegistry = class {
     constructor() {
@@ -1544,13 +1583,18 @@
     #z = 0;
     #h = 100;
     #w = 300;
+    // Theme
     #bg = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
     constructor() {
+      let intervalID = setInterval(() => {
+        this.x = Math.random() > 0.5 ? this.x + 50 : this.x - 50;
+        this.y = Math.random() > 0.5 ? this.y + 50 : this.y - 50;
+      }, 5e3 * Math.random());
     }
     #subscribers = {};
-    notify(type, property, value) {
+    notify({ type, name, oldVal, newVal }) {
       Object.values(this.#subscribers).forEach(
-        (callback) => callback(type, property, value)
+        (callback) => callback({ type, name, oldVal, newVal, node: this })
       );
     }
     subscribe(callback) {
@@ -1561,72 +1605,80 @@
     unsubscribe(id) {
       delete this.#subscribers[id];
     }
-    set id(v) {
-      this.#id = v;
+    set id(newVal) {
+      const oldVal = this.#id;
+      this.#id = newVal;
       this.version++;
-      this.notify("updated", "id", v);
+      this.notify({ type: "updated", name: "id", newVal, oldVal });
     }
     get id() {
       return this.#id;
     }
-    set name(v) {
-      this.#name = v;
+    set name(newVal) {
+      const oldVal = this.#name;
+      this.#name = newVal;
       this.version++;
-      this.notify("updated", "name", v);
+      this.notify({ type: "updated", name: "name", newVal, oldVal });
     }
     get name() {
       return this.#name;
     }
-    set bg(v) {
-      this.#bg = v;
+    set bg(newVal) {
+      const oldVal = this.#bg;
+      this.#bg = newVal;
       this.version++;
-      this.notify("updated", "bg", v);
+      this.notify({ type: "updated", name: "bg", newVal, oldVal });
     }
     get bg() {
       return this.#bg;
     }
-    set version(noop) {
+    set version(newVal) {
       this.#version++;
     }
     get version() {
       return this.#version;
     }
-    set x(v) {
-      this.#x = v;
+    set x(newVal) {
+      const oldVal = this.#x;
+      this.#x = newVal;
       this.version++;
-      this.notify("updated", "x", v);
+      this.notify({ type: "updated", name: "x", newVal, oldVal });
     }
     get x() {
       return this.#x;
     }
-    set y(v) {
-      this.#y = v;
+    set y(newVal) {
+      const oldVal = this.#y;
+      this.#y = newVal;
       this.version++;
-      this.notify("updated", "y", v);
+      this.notify({ type: "updated", name: "y", newVal, oldVal });
     }
     get y() {
       return this.#y;
     }
-    set z(v) {
-      this.#z = v;
+    set z(newVal) {
+      const oldVal = this.#z;
+      this.#z = newVal;
       this.version++;
-      this.notify("updated", "z", v);
+      this.notify({ type: "updated", name: "z", newVal, oldVal });
     }
     get z() {
       return this.#z;
     }
-    set h(v) {
-      this.#h = v;
+    set h(newVal) {
+      const oldVal = this.#h;
+      this.#h = newVal;
       this.version++;
-      this.notify("updated", "h", v);
+      this.notify({ type: "updated", name: "h", newVal, oldVal });
     }
     get h() {
       return this.#h;
     }
-    set w(v) {
-      this.#w = v;
+    set w(newVal) {
+      const oldVal = this.#w;
+      this.#w = newVal;
       this.version++;
-      this.notify("updated", "w", v);
+      this.notify({ type: "updated", name: "w", newVal, oldVal });
     }
     get w() {
       return this.#w;
@@ -1739,6 +1791,9 @@
       this.#registry.register("color", ColorNode);
       this.#registry.register("function", CodeNode);
     }
+    forEach(callback) {
+      this.#content.forEach(callback);
+    }
     create(...arg) {
       const node = this.#registry.create(...arg);
       this.#content.push(node);
@@ -1785,46 +1840,7 @@
     }
   };
 
-  // src/library/ReactiveObject.js
-  var ReactiveObject = class {
-    #observers = {};
-    constructor(obj) {
-      if (typeof obj !== "object")
-        throw new TypeError("Argument must be an object.");
-      Object.entries(obj).forEach(([key, val]) => this.#defineReactiveProperty(key, val));
-    }
-    #defineReactiveProperty(key, val) {
-      Object.defineProperty(this, key, {
-        get: () => val,
-        set: (newValue) => {
-          if (newValue === val)
-            return;
-          val = newValue;
-          this.#notifyObservers(key, newValue);
-        }
-      });
-    }
-    #notifyObservers(key, value) {
-      if (Array.isArray(this.#observers[key]))
-        this.#observers[key].forEach((observer) => observer(value));
-    }
-    subscribe(key, observer) {
-      if (typeof observer !== "function")
-        throw new TypeError("Observer must be a function.");
-      if (!Array.isArray(this.#observers[key]))
-        this.#observers[key] = [];
-      this.#observers[key].push(observer);
-      observer(this[key]);
-      return () => {
-        this.#unsubscribe(key, observer);
-      };
-    }
-    #unsubscribe(key, observer) {
-      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
-    }
-  };
-
-  // src/Core.js
+  // src/Application.js
   var SignalcraftCore = class {
     #nodes = new NodeCollection();
     // #edges = new EdgeCollection();
@@ -1832,14 +1848,17 @@
     constructor() {
       let intervalID = setInterval(() => {
         this.#setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
-        console.log(this.#setup.bgColor);
-      }, 1e3);
+        this.createNode("color");
+      }, 1e4);
     }
     async ready() {
     }
     async start() {
     }
     async stop() {
+    }
+    get nodes() {
+      return this.#nodes;
     }
     createNode(...arg) {
       this.#nodes.create(...arg);
@@ -2361,15 +2380,13 @@
       this.#signalcraft = globalThis.signalcraft;
       this.attachShadow({ mode: "open" });
       this.#templateInitialization();
+      this.#signalcraft.nodes.forEach((node) => {
+        this.#createNode(node);
+      });
       const grandCentral = {
         "setup bgColor": (v) => this.#svgElement.querySelector(".background").setAttribute("fill", v),
-        "nodes created ...": this.#appendNode,
-        "nodes updated ...": (v) => ({
-          /*...*/
-        }),
-        "nodes deleted ...": (v) => ({
-          /*...*/
-        })
+        "nodes created ...": this.#createNode,
+        "nodes deleted ...": this.#deleteNode
         // 'setup .backgroundColor 2': v => this.#svgElement.getElementById("backgroundColor").setAttribute("fill", v),
         // 'click .button.edit':   this.#something,
         // 'click .button.delete': 'destroy',
@@ -2402,6 +2419,9 @@
       this.#svgElement.setAttributeNS(null, "width", "100%");
       this.#svgElement.setAttributeNS(null, "height", "666");
       this.#rootElement.appendChild(this.#svgElement);
+      this.#svgElement.appendChild(
+        /* @__PURE__ */ index.createElement("defs", null, /* @__PURE__ */ index.createElement("linearGradient", { id: "Gradient2" }, /* @__PURE__ */ index.createElement("stop", { offset: "0%", "stop-color": "#1d2b3a" }), /* @__PURE__ */ index.createElement("stop", { offset: "100%", "stop-color": "#1c293b" })))
+      );
       this.#svgScene = document.createElementNS("http://www.w3.org/2000/svg", "g");
       this.#svgScene.setAttributeNS(null, "id", "scene");
       this.#svgElement.appendChild(this.#svgScene);
@@ -2438,11 +2458,19 @@
       horizontal1.setAttributeNS(null, "stroke", "white");
       this.#svgScene.appendChild(horizontal1);
     }
-    #appendNode({ node: o }) {
-      console.log(`appendNode appendNode appendNode x=${o.x}`, o);
+    #deleteNode({ node: o }) {
+      const node = this.#svgElement.getElementById(o.id);
+      node.remove();
+    }
+    #createNode({ node: o }) {
+      this.#unsubscribe.push(o.subscribe((o2) => this.#updateNode(o2)));
       this.#svgScene.appendChild(
-        /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: o.bg }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
+        /* @__PURE__ */ index.createElement("g", { id: o.id, transform: `translate(${o.x},${o.y})` }, /* @__PURE__ */ index.createElement("rect", { class: "interactive", width: o.w, height: "80", ry: "5", fill: o.bg, dfill: "url(#Gradient2)" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "90", y: "25", "font-size": "12px", fill: "#fff", "text-anchor": "middle", "font-weight": "bold", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: "0", cy: "50", r: "5", fill: "cyan" }), /* @__PURE__ */ index.createElement("text", { class: "interactive", x: "10", y: "55", "font-size": "10px", fill: "#fff", "font-family": "Arial" }, " Geometry "), /* @__PURE__ */ index.createElement("circle", { class: "interactive", cx: o.w, cy: "50", r: "5", fill: "magenta" }))
       );
+    }
+    #updateNode({ type, name, oldVal, newVal, node: o }) {
+      const node = this.#svgElement.getElementById(o.id);
+      node.setAttributeNS(null, "transform", `translate(${o.x},${o.y})`);
     }
     async #installPanAndZoom() {
       (0, import_panzoom.default)(this.#svgScene, { smoothScroll: false });
@@ -2489,11 +2517,11 @@
   };
 
   // src/signalcraft.js
-  var core = new SignalcraftCore();
-  globalThis.signalcraft = core;
-  signalcraft.start();
+  var application = new SignalcraftCore();
+  globalThis.signalcraft = application;
+  application.start();
   customElements.define("signalcraft-view", SignalcraftViewElement);
-  for (let i = 0; i < 666; i++) {
+  for (let i = 0; i < 100; i++) {
     signalcraft.createNode("color");
   }
   signalcraft.createNode("text");
