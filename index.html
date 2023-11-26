@@ -6,75 +6,27 @@
     <title>Bootstrap demo</title>
     <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="./styles.css" rel="stylesheet" />
-
     <script type="module" src="./dist/signalcraft.js"></script>
-
+    <script type="module" src="./src/tools/todom.js"></script>
   </head>
   <body class="py-3 me-3">
     <div class="container-fluid">
       <div class="row mb-3">
-        <div class="col">
-          <signalcraft-view></signalcraft-view>
+        <div class="signalcraft-view-1 col">
+        </div>
+        <div class="signalcraft-view-2 col">
         </div>
       </div>
     </div>
-
     <div class="container-fluid">
       <div class="row mb-3">
-        <div class="col-3">
-          <!-- Library Pane -->
-          <!-- <node-library name="Library"></node-library> -->
-        </div>
-        <div class="col">
-          <!-- <signalcraft-view></signalcraft-view> -->
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-3">
-          <nav class="nav flex-column">
-            <a class="nav-link active" aria-current="page" href="#"
-              >Node Configuration</a
-            >
-            <a class="nav-link" href="#">Property Manager</a>
-            <a class="nav-link" href="#">Output Functions</a>
-          </nav>
-        </div>
-        <div class="col">
-          <div class="border border-darker rounded" style="min-height: 8rem;">
-            Code Area, function(){} for StandardOutput function
-          </div>
-        </div>
+        <tool-todom/>
       </div>
     </div>
-
-    <div class="dropdown">
-      <button
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        Dropdown button
-      </button>
-      <ul class="dropdown-menu" style="">
-        <li><a class="dropdown-item" href="#">Action</a></li>
-        <li><a class="dropdown-item" href="#">Another action</a></li>
-        <li><a class="dropdown-item" href="#">Something else here</a></li>
-      </ul>
-    </div>
-
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-
       new EventSource("/esbuild").addEventListener("change", () => location.reload() );
       console.log("EventSource LiveReload Activated");
-
-    </script>
-
-    <script type="module">
-      //... import NodeTree from './src/api/NodeTree.js';
     </script>
   </body>
 </html>

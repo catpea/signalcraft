@@ -1,71 +1,46 @@
-import ReactiveObject from "./library/ReactiveObject.js";
-import NodeCollection from "./node/NodeCollection.js";
+import ApplicationReactivity from "./application/ApplicationReactivity.js";
+
+import TypeCollection from "./types/TypeCollection.js";
+import ViewCollection from "./views/ViewCollection.js";
+import NodeCollection from "./nodes/NodeCollection.js";
+import EdgeCollection from "./edges/EdgeCollection.js";
+import ReactiveObject from "./setup/ReactiveObject.js";
+
+// import ReactiveObject from "./library/ReactiveObject.js";
 // import EdgeCollection from "./node/EdgeCollection.js";
 
-export default class SignalcraftCore {
-  #nodes = new NodeCollection();
-  // #edges = new EdgeCollection();
-  #setup = new ReactiveObject({ fgColor: "blue", bgColor: "green" });
+export default class Application extends ApplicationReactivity {
+
+  Types;
+  Views;
+  Setup;
+  Nodes;
+  Edges;
 
   constructor() {
+    super();
+    this.Types = new TypeCollection(this);
+    this.Views = new ViewCollection(this);
+    this.Setup = new ReactiveObject(this, { fgColor: "blue", bgColor: "green" });
+    this.Nodes = new NodeCollection(this);
+    this.Edges = new EdgeCollection(this);
+  }
+
+  async start() {
+    console.log('Starting...');
+    this.Setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
 
     let intervalID = setInterval(() => {
-      this.#setup.bgColor = `hsl(${ parseInt(Math.random() * 360) }, 20%, 35%)`;
-      this.createNode("color");
 
-    }, 10_000);
+      // this.Setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
+      // signalcraft.Nodes.create("text");
+
+    }, 1_000);
 
   }
 
-  async ready() {}
-  async start() {}
-  async stop() {}
-
-  get nodes(){
-    return this.#nodes;
+  async stop() {
+    //TODO: destroy all listeners
   }
 
-  createNode(...arg) {
-    this.#nodes.create(...arg);
-  }
-  removeNode() {}
-  linkNodes() {}
-  unlinkNodes() {}
-
-  #subscribers = {};
-  #notify(type, data) {
-    Object.values(this.#subscribers).forEach((callback) =>
-      callback(type, data)
-    );
-  }
-
-  subscribe(callback) {
-    const id = Math.random().toString(36).substring(2);
-    this.#subscribers[id] = callback;
-    return () => this.unsubscribe(id);
-  }
-  unsubscribe(id) {
-    delete this.#subscribers[id];
-  }
-
-  integrate(that, map) {
-    for (const key in map) {
-      if (map.hasOwnProperty(key)) {
-        const [objectName, eventName, fluff] = key.split(" ");
-        const handlerFunction = map[key];
-        switch (objectName) {
-          case "setup":
-            this.#setup.subscribe(eventName, handlerFunction.bind(that) );
-            break;
-          case "nodes":
-            this.#nodes.subscribe(eventName, handlerFunction.bind(that) );
-            break;
-          case "edges":
-            //this.#setup.subscribe(eventName, handlerFunction.bind(that));
-            break;
-          default:
-        }
-      }
-    }
-  }
 }
