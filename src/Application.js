@@ -5,12 +5,14 @@ import ViewCollection from "./views/ViewCollection.js";
 import NodeCollection from "./nodes/NodeCollection.js";
 import EdgeCollection from "./edges/EdgeCollection.js";
 import ReactiveObject from "./setup/ReactiveObject.js";
+import MightyMidnight from "./theme/MightyMidnight.js";
 
 // import ReactiveObject from "./library/ReactiveObject.js";
 // import EdgeCollection from "./node/EdgeCollection.js";
 
 export default class Application extends ApplicationReactivity {
 
+  Theme;
   Types;
   Views;
   Setup;
@@ -19,6 +21,7 @@ export default class Application extends ApplicationReactivity {
 
   constructor() {
     super();
+    this.Theme = new MightyMidnight(this);
     this.Types = new TypeCollection(this);
     this.Views = new ViewCollection(this);
     this.Setup = new ReactiveObject(this, { fgColor: "blue", bgColor: "green" });

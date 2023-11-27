@@ -22,8 +22,14 @@ application.start();
 
 // Tests
 
-for (let i = 0; i < 100; i++) {
-  application.Nodes.create(uuid(), "text/string");
+for (let i = 0; i < 500; i++) {
+  if( Math.random() < 0.3 ){
+    application.Nodes.create(uuid(), "text/string");
+  }else if( Math.random() < 0.6 ){
+    application.Nodes.create(uuid(), "text/case");
+  }else{
+    application.Nodes.create(uuid(), "text/color");
+  }
 }
 
 // application.Nodes.create("text/string");

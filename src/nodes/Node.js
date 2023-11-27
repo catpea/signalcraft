@@ -20,6 +20,8 @@ export default class Node extends NodeReactivity {
 
     super();
 
+    if(!type) throw new Error('You must initialize a node with a known type');
+
     this.#id = id||uuid();
     this.#type = type;
 
@@ -28,7 +30,7 @@ export default class Node extends NodeReactivity {
       horizontalPosition:  10_000*Math.random(),
       verticalPosition:  8_000*Math.random(),
       nodeWidth: 300,
-      nodeHeight: 100,
+      nodeHeight: 32,
       depthLevel: 0,
     };
 
@@ -41,10 +43,16 @@ export default class Node extends NodeReactivity {
   get id(){
     return this.#id;
   }
+  get type(){
+    return this.#type;
+  }
 
   start(){
+    if(!this.#type) throw new Error('You must initialize a node with a known type');
 
     const typeDeclaration = this.application.Types.find(this.#type);
+
+    console.log(`Node started (${typeDeclaration})`);
     if(typeDeclaration){
       this.Incoming.import( typeDeclaration.Incoming.export() );
       this.Outgoing.import( typeDeclaration.Outgoing.export() );

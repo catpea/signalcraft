@@ -15,6 +15,10 @@ export default class Type {
   Incoming = new IncomingCollection();
   Outgoing = new OutgoingCollection();
 
+  get id(){
+    return this.#id;
+  }
+  
   constructor(category, name){
     this.#category = category;
     this.#name = name;

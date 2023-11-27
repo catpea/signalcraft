@@ -70,15 +70,15 @@
       var arrayProto = Array.prototype;
       var splice = arrayProto.splice;
       function listCacheDelete(key) {
-        var data = this.__data__, index2 = assocIndexOf(data, key);
-        if (index2 < 0) {
+        var data = this.__data__, index = assocIndexOf(data, key);
+        if (index < 0) {
           return false;
         }
         var lastIndex = data.length - 1;
-        if (index2 == lastIndex) {
+        if (index == lastIndex) {
           data.pop();
         } else {
-          splice.call(data, index2, 1);
+          splice.call(data, index, 1);
         }
         --this.size;
         return true;
@@ -92,8 +92,8 @@
     "node_modules/lodash/_listCacheGet.js"(exports, module) {
       var assocIndexOf = require_assocIndexOf();
       function listCacheGet(key) {
-        var data = this.__data__, index2 = assocIndexOf(data, key);
-        return index2 < 0 ? void 0 : data[index2][1];
+        var data = this.__data__, index = assocIndexOf(data, key);
+        return index < 0 ? void 0 : data[index][1];
       }
       module.exports = listCacheGet;
     }
@@ -115,12 +115,12 @@
     "node_modules/lodash/_listCacheSet.js"(exports, module) {
       var assocIndexOf = require_assocIndexOf();
       function listCacheSet(key, value) {
-        var data = this.__data__, index2 = assocIndexOf(data, key);
-        if (index2 < 0) {
+        var data = this.__data__, index = assocIndexOf(data, key);
+        if (index < 0) {
           ++this.size;
           data.push([key, value]);
         } else {
-          data[index2][1] = value;
+          data[index][1] = value;
         }
         return this;
       }
@@ -137,10 +137,10 @@
       var listCacheHas = require_listCacheHas();
       var listCacheSet = require_listCacheSet();
       function ListCache(entries) {
-        var index2 = -1, length = entries == null ? 0 : entries.length;
+        var index = -1, length = entries == null ? 0 : entries.length;
         this.clear();
-        while (++index2 < length) {
-          var entry = entries[index2];
+        while (++index < length) {
+          var entry = entries[index];
           this.set(entry[0], entry[1]);
         }
       }
@@ -511,10 +511,10 @@
       var hashHas = require_hashHas();
       var hashSet = require_hashSet();
       function Hash(entries) {
-        var index2 = -1, length = entries == null ? 0 : entries.length;
+        var index = -1, length = entries == null ? 0 : entries.length;
         this.clear();
-        while (++index2 < length) {
-          var entry = entries[index2];
+        while (++index < length) {
+          var entry = entries[index];
           this.set(entry[0], entry[1]);
         }
       }
@@ -626,10 +626,10 @@
       var mapCacheHas = require_mapCacheHas();
       var mapCacheSet = require_mapCacheSet();
       function MapCache(entries) {
-        var index2 = -1, length = entries == null ? 0 : entries.length;
+        var index = -1, length = entries == null ? 0 : entries.length;
         this.clear();
-        while (++index2 < length) {
-          var entry = entries[index2];
+        while (++index < length) {
+          var entry = entries[index];
           this.set(entry[0], entry[1]);
         }
       }
@@ -694,9 +694,9 @@
   var require_arrayEach = __commonJS({
     "node_modules/lodash/_arrayEach.js"(exports, module) {
       function arrayEach(array, iteratee) {
-        var index2 = -1, length = array == null ? 0 : array.length;
-        while (++index2 < length) {
-          if (iteratee(array[index2], index2, array) === false) {
+        var index = -1, length = array == null ? 0 : array.length;
+        while (++index < length) {
+          if (iteratee(array[index], index, array) === false) {
             break;
           }
         }
@@ -767,9 +767,9 @@
       function copyObject(source, props, object, customizer) {
         var isNew = !object;
         object || (object = {});
-        var index2 = -1, length = props.length;
-        while (++index2 < length) {
-          var key = props[index2];
+        var index = -1, length = props.length;
+        while (++index < length) {
+          var key = props[index];
           var newValue = customizer ? customizer(object[key], source[key], key, object, source) : void 0;
           if (newValue === void 0) {
             newValue = source[key];
@@ -790,9 +790,9 @@
   var require_baseTimes = __commonJS({
     "node_modules/lodash/_baseTimes.js"(exports, module) {
       function baseTimes(n, iteratee) {
-        var index2 = -1, result = Array(n);
-        while (++index2 < n) {
-          result[index2] = iteratee(index2);
+        var index = -1, result = Array(n);
+        while (++index < n) {
+          result[index] = iteratee(index);
         }
         return result;
       }
@@ -1086,10 +1086,10 @@
       var arrayLikeKeys = require_arrayLikeKeys();
       var baseKeys = require_baseKeys();
       var isArrayLike = require_isArrayLike();
-      function keys2(object) {
+      function keys(object) {
         return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
       }
-      module.exports = keys2;
+      module.exports = keys;
     }
   });
 
@@ -1097,9 +1097,9 @@
   var require_baseAssign = __commonJS({
     "node_modules/lodash/_baseAssign.js"(exports, module) {
       var copyObject = require_copyObject();
-      var keys2 = require_keys();
+      var keys = require_keys();
       function baseAssign(object, source) {
-        return object && copyObject(source, keys2(source), object);
+        return object && copyObject(source, keys(source), object);
       }
       module.exports = baseAssign;
     }
@@ -1195,10 +1195,10 @@
   var require_copyArray = __commonJS({
     "node_modules/lodash/_copyArray.js"(exports, module) {
       function copyArray(source, array) {
-        var index2 = -1, length = source.length;
+        var index = -1, length = source.length;
         array || (array = Array(length));
-        while (++index2 < length) {
-          array[index2] = source[index2];
+        while (++index < length) {
+          array[index] = source[index];
         }
         return array;
       }
@@ -1210,10 +1210,10 @@
   var require_arrayFilter = __commonJS({
     "node_modules/lodash/_arrayFilter.js"(exports, module) {
       function arrayFilter(array, predicate) {
-        var index2 = -1, length = array == null ? 0 : array.length, resIndex = 0, result = [];
-        while (++index2 < length) {
-          var value = array[index2];
-          if (predicate(value, index2, array)) {
+        var index = -1, length = array == null ? 0 : array.length, resIndex = 0, result = [];
+        while (++index < length) {
+          var value = array[index];
+          if (predicate(value, index, array)) {
             result[resIndex++] = value;
           }
         }
@@ -1270,9 +1270,9 @@
   var require_arrayPush = __commonJS({
     "node_modules/lodash/_arrayPush.js"(exports, module) {
       function arrayPush(array, values) {
-        var index2 = -1, length = values.length, offset = array.length;
-        while (++index2 < length) {
-          array[offset + index2] = values[index2];
+        var index = -1, length = values.length, offset = array.length;
+        while (++index < length) {
+          array[offset + index] = values[index];
         }
         return array;
       }
@@ -1339,9 +1339,9 @@
     "node_modules/lodash/_getAllKeys.js"(exports, module) {
       var baseGetAllKeys = require_baseGetAllKeys();
       var getSymbols = require_getSymbols();
-      var keys2 = require_keys();
+      var keys = require_keys();
       function getAllKeys(object) {
-        return baseGetAllKeys(object, keys2, getSymbols);
+        return baseGetAllKeys(object, keys, getSymbols);
       }
       module.exports = getAllKeys;
     }
@@ -1710,7 +1710,7 @@
       var isMap = require_isMap();
       var isObject = require_isObject();
       var isSet = require_isSet();
-      var keys2 = require_keys();
+      var keys = require_keys();
       var keysIn = require_keysIn();
       var CLONE_DEEP_FLAG = 1;
       var CLONE_FLAT_FLAG = 2;
@@ -1793,7 +1793,7 @@
             result.set(key2, baseClone(subValue, bitmask, customizer, key2, value, stack));
           });
         }
-        var keysFunc = isFull ? isFlat ? getAllKeysIn : getAllKeys : isFlat ? keysIn : keys2;
+        var keysFunc = isFull ? isFlat ? getAllKeysIn : getAllKeys : isFlat ? keysIn : keys;
         var props = isArr ? void 0 : keysFunc(value);
         arrayEach(props || value, function(subValue, key2) {
           if (props) {
@@ -1959,8 +1959,8 @@
         var step = typeof options.step === "function" ? options.step : noop;
         var done = typeof options.done === "function" ? options.done : noop;
         var scheduler = getScheduler(options.scheduler);
-        var keys2 = Object.keys(target);
-        keys2.forEach(function(key) {
+        var keys = Object.keys(target);
+        keys.forEach(function(key) {
           start[key] = source[key];
           diff[key] = target[key] - source[key];
         });
@@ -1991,7 +1991,7 @@
           }
         }
         function setValues(t) {
-          keys2.forEach(function(key) {
+          keys.forEach(function(key) {
             source[key] = diff[key] * t + start[key];
           });
         }
@@ -3476,6 +3476,9 @@
     #name;
     Incoming = new IncomingCollection();
     Outgoing = new OutgoingCollection();
+    get id() {
+      return this.#id;
+    }
     constructor(category, name) {
       this.#category = category;
       this.#name = name;
@@ -3494,76 +3497,95 @@
   // src/views/View.js
   var import_panzoom = __toESM(require_panzoom(), 1);
 
-  // node_modules/jsx-dom/index.js
-  var keys = Object.keys;
-  var isUnitlessNumber = {
-    animationIterationCount: 0,
-    borderImageOutset: 0,
-    borderImageSlice: 0,
-    borderImageWidth: 0,
-    boxFlex: 0,
-    boxFlexGroup: 0,
-    boxOrdinalGroup: 0,
-    columnCount: 0,
-    columns: 0,
-    flex: 0,
-    flexGrow: 0,
-    flexPositive: 0,
-    flexShrink: 0,
-    flexNegative: 0,
-    flexOrder: 0,
-    gridArea: 0,
-    gridRow: 0,
-    gridRowEnd: 0,
-    gridRowSpan: 0,
-    gridRowStart: 0,
-    gridColumn: 0,
-    gridColumnEnd: 0,
-    gridColumnSpan: 0,
-    gridColumnStart: 0,
-    fontWeight: 0,
-    lineClamp: 0,
-    lineHeight: 0,
-    opacity: 0,
-    order: 0,
-    orphans: 0,
-    tabSize: 0,
-    widows: 0,
-    zIndex: 0,
-    zoom: 0,
-    // SVG-related properties
-    fillOpacity: 0,
-    floodOpacity: 0,
-    stopOpacity: 0,
-    strokeDasharray: 0,
-    strokeDashoffset: 0,
-    strokeMiterlimit: 0,
-    strokeOpacity: 0,
-    strokeWidth: 0
+  // src/views/NodeRenderer.js
+  var NodeRenderer = class {
+    #view;
+    // the view (canvas)
+    #node;
+    // node object
+    #root;
+    // container
+    #self;
+    // g element
+    #body;
+    // backdrop
+    #text;
+    // caption
+    #name;
+    // caption text
+    #exit = [];
+    // remove listeners
+    constructor(node, view, root) {
+      this.#view = view;
+      this.#node = node;
+      this.#root = root;
+    }
+    start() {
+      this.create();
+      this.update();
+      const monitor = this.#node.monitor((key, value, item) => {
+        this.update();
+      });
+      this.#exit.push(monitor);
+      console.log(`Node ${this.#node.id} start()`);
+    }
+    stop() {
+      this.#exit.map((o) => o());
+    }
+    create() {
+      this.#self = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      this.#self.setAttribute("id", this.#node);
+      this.#root.appendChild(this.#self);
+      this.#body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      this.#body.setAttribute("class", "interactive");
+      this.#body.setAttribute("ry", "5");
+      this.#self.appendChild(this.#body);
+      this.#text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      this.#text.setAttribute("class", "interactive");
+      this.#text.setAttribute("x", "90");
+      this.#text.setAttribute("y", "25");
+      this.#text.setAttribute("font-size", "12px");
+      this.#text.setAttribute("fill", "#fff");
+      this.#text.setAttribute("text-anchor", "middle");
+      this.#text.setAttribute("font-weight", "bold");
+      this.#text.setAttribute("font-family", "Arial");
+      this.#self.appendChild(this.#text);
+      this.#name = document.createTextNode("");
+      this.#text.appendChild(this.#name);
+      const geometry = this.#view.application.Theme.getNodeHeightFor(this.#node);
+      for (const y of geometry.inputs) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "interactive");
+        circle.setAttribute("cx", "0");
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "5");
+        circle.setAttribute("fill", "cyan");
+        this.#self.appendChild(circle);
+      }
+      for (const y of geometry.outputs) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "interactive");
+        circle.setAttribute("cx", this.#node.nodeWidth);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "5");
+        circle.setAttribute("fill", "aliceblue");
+        this.#self.appendChild(circle);
+      }
+    }
+    update() {
+      const geometry = this.#view.application.Theme.getNodeHeightFor(this.#node);
+      const { height } = geometry;
+      console.log("GOT", geometry);
+      this.#self.setAttribute("transform", `translate(${this.#node.horizontalPosition}, ${this.#node.verticalPosition})`);
+      this.#body.setAttribute("width", this.#node.nodeWidth);
+      this.#body.setAttribute("height", height);
+      this.#body.setAttribute("fill", this.#node.backgroundColor);
+      this.#name.nodeValue = this.#node.type;
+    }
+    remove() {
+      this.#self.remove();
+    }
   };
-  function prefixKey(prefix, key) {
-    return prefix + key.charAt(0).toUpperCase() + key.substring(1);
-  }
-  var prefixes = ["Webkit", "ms", "Moz", "O"];
-  keys(isUnitlessNumber).forEach((prop) => {
-    prefixes.forEach((prefix) => {
-      isUnitlessNumber[prefixKey(prefix, prop)] = 0;
-    });
-  });
-  var jsxDomType = Symbol.for("jsx-dom:type");
-  var Component = class {
-    constructor(props) {
-      this.props = props;
-    }
-    render() {
-      return null;
-    }
-  };
-  /* @__PURE__ */ Object.defineProperties(Component.prototype, {
-    isReactComponent: {
-      value: true
-    }
-  });
 
   // src/views/View.js
   var View = class {
@@ -3572,6 +3594,7 @@
     #element;
     #svg;
     #scene;
+    #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
     constructor(name, element) {
       console.log({ name, element });
@@ -3579,23 +3602,16 @@
       this.#element = element;
     }
     start() {
-      console.log("VIEW STARTING");
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
       (0, import_panzoom.default)(this.#scene, { smoothScroll: false });
-      console.log(`The size of this.application.Nodes is ${this.application.Nodes.size()}`);
-      this.application.Nodes.forEach((node) => {
-        this.#createNode(node);
-      });
+      this.application.Nodes.forEach((node) => this.#createNode(node));
       const grandCentral = {
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
         "Nodes created ...": this.#createNode,
+        //   NOTE:
         "Nodes deleted ...": this.#deleteNode
-        // 'setup .backgroundColor 2': v => this.#svg.getElementById("backgroundColor").setAttribute("fill", v),
-        // 'click .button.edit':   this.#something,
-        // 'click .button.delete': 'destroy',
-        // 'node *': this.#updateNode,
-        // 'nodes *': this.#updateNodes,
+        //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
       this.application.integrate(this, grandCentral);
     }
@@ -3652,68 +3668,18 @@
       scene.appendChild(horizontal1);
       return scene;
     }
-    #deleteNode({ node: o }) {
-      const node = this.#svg.getElementById(o.id);
-      node.remove();
+    #deleteNode({ item }) {
+      this.#renderers.get(item.id).remove();
     }
     #createNode({ item }) {
-      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g.setAttribute("id", item.id);
-      g.setAttribute("transform", `translate(${item.horizontalPosition},${item.verticalPosition})`);
-      this.#scene.appendChild(g);
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("class", "interactive");
-      rect.setAttribute("width", item.nodeWidth);
-      rect.setAttribute("height", item.nodeHeight);
-      rect.setAttribute("ry", "5");
-      rect.setAttribute("fill", item.backgroundColor);
-      rect.setAttribute("dfill", "url(#Gradient2)");
-      g.appendChild(rect);
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("class", "interactive");
-      text.setAttribute("x", "90");
-      text.setAttribute("y", "25");
-      text.setAttribute("font-size", "12px");
-      text.setAttribute("fill", "#fff");
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("font-weight", "bold");
-      text.setAttribute("font-family", "Arial");
-      g.appendChild(text);
-      const text2 = document.createTextNode("Geometry");
-      text.appendChild(text2);
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("class", "interactive");
-      circle.setAttribute("cx", "0");
-      circle.setAttribute("cy", "50");
-      circle.setAttribute("r", "5");
-      circle.setAttribute("fill", "cyan");
-      g.appendChild(circle);
-      const text3 = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text3.setAttribute("class", "interactive");
-      text3.setAttribute("x", "10");
-      text3.setAttribute("y", "55");
-      text3.setAttribute("font-size", "10px");
-      text3.setAttribute("fill", "#fff");
-      text3.setAttribute("font-family", "Arial");
-      g.appendChild(text3);
-      const text4 = document.createTextNode("Geometry");
-      text3.appendChild(text4);
-      const circle2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle2.setAttribute("class", "interactive");
-      circle2.setAttribute("cx", item.nodeWidth);
-      circle2.setAttribute("cy", "50");
-      circle2.setAttribute("r", "5");
-      circle2.setAttribute("fill", "magenta");
-      g.appendChild(circle2);
-      const monitor = item.monitor((key, value, item2) => {
-        this.#updateNode({ item: item2, key, value });
-      });
-      this.#unsubscribe.push(monitor);
+      const node = new NodeRenderer(item, this, this.#scene);
+      this.#renderers.set(item.id, node);
+      node.start();
     }
-    #updateNode({ item, key, value }) {
-      const element = this.#svg.getElementById(item.id);
-      element.setAttributeNS(null, "transform", `translate(${item.horizontalPosition},${item.verticalPosition})`);
-    }
+    // #updateNode({ item, key, value }) {
+    // const element = this.#svg.getElementById(item.id);
+    // element.setAttributeNS(null, "transform", `translate(${item.horizontalPosition},${item.verticalPosition})`);
+    // }
   };
 
   // src/views/ViewCollection.js
@@ -3785,6 +3751,8 @@
     Outgoing = new OutgoingCollection();
     constructor(id, type, state = {}) {
       super();
+      if (!type)
+        throw new Error("You must initialize a node with a known type");
       this.#id = id || v4_default();
       this.#type = type;
       const defaults = {
@@ -3792,7 +3760,7 @@
         horizontalPosition: 1e4 * Math.random(),
         verticalPosition: 8e3 * Math.random(),
         nodeWidth: 300,
-        nodeHeight: 100,
+        nodeHeight: 32,
         depthLevel: 0
       };
       this.#state = Object.assign({}, state, defaults);
@@ -3801,8 +3769,14 @@
     get id() {
       return this.#id;
     }
+    get type() {
+      return this.#type;
+    }
     start() {
+      if (!this.#type)
+        throw new Error("You must initialize a node with a known type");
       const typeDeclaration = this.application.Types.find(this.#type);
+      console.log(`Node started (${typeDeclaration})`);
       if (typeDeclaration) {
         this.Incoming.import(typeDeclaration.Incoming.export());
         this.Outgoing.import(typeDeclaration.Outgoing.export());
@@ -3890,8 +3864,73 @@
     }
   };
 
+  // src/theme/Box.js
+  var Box = class _Box {
+    children = [];
+    parent;
+    x = 0;
+    y = 0;
+    constructor({ w = 0, h = 0, padding = 5 } = {}) {
+      this.width = w;
+      this.height = h;
+      this.padding = padding;
+    }
+    append(box) {
+      box.parent = this;
+      this.children.push(box);
+    }
+    get totalPadding() {
+      return this.padding * (this.children.length + 1);
+    }
+    finalCalculate(y = 0) {
+      let cumulativeHeight = y + this.padding;
+      this.y = cumulativeHeight;
+      this.children.forEach((child) => {
+        child.finalCalculate(cumulativeHeight);
+        cumulativeHeight += child.totalHeight;
+      });
+    }
+    get totalHeight() {
+      let childrenHeight = this.children.reduce((total, childBox) => total + (childBox.totalHeight || 0), 0);
+      return (this.height || 0) + this.totalPadding + childrenHeight;
+    }
+    fill(times, conf) {
+      for (let i = 0; i < times; i++) {
+        this.append(new _Box(conf));
+      }
+      return this;
+    }
+  };
+
+  // src/theme/MightyMidnight.js
+  var MidnightTheme = class {
+    captionHeight = 48;
+    lineHeight = 32;
+    gapHeight = 5;
+    padding = 5;
+    margin = 5;
+    getNodeHeightFor(node) {
+      const main = new Box({ w: 300 });
+      const caption = new Box({ h: this.captionHeight });
+      const inputs = new Box();
+      const outputs = new Box();
+      main.append(caption);
+      main.append(outputs);
+      main.append(inputs);
+      inputs.fill(node.Incoming.size(), { h: this.lineHeight });
+      outputs.fill(node.Outgoing.size(), { h: this.lineHeight });
+      main.finalCalculate();
+      return {
+        height: main.totalHeight,
+        inputs: inputs.children.map((o) => o.y),
+        outputs: outputs.children.map((o) => o.y)
+      };
+    }
+  };
+
   // src/Application.js
   var Application = class extends ApplicationReactivity {
+    Theme;
     Types;
     Views;
     Setup;
@@ -3899,6 +3938,7 @@
     Edges;
     constructor() {
       super();
+      this.Theme = new MidnightTheme(this);
       this.Types = new TypeCollection(this);
       this.Views = new ViewCollection(this);
       this.Setup = new ReactiveObject(this, { fgColor: "blue", bgColor: "green" });
@@ -3922,15 +3962,22 @@
     textType.Outgoing.create("output", () => {
       return this.string;
     });
-    const colorType = application2.Types.create("basic", "color");
+    const colorType = application2.Types.create("text", "color");
     colorType.Incoming.create("color", { type: "string", description: "color" });
+    colorType.Incoming.create("model", { type: "string", description: "preferred model" });
+    colorType.Incoming.create("description", { type: "string", description: "description" });
     colorType.Outgoing.create("output", () => {
       return this.color;
     });
-    const uppercaseType = application2.Types.create("text", "uppercase");
+    const uppercaseType = application2.Types.create("text", "case");
     uppercaseType.Incoming.create("input");
-    uppercaseType.Outgoing.create("output", () => {
+    uppercaseType.Incoming.create("template", { type: "string", description: "string template use $input to interpolate" });
+    uppercaseType.Incoming.create("description", { type: "string", description: "description" });
+    uppercaseType.Outgoing.create("upper", () => {
       return this.input.toUpperCase();
+    });
+    uppercaseType.Outgoing.create("lower", () => {
+      return this.input.toLowerCase();
     });
   }
 
@@ -3941,7 +3988,13 @@
   application.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
   registerTypes_default(application);
   application.start();
-  for (let i = 0; i < 100; i++) {
-    application.Nodes.create(v4_default(), "text/string");
+  for (let i = 0; i < 500; i++) {
+    if (Math.random() < 0.3) {
+      application.Nodes.create(v4_default(), "text/string");
+    } else if (Math.random() < 0.6) {
+      application.Nodes.create(v4_default(), "text/case");
+    } else {
+      application.Nodes.create(v4_default(), "text/color");
+    }
   }
 })();
