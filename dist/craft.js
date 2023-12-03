@@ -3611,17 +3611,18 @@
       this.backgroundRectangle = svg.rect({ class: "interactive", ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
       this.el = svg.g({ "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` });
       this.el.appendChild(this.backgroundRectangle);
-      this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
-      this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
-      this.wipe(this.node.observe("backgroundColor", (v) => update(this.backgroundRectangle, { fill: v })));
       this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
+      this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
+      this.wipe(this.node.observe("backgroundColor", (v) => update(this.backgroundRectangle, { fill: v })));
       this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { height: v })));
       this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
       this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
-      console.info("TODO: make me draggable");
+      console.info("TODO: Hey, maybe Pods should be measured here, and store in in input/reply???");
+      console.info("TODO: make me draggable, mimic bring to top");
     }
     draw() {
     }
@@ -3840,6 +3841,7 @@
         this.Reply.import(typeDeclaration.Reply.export());
       }
       let intervalID = setInterval(() => {
+        this.depthLevel = Math.random() > 0.5 ? 1 : 0;
         this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + 50 : this.horizontalPosition - 50;
         this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + 50 : this.verticalPosition - 50;
         this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;

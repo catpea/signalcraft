@@ -60,10 +60,11 @@ export default class Node extends NodeReactivity {
     }
 
     let intervalID = setInterval(() => {
+      this.depthLevel = Math.random() > 0.5 ? 1 : 0;
       this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + 50 : this.horizontalPosition - 50;
       this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + 50 : this.verticalPosition - 50;
       this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
-      
+
     }, 666+(5_000*Math.random()) );
 
   }

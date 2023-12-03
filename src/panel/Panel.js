@@ -14,9 +14,7 @@ class Component   {
   #wipe = [];
 
   constructor(conf) {
-
     const setup = Object.assign({}, {node:null, view:null, root:null, padd:3, size:0, data:null}, conf);
-
     this.#data = setup.data;
     this.#size = setup.size;
     this.#padd = setup.padd;
@@ -93,7 +91,10 @@ class Pod extends Component {
   constructor(setup) {
     super(setup);
     this.el = svg.g();
+
     this.data.forEach( item => this.append( new Line({...setup, item, size:32}) ));
+
+
   }
 }
 
@@ -114,20 +115,23 @@ class Panel extends Component {
     this.el = svg.g({ 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, });
     this.el.appendChild( this.backgroundRectangle )
 
-    this.wipe(      this.node.observe('horizontalPosition', (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
-    this.wipe(      this.node.observe('verticalPosition',   (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
-    this.wipe(      this.node.observe('backgroundColor',    (v)=>update( this.backgroundRectangle, {fill:v})   )  );
+    // PLEASE NOTE THAT THIS WRITES TO THE NODE, after measuring the rectangle size
+    this.wipe(      this.node.Input.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
+    this.wipe(      this.node.Input.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
+    this.wipe(      this.node.Reply.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
+    this.wipe(      this.node.Reply.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
 
-    this.wipe(      this.node.Input.observe('created',      (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Input.observe('removed',      (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Reply.observe('created',      (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Reply.observe('removed',      (v)=>this.node.nodeHeight = this.size   )  );
-
+    // PLEASE NOTE the .observe will trigger immiately upon subscription to reliably deliver the value.
+    this.wipe(      this.node.observe('horizontalPosition',      (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
+    this.wipe(      this.node.observe('verticalPosition',        (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
+    this.wipe(      this.node.observe('backgroundColor',         (v)=>update( this.backgroundRectangle, {fill:v})   )  );
     this.wipe(      this.node.observe('nodeHeight',              (v)=>update( this.backgroundRectangle, {height: v}) ));
     this.wipe(      this.node.observe('nodeWidth',               (v)=>update( this.backgroundRectangle, {width: v}) ));
-    this.wipe(      this.node.observe('depthLevel',              (v)=>update( this.el, {zIndex: v}) ));
+    this.wipe(      this.node.observe('depthLevel',              (v)=>update( this.el, {zIndex: v}) )); // mimic bring-to-top
 
-    console.info('TODO: make me draggable')
+    // ANNOy
+    console.info('TODO: Hey, maybe Pods should be measured here, and store in in input/reply???')
+    console.info('TODO: make me draggable, mimic bring to top')
 
   }
 
