@@ -31,7 +31,7 @@ export default class Core extends ApplicationReactivity {
 
   async start() {
     console.log('Starting...');
-    this.Setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
+    this.Setup.bgColor = `url(#background-secondary)`;
 
     let intervalID = setInterval(() => {
 

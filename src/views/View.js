@@ -1,4 +1,5 @@
 import panzoom from "panzoom";
+import calculatePercent from 'calculate-percent';
 // import React from "jsx-dom";
 
 import Panel from '../panel/Panel.js';
@@ -52,31 +53,116 @@ export default class View {
 
   #installCanvas() {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-
-    svg.setAttributeNS(null, "style", "border: 1px solid gold;");
+    // svg.setAttributeNS(null, "style", "border: 1px solid gold;");
     svg.setAttributeNS(null, "width", "100%");
     svg.setAttributeNS(null, "height", "666");
 
     this.#element.appendChild(svg);
 
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    svg.appendChild(defs);
 
     // NOTE: available gradients get installed here!
 
-    const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", "lineargradient");
-    lineargradient.setAttributeNS(null, "id", "Gradient2");
-    defs.appendChild(lineargradient);
+
+    const gradientSpecification = {
+      linearGradient: {
+        background: {
+          primary: ["#193452", "#0f2342"],
+          secondary: ["#0f181f", "#172029"],
+        },
+        panel: {
+          primary: ["#193452", "#0f2342"],
+          secondary: ["#0f181f", "#172029"],
+          caption: ["#0f181f", "#172029"],
+          pod: ["#162b39", "#0f2f50"],
+        },
+        cable: {
+          primary: ["#294666", "#1c293b"],
+          secondary: ["#0f181f", "#172029"],
+        },
+        alert: {
+          danger: ["#d07c0c", "#e78f2a", "#f2870a"],
+          sucess: ["#075d39", "#097d68"],
+        },
+      },
+
+      radialGradient: {
+        socket: {
+          primary: ["#d07c0c", "#e72a79", "#420f3f"],
+          error: ["#5dc316", "#075d39"],
+        },
+      },
+
+    };
+
+
+    for (const gradientType in gradientSpecification) {
+      for (const categoryName in gradientSpecification[gradientType]) {
+        for (const gradientName in gradientSpecification[gradientType][categoryName]) {
+          const colors = gradientSpecification[gradientType][categoryName][gradientName];
+          const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", gradientType);
+          lineargradient.setAttributeNS(null, "id", `${categoryName}-${gradientName}`);
+          lineargradient.setAttributeNS(null, "gradientTransform", `rotate(16)`);
+          let index = 0;
+          for (const color of colors) {
+            const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+            stop.setAttributeNS(null, "offset", `${calculatePercent(index++,colors.length-1)}%`);
+            stop.setAttributeNS(null, "stop-color", color);
+            lineargradient.appendChild(stop);
+          }
+          defs.appendChild(lineargradient);
+          svg.appendChild(defs);
+        }
+      }
+    }
+
+    const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    lineargradient.setAttributeNS(null, "id", "gradient-primary");
 
     const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
     stop.setAttributeNS(null, "offset", "0%");
-    stop.setAttributeNS(null, "stop-color", "#1d2b3a");
-    lineargradient.appendChild(stop);
+    stop.setAttributeNS(null, "stop-color", "#294666");
 
     const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
     stop2.setAttributeNS(null, "offset", "100%");
     stop2.setAttributeNS(null, "stop-color", "#1c293b");
+
+    lineargradient.appendChild(stop);
     lineargradient.appendChild(stop2);
+    defs.appendChild(lineargradient);
+
+
+
+
+
+    {
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'shadow-primary');
+    filter.setAttribute('filterUnits', 'userSpaceOnUse');
+    const fedropshadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    fedropshadow.setAttribute('dx', '1');
+    fedropshadow.setAttribute('dy', '1');
+    fedropshadow.setAttribute('stdDeviation', '32');
+    filter.appendChild(fedropshadow);
+    defs.appendChild(filter);
+    }
+
+    {
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'glow-primary');
+    filter.setAttribute('filterUnits', 'userSpaceOnUse');
+
+    const fedropshadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    fedropshadow.setAttribute('flood-color', '#e72a79');
+    fedropshadow.setAttribute('dx', '.4');
+    fedropshadow.setAttribute('dy', '.4');
+    fedropshadow.setAttribute('stdDeviation', '.5');
+    filter.appendChild(fedropshadow);
+    defs.appendChild(filter);
+    }
+
+
+    svg.appendChild(defs);
 
     return svg;
   }
@@ -92,7 +178,7 @@ export default class View {
     rect2.setAttributeNS(null, "y", "0");
     rect2.setAttributeNS(null, "width", 11_000);
     rect2.setAttributeNS(null, "height", 8_000);
-    rect2.setAttributeNS(null, "fill", "silver");
+    rect2.setAttributeNS(null, "fill", "url(#background-primary)");
     scene.appendChild(rect2);
 
     const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");

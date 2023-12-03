@@ -3256,6 +3256,34 @@
     }
   });
 
+  // node_modules/calculate-percent/index.js
+  var require_calculate_percent = __commonJS({
+    "node_modules/calculate-percent/index.js"(exports, module) {
+      module.exports = function(val, max, min = 0) {
+        const range = Math.abs(max - min);
+        const value = val - min;
+        let percent = 100 * parseFloat(value) / parseFloat(range) / 100;
+        return parseInt(percent * 100);
+      };
+    }
+  });
+
+  // node_modules/oneof/index.js
+  var require_oneof = __commonJS({
+    "node_modules/oneof/index.js"(exports, module) {
+      module.exports = function(list2) {
+        if (list2 == void 0)
+          return null;
+        if (list2.length === 0)
+          return null;
+        var min = 0;
+        var max = list2.length - 1;
+        var idx = Math.floor(Math.random() * (max - min + 1)) + min;
+        return list2[idx];
+      };
+    }
+  });
+
   // node_modules/uuid/dist/esm-browser/rng.js
   var getRandomValues;
   var rnds8 = new Uint8Array(16);
@@ -3500,6 +3528,10 @@
 
   // src/views/View.js
   var import_panzoom = __toESM(require_panzoom(), 1);
+  var import_calculate_percent = __toESM(require_calculate_percent(), 1);
+
+  // src/panel/Panel.js
+  var import_oneof = __toESM(require_oneof(), 1);
 
   // src/domek/domek.js
   var svg = new Proxy({}, {
@@ -3530,9 +3562,13 @@
   // src/panel/Panel.js
   var Component = class {
     el;
+    #name = null;
+    // name, spaces allowed
+    #main = null;
+    // root parent object
     #data = null;
     #home = null;
-    #size = -1;
+    #height = -1;
     #padd = -1;
     #list = [];
     #view = null;
@@ -3540,9 +3576,12 @@
     #root = null;
     #wipe = [];
     constructor(conf) {
-      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, size: 0, data: null }, conf);
+      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, height: 0, data: null, main: null, name: null }, conf);
+      this.#name = setup.name;
+      this.#main = setup.main;
+      this.#home = setup.home;
       this.#data = setup.data;
-      this.#size = setup.size;
+      this.#height = setup.height;
       this.#padd = setup.padd;
       this.#view = setup.view;
       this.#node = setup.node;
@@ -3552,11 +3591,32 @@
       component.home = this;
       this.#list.push(component);
     }
+    get isRoot() {
+      return this.#home == null;
+    }
+    get name() {
+      return this.#name;
+    }
+    get padd() {
+      return this.#padd;
+    }
     set home(v) {
       this.#home = v;
     }
     get home() {
       return this.#home;
+    }
+    set main(v) {
+      this.#main = v;
+    }
+    get main() {
+      return this.#main;
+    }
+    set list(v) {
+      this.#list = v;
+    }
+    get list() {
+      return this.#list;
     }
     get node() {
       return this.#node;
@@ -3564,11 +3624,41 @@
     get data() {
       return this.#data;
     }
-    get size() {
-      return this.#size + this.#list.reduce((total, child) => total + child.size, 0) + this.#padd * (this.#list.length + 1);
+    get containers() {
+      if (this.isRoot)
+        return [this];
+      return [...this.#home.containers, this.#home];
+    }
+    get aboveAll() {
+      if (this.isRoot)
+        return [this];
+      return [...this.#home.aboveAll, ...this.#home.list.slice(0, this.#home.list.indexOf(this))];
+    }
+    get above() {
+      if (this.isRoot)
+        return [];
+      return [...this.#home.list.slice(0, this.#home.list.indexOf(this))];
+    }
+    get top() {
+      if (this.isRoot)
+        return 0;
+      const topPadding = this.#padd;
+      const heightOfAllAbove = this.above.reduce((total, item) => total + item.height, 0);
+      const paddOfAllAbove = this.above.length * this.#padd;
+      return this.#home.top + topPadding + heightOfAllAbove + paddOfAllAbove;
+    }
+    get height() {
+      return this.#height + this.#list.reduce((total, child) => total + child.height, 0) + this.#padd * (this.#list.length + 1);
+    }
+    get width() {
+      return this.node.nodeWidth - this.containers.slice(1).reduce((total, item) => total + item.padd * 2, 0);
+    }
+    get left() {
+      return this.containers.slice(1).reduce((total, item) => total + item.padd, 0);
     }
     start() {
       this.draw();
+      this.#list.map((o) => o.start());
     }
     draw() {
     }
@@ -3582,47 +3672,59 @@
   };
   var Line = class extends Component {
     constructor(setup) {
-      super(setup, { size: 32 });
-      this.el = svg.g();
+      super(setup, { height: 32 });
+    }
+    draw() {
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.height, fill: `url(#panel-secondary)` });
+      this.el = svg.circle({ cx: this.left - 5, cy: this.top + this.height / 2, r: 8, height: this.height, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#glow-primary)` });
+      this.main.el.appendChild(this.el);
+      console.log(this.aboveAll);
     }
   };
   var Caption = class extends Component {
     constructor(setup) {
-      super(setup, { size: 32 });
-      this.el = svg.g();
+      super(setup, { height: 32 });
+    }
+    draw() {
+      console.log("Caption", this.top);
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.height, fill: `url(#panel-caption)` });
+      this.main.el.appendChild(this.el);
     }
   };
   var Pod = class extends Component {
     constructor(setup) {
       super(setup);
-      this.el = svg.g();
-      this.data.forEach((item) => this.append(new Line({ ...setup, item, size: 32 })));
+      this.data.forEach((item, index) => this.append(new Line({ ...setup, name: `pod line ${index}`, item, height: 32 })));
+    }
+    draw() {
+      console.log("Pod!", this.top);
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.height, fill: `url(#panel-pod)`, stroke: "black" });
+      this.main.el.appendChild(this.el);
     }
   };
   var Panel = class extends Component {
     constructor(setup) {
       super(setup);
-      const caption = new Caption({ ...setup, size: 32 });
-      this.append(caption);
-      const inputPod = new Pod({ ...setup, data: setup.node.Input });
-      this.append(inputPod);
-      const replyPod = new Pod({ ...setup, data: setup.node.Reply });
-      this.append(replyPod);
-      this.backgroundRectangle = svg.rect({ class: "interactive", ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
       this.el = svg.g({ "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` });
+      setup.main = this;
+      const caption = new Caption({ ...setup, name: "caption bar", height: 64 });
+      this.append(caption);
+      const inputPod = new Pod({ ...setup, name: "input pod", data: setup.node.Input });
+      this.append(inputPod);
+      const replyPod = new Pod({ ...setup, name: "output pod", data: setup.node.Reply });
+      this.append(replyPod);
+      this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.height, fill: this.node.backgroundColor, stroke: "black" });
       this.el.appendChild(this.backgroundRectangle);
-      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.height));
+      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.height));
+      this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.height));
+      this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.height));
       this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
       this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
       this.wipe(this.node.observe("backgroundColor", (v) => update(this.backgroundRectangle, { fill: v })));
       this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { height: v })));
       this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
       this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
-      console.info("TODO: Hey, maybe Pods should be measured here, and store in in input/reply???");
-      console.info("TODO: make me draggable, mimic bring to top");
     }
     draw() {
     }
@@ -3635,12 +3737,13 @@
       this.#node = setup.node;
       this.#view = setup.view;
       this.#root = setup.root;
-      this.#root = new Panel(setup);
+      this.#root = new Panel({ ...setup, name: "main panel", padd: 3 });
     }
     get root() {
       return this.#root.el;
     }
     start() {
+      console.log(`SIZE OF ${this.#node.type} is ${this.#root.height}`);
       this.#root.start();
     }
   };
@@ -3681,23 +3784,92 @@
     }
     #installCanvas() {
       const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg2.setAttributeNS(null, "style", "border: 1px solid gold;");
       svg2.setAttributeNS(null, "width", "100%");
       svg2.setAttributeNS(null, "height", "666");
       this.#element.appendChild(svg2);
       const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      svg2.appendChild(defs);
-      const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", "lineargradient");
-      lineargradient.setAttributeNS(null, "id", "Gradient2");
-      defs.appendChild(lineargradient);
+      const gradientSpecification = {
+        linearGradient: {
+          background: {
+            primary: ["#193452", "#0f2342"],
+            secondary: ["#0f181f", "#172029"]
+          },
+          panel: {
+            primary: ["#193452", "#0f2342"],
+            secondary: ["#0f181f", "#172029"],
+            caption: ["#0f181f", "#172029"],
+            pod: ["#162b39", "#0f2f50"]
+          },
+          cable: {
+            primary: ["#294666", "#1c293b"],
+            secondary: ["#0f181f", "#172029"]
+          },
+          alert: {
+            danger: ["#d07c0c", "#e78f2a", "#f2870a"],
+            sucess: ["#075d39", "#097d68"]
+          }
+        },
+        radialGradient: {
+          socket: {
+            primary: ["#d07c0c", "#e72a79", "#420f3f"],
+            error: ["#5dc316", "#075d39"]
+          }
+        }
+      };
+      for (const gradientType in gradientSpecification) {
+        for (const categoryName in gradientSpecification[gradientType]) {
+          for (const gradientName in gradientSpecification[gradientType][categoryName]) {
+            const colors = gradientSpecification[gradientType][categoryName][gradientName];
+            const lineargradient2 = document.createElementNS("http://www.w3.org/2000/svg", gradientType);
+            lineargradient2.setAttributeNS(null, "id", `${categoryName}-${gradientName}`);
+            lineargradient2.setAttributeNS(null, "gradientTransform", `rotate(16)`);
+            let index = 0;
+            for (const color of colors) {
+              const stop3 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+              stop3.setAttributeNS(null, "offset", `${(0, import_calculate_percent.default)(index++, colors.length - 1)}%`);
+              stop3.setAttributeNS(null, "stop-color", color);
+              lineargradient2.appendChild(stop3);
+            }
+            defs.appendChild(lineargradient2);
+            svg2.appendChild(defs);
+          }
+        }
+      }
+      const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+      lineargradient.setAttributeNS(null, "id", "gradient-primary");
       const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
       stop.setAttributeNS(null, "offset", "0%");
-      stop.setAttributeNS(null, "stop-color", "#1d2b3a");
-      lineargradient.appendChild(stop);
+      stop.setAttributeNS(null, "stop-color", "#294666");
       const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
       stop2.setAttributeNS(null, "offset", "100%");
       stop2.setAttributeNS(null, "stop-color", "#1c293b");
+      lineargradient.appendChild(stop);
       lineargradient.appendChild(stop2);
+      defs.appendChild(lineargradient);
+      {
+        const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        filter.setAttribute("id", "shadow-primary");
+        filter.setAttribute("filterUnits", "userSpaceOnUse");
+        const fedropshadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
+        fedropshadow.setAttribute("dx", "1");
+        fedropshadow.setAttribute("dy", "1");
+        fedropshadow.setAttribute("stdDeviation", "32");
+        filter.appendChild(fedropshadow);
+        defs.appendChild(filter);
+      }
+      {
+        const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        filter.setAttribute("id", "glow-primary");
+        filter.setAttribute("filterUnits", "userSpaceOnUse");
+        const fedropshadow = document.createElementNS("http://www.w3.org/2000/svg", "feDropShadow");
+        fedropshadow.setAttribute("flood-color", "#e72a79");
+        fedropshadow.setAttribute("dx", ".4");
+        fedropshadow.setAttribute("dy", ".4");
+        fedropshadow.setAttribute("stdDeviation", ".5");
+        filter.appendChild(fedropshadow);
+        defs.appendChild(filter);
+      }
+      svg2.appendChild(defs);
       return svg2;
     }
     #installScene() {
@@ -3710,7 +3882,7 @@
       rect2.setAttributeNS(null, "y", "0");
       rect2.setAttributeNS(null, "width", 11e3);
       rect2.setAttributeNS(null, "height", 8e3);
-      rect2.setAttributeNS(null, "fill", "silver");
+      rect2.setAttributeNS(null, "fill", "url(#background-primary)");
       scene.appendChild(rect2);
       const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
       vertical1.setAttributeNS(null, "x1", "100");
@@ -3746,6 +3918,9 @@
       return view;
     }
   };
+
+  // src/nodes/Node.js
+  var import_oneof2 = __toESM(require_oneof(), 1);
 
   // src/nodes/NodeReactivity.js
   var NodeReactivity = class {
@@ -3816,7 +3991,8 @@
       this.#id = id || v4_default();
       this.#type = type;
       const defaults = {
-        backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
+        backgroundColor: (0, import_oneof2.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
+        // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
         horizontalPosition: 1e4 * Math.random(),
         verticalPosition: 8e3 * Math.random(),
         nodeWidth: 300,
@@ -3840,12 +4016,13 @@
         this.Input.import(typeDeclaration.Input.export());
         this.Reply.import(typeDeclaration.Reply.export());
       }
+      const d = 133;
       let intervalID = setInterval(() => {
         this.depthLevel = Math.random() > 0.5 ? 1 : 0;
-        this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + 50 : this.horizontalPosition - 50;
-        this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + 50 : this.verticalPosition - 50;
+        this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + d : this.horizontalPosition - d;
+        this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + d : this.verticalPosition - d;
         this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
-      }, 666 + 5e3 * Math.random());
+      }, 1e4 + 5e3 * Math.random());
     }
     stop() {
       this.#unsubscribe.map((o) => o());
@@ -4008,7 +4185,7 @@
     }
     async start() {
       console.log("Starting...");
-      this.Setup.bgColor = `hsl(${parseInt(Math.random() * 360)}, 20%, 35%)`;
+      this.Setup.bgColor = `url(#background-secondary)`;
       let intervalID = setInterval(() => {
       }, 1e3);
     }
