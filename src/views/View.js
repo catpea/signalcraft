@@ -1,6 +1,9 @@
 import panzoom from "panzoom";
 // import React from "jsx-dom";
 
+import Panel from '../panel/Panel.js';
+import Cable from '../cable/Cable.js';
+
 import NodeRenderer from './NodeRenderer.js';
 
 export default class View {
@@ -30,16 +33,16 @@ export default class View {
     panzoom(this.#scene, { smoothScroll: false });
 
     // setup all th einstances of nodes
-    this.application.Nodes.forEach( node=>this.#createNode(node) );
+    this.application.Nodes.forEach( node=>this.#createPanel(node) );
 
     // ...and keep an eye on changes
     const grandCentral = {
       "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
-      'Nodes created ...': this.#createNode, //   NOTE:
-      'Nodes deleted ...': this.#deleteNode, //   the node updates it self, here we only ensure it exists, or is removed as needed
+      'Nodes created ...': this.#createPanel, //   NOTE:
+      'Nodes deleted ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
     };
-    this.application.integrate(this, grandCentral);
-    //TODO: ass to unsubscribe
+    const unintegrate = this.application.integrate(this, grandCentral);
+    this.#unsubscribe.push(unintegrate);
   }
 
   stop() {
@@ -113,83 +116,16 @@ export default class View {
     return scene;
   }
 
-  #deleteNode({ item }) {
-    this.#renderers.get( item.id ).remove();
+  #deletePanel({ item }) {
+    this.#renderers.get( item.id ).stop();
   }
 
-  #createNode({ item }) {
-
-    const node = new NodeRenderer(item, this, this.#scene);
-    this.#renderers.set( item.id, node );
-    node.start();
-
-    //
-    // const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    // g.setAttribute('id', item.id);
-    // g.setAttribute('transform', `translate(${item.horizontalPosition},${item.verticalPosition})`);
-    // this.#scene.appendChild(g);
-    //
-    // const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    // rect.setAttribute('class', 'interactive');
-    // rect.setAttribute('width', item.nodeWidth);
-    // rect.setAttribute('height', item.nodeHeight);
-    // rect.setAttribute('ry', '5');
-    // rect.setAttribute('fill', item.backgroundColor);
-    // rect.setAttribute('dfill', 'url(#Gradient2)');
-    // g.appendChild(rect);
-    //
-    // const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // text.setAttribute('class', 'interactive');
-    // text.setAttribute('x', '90');
-    // text.setAttribute('y', '25');
-    // text.setAttribute('font-size', '12px');
-    // text.setAttribute('fill', '#fff');
-    // text.setAttribute('text-anchor', 'middle');
-    // text.setAttribute('font-weight', 'bold');
-    // text.setAttribute('font-family', 'Arial');
-    // g.appendChild(text);
-    //
-    // const text2 = document.createTextNode('Geometry');
-    // text.appendChild(text2);
-    //
-    // const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    // circle.setAttribute('class', 'interactive');
-    // circle.setAttribute('cx', '0');
-    // circle.setAttribute('cy', '50');
-    // circle.setAttribute('r', '5');
-    // circle.setAttribute('fill', 'cyan');
-    // g.appendChild(circle);
-    //
-    // const text3 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // text3.setAttribute('class', 'interactive');
-    // text3.setAttribute('x', '10');
-    // text3.setAttribute('y', '55');
-    // text3.setAttribute('font-size', '10px');
-    // text3.setAttribute('fill', '#fff');
-    // text3.setAttribute('font-family', 'Arial');
-    // g.appendChild(text3);
-    //
-    // const text4 = document.createTextNode('Geometry');
-    // text3.appendChild(text4);
-    //
-    // const circle2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    // circle2.setAttribute('class', 'interactive');
-    // circle2.setAttribute('cx', item.nodeWidth);
-    // circle2.setAttribute('cy', '50');
-    // circle2.setAttribute('r', '5');
-    // circle2.setAttribute('fill', 'magenta');
-    // g.appendChild(circle2);
-    //
-    // const monitor = item.monitor((key, value, item)=>{
-    //   this.#updateNode({item, key, value});
-    // });
-    //
-    // this.#unsubscribe.push( monitor );
-
+  #createPanel({ item }) {
+    const panel = new Panel({node: item, view:this, root:this.#scene});
+    this.#renderers.set( item.id, panel );
+    this.#scene.appendChild(panel.root);
+    panel.start();
   }
 
-  // #updateNode({ item, key, value }) {
-    // const element = this.#svg.getElementById(item.id);
-    // element.setAttributeNS(null, "transform", `translate(${item.horizontalPosition},${item.verticalPosition})`);
-  // }
+
 }

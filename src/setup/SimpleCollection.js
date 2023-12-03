@@ -64,6 +64,13 @@ export default class SimpleCollection {
     if (Array.isArray(this.#observers[eventName]))
       this.#observers[eventName].forEach((observer) => observer(eventData));
   }
+
+
+  observe(eventName, observer) { // triggers asap
+    this.subscribe(eventName, observer);
+    observer({data: this.#content});
+  }
+
   subscribe(eventName, observer) {
     // Ensure that observer is a function
     if (typeof observer !== "function")

@@ -1,4 +1,4 @@
-import ApplicationReactivity from "./application/ApplicationReactivity.js";
+import ApplicationReactivity from "./setup/ApplicationReactivity.js";
 
 import TypeCollection from "./types/TypeCollection.js";
 import ViewCollection from "./views/ViewCollection.js";
@@ -10,7 +10,7 @@ import MightyMidnight from "./theme/MightyMidnight.js";
 // import ReactiveObject from "./library/ReactiveObject.js";
 // import EdgeCollection from "./node/EdgeCollection.js";
 
-export default class Application extends ApplicationReactivity {
+export default class Core extends ApplicationReactivity {
 
   Theme;
   Types;

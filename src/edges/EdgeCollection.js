@@ -1,5 +1,5 @@
 import Edge from "./Edge.js";
-import SimpleCollection from '../struct/SimpleCollection.js';
+import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class EdgeCollection extends SimpleCollection {
 

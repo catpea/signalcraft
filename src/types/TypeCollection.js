@@ -1,6 +1,6 @@
 import Type from "./Type.js";
 
-import SimpleCollection from '../struct/SimpleCollection.js';
+import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class TypeCollection extends SimpleCollection {
 

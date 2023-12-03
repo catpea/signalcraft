@@ -1,5 +1,5 @@
 import View from "./View.js";
-import SimpleCollection from '../struct/SimpleCollection.js';
+import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class ViewCollection extends SimpleCollection {
 

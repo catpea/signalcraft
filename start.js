@@ -5,7 +5,7 @@ import * as esbuild from 'esbuild'
 let ctx = await esbuild.context({
   bundle: true,
    // jsxFactory: 'h',
-  entryPoints: ['src/signalcraft.js'],
+  entryPoints: ['src/craft.js'],
   outdir: 'dist',
   loader: {
      '.html': 'text',

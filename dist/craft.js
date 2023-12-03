@@ -3304,7 +3304,7 @@
   }
   var v4_default = v4;
 
-  // src/application/ApplicationReactivity.js
+  // src/setup/ApplicationReactivity.js
   var ApplicationReactivity = class {
     #subscribers = {};
     #notify(type, data) {
@@ -3342,7 +3342,7 @@
     }
   };
 
-  // src/incoming/Incoming.js
+  // src/input/Incoming.js
   var Incoming = class {
     #id;
     #format;
@@ -3359,13 +3359,13 @@
     }
   };
 
-  // src/struct/SimpleCollection.js
+  // src/setup/SimpleCollection.js
   var import_cloneDeep = __toESM(require_cloneDeep(), 1);
   var SimpleCollection = class {
     #application;
     #content = [];
-    constructor(application2) {
-      this.#application = application2;
+    constructor(application) {
+      this.#application = application;
     }
     size() {
       return this.#content.filter((item) => !item.deleted).length;
@@ -3416,6 +3416,10 @@
       if (Array.isArray(this.#observers[eventName]))
         this.#observers[eventName].forEach((observer) => observer(eventData));
     }
+    observe(eventName, observer) {
+      this.subscribe(eventName, observer);
+      observer({ data: this.#content });
+    }
     subscribe(eventName, observer) {
       if (typeof observer !== "function")
         throw new TypeError("Observer must be a function.");
@@ -3436,7 +3440,7 @@
     }
   };
 
-  // src/incoming/IncomingCollection.js
+  // src/input/IncomingCollection.js
   var IncomingCollection = class extends SimpleCollection {
     instantiate(id, format, label) {
       const input = new Incoming(id, format, label);
@@ -3444,7 +3448,7 @@
     }
   };
 
-  // src/outgoing/Outgoing.js
+  // src/reply/Outgoing.js
   var Outgoing = class {
     #id;
     #format;
@@ -3461,7 +3465,7 @@
     }
   };
 
-  // src/outgoing/OutgoingCollection.js
+  // src/reply/OutgoingCollection.js
   var OutgoingCollection = class extends SimpleCollection {
     instantiate(id, format, label, generator) {
       const output = new Outgoing(id, format, label, generator);
@@ -3474,8 +3478,8 @@
     #id;
     #category;
     #name;
-    Incoming = new IncomingCollection();
-    Outgoing = new OutgoingCollection();
+    Input = new IncomingCollection();
+    Reply = new OutgoingCollection();
     get id() {
       return this.#id;
     }
@@ -3497,95 +3501,149 @@
   // src/views/View.js
   var import_panzoom = __toESM(require_panzoom(), 1);
 
-  // src/views/NodeRenderer.js
-  var NodeRenderer = class {
-    #view;
-    // the view (canvas)
-    #node;
-    // node object
-    #root;
-    // container
-    #self;
-    // g element
-    #body;
-    // backdrop
-    #text;
-    // caption
-    #name;
-    // caption text
-    #exit = [];
-    // remove listeners
-    constructor(node, view, root) {
-      this.#view = view;
-      this.#node = node;
-      this.#root = root;
+  // src/domek/domek.js
+  var svg = new Proxy({}, {
+    get: function(target, property) {
+      return function(properties) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", property);
+        for (const key in properties) {
+          if (properties.hasOwnProperty(key)) {
+            el.setAttributeNS(null, key, properties[key]);
+          }
+        }
+        return el;
+      };
     }
-    start() {
-      this.create();
-      this.update();
-      const monitor = this.#node.monitor((key, value, item) => {
-        this.update();
-      });
-      this.#exit.push(monitor);
-      console.log(`Node ${this.#node.id} start()`);
+  });
+  var html = new Proxy({}, {
+    get: function(target, property) {
+      const el = document.createElement(property);
+      return el;
     }
-    stop() {
-      this.#exit.map((o) => o());
-    }
-    create() {
-      this.#self = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      this.#self.setAttribute("id", this.#node);
-      this.#root.appendChild(this.#self);
-      this.#body = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      this.#body.setAttribute("class", "interactive");
-      this.#body.setAttribute("ry", "5");
-      this.#self.appendChild(this.#body);
-      this.#text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      this.#text.setAttribute("class", "interactive");
-      this.#text.setAttribute("x", "90");
-      this.#text.setAttribute("y", "25");
-      this.#text.setAttribute("font-size", "12px");
-      this.#text.setAttribute("fill", "#fff");
-      this.#text.setAttribute("text-anchor", "middle");
-      this.#text.setAttribute("font-weight", "bold");
-      this.#text.setAttribute("font-family", "Arial");
-      this.#self.appendChild(this.#text);
-      this.#name = document.createTextNode("");
-      this.#text.appendChild(this.#name);
-      const geometry = this.#view.application.Theme.getNodeHeightFor(this.#node);
-      for (const y of geometry.inputs) {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("class", "interactive");
-        circle.setAttribute("cx", "0");
-        circle.setAttribute("cy", y);
-        circle.setAttribute("r", "5");
-        circle.setAttribute("fill", "cyan");
-        this.#self.appendChild(circle);
-      }
-      for (const y of geometry.outputs) {
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("class", "interactive");
-        circle.setAttribute("cx", this.#node.nodeWidth);
-        circle.setAttribute("cy", y);
-        circle.setAttribute("r", "5");
-        circle.setAttribute("fill", "aliceblue");
-        this.#self.appendChild(circle);
-      }
-    }
-    update() {
-      const geometry = this.#view.application.Theme.getNodeHeightFor(this.#node);
-      const { height } = geometry;
-      console.log("GOT", geometry);
-      this.#self.setAttribute("transform", `translate(${this.#node.horizontalPosition}, ${this.#node.verticalPosition})`);
-      this.#body.setAttribute("width", this.#node.nodeWidth);
-      this.#body.setAttribute("height", height);
-      this.#body.setAttribute("fill", this.#node.backgroundColor);
-      this.#name.nodeValue = this.#node.type;
-    }
-    remove() {
-      this.#self.remove();
+  });
+  var update = function(el, properties) {
+    for (const key in properties) {
+      el.setAttribute(key, properties[key]);
     }
   };
+
+  // src/panel/Panel.js
+  var Component = class {
+    el;
+    #data = null;
+    #home = null;
+    #size = -1;
+    #padd = -1;
+    #list = [];
+    #view = null;
+    #node = null;
+    #root = null;
+    #wipe = [];
+    constructor(conf) {
+      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, size: 0, data: null }, conf);
+      this.#data = setup.data;
+      this.#size = setup.size;
+      this.#padd = setup.padd;
+      this.#view = setup.view;
+      this.#node = setup.node;
+      this.#root = setup.root;
+    }
+    append(component) {
+      component.home = this;
+      this.#list.push(component);
+    }
+    set home(v) {
+      this.#home = v;
+    }
+    get home() {
+      return this.#home;
+    }
+    get node() {
+      return this.#node;
+    }
+    get data() {
+      return this.#data;
+    }
+    get size() {
+      return this.#size + this.#list.reduce((total, child) => total + child.size, 0) + this.#padd * (this.#list.length + 1);
+    }
+    start() {
+      this.draw();
+    }
+    draw() {
+    }
+    stop() {
+      this.el.remove();
+      this.#wipe.map((x) => x());
+    }
+    wipe(...arg) {
+      this.#wipe.push(...arg);
+    }
+  };
+  var Line = class extends Component {
+    constructor(setup) {
+      super(setup, { size: 32 });
+      this.el = svg.g();
+    }
+  };
+  var Caption = class extends Component {
+    constructor(setup) {
+      super(setup, { size: 32 });
+      this.el = svg.g();
+    }
+  };
+  var Pod = class extends Component {
+    constructor(setup) {
+      super(setup);
+      this.el = svg.g();
+      this.data.forEach((item) => this.append(new Line({ ...setup, item, size: 32 })));
+    }
+  };
+  var Panel = class extends Component {
+    constructor(setup) {
+      super(setup);
+      const caption = new Caption({ ...setup, size: 32 });
+      this.append(caption);
+      const inputPod = new Pod({ ...setup, data: setup.node.Input });
+      this.append(inputPod);
+      const replyPod = new Pod({ ...setup, data: setup.node.Reply });
+      this.append(replyPod);
+      this.backgroundRectangle = svg.rect({ class: "interactive", ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
+      this.el = svg.g({ "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` });
+      this.el.appendChild(this.backgroundRectangle);
+      this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
+      this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
+      this.wipe(this.node.observe("backgroundColor", (v) => update(this.backgroundRectangle, { fill: v })));
+      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { height: v })));
+      this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
+      this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
+      console.info("TODO: make me draggable");
+    }
+    draw() {
+    }
+  };
+  var Composer = class {
+    #root;
+    #node;
+    #view;
+    constructor(setup) {
+      this.#node = setup.node;
+      this.#view = setup.view;
+      this.#root = setup.root;
+      this.#root = new Panel(setup);
+    }
+    get root() {
+      return this.#root.el;
+    }
+    start() {
+      this.#root.start();
+    }
+  };
+  var Panel_default = Composer;
 
   // src/views/View.js
   var View = class {
@@ -3605,28 +3663,29 @@
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
       (0, import_panzoom.default)(this.#scene, { smoothScroll: false });
-      this.application.Nodes.forEach((node) => this.#createNode(node));
+      this.application.Nodes.forEach((node) => this.#createPanel(node));
       const grandCentral = {
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
-        "Nodes created ...": this.#createNode,
+        "Nodes created ...": this.#createPanel,
         //   NOTE:
-        "Nodes deleted ...": this.#deleteNode
+        "Nodes deleted ...": this.#deletePanel
         //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
-      this.application.integrate(this, grandCentral);
+      const unintegrate = this.application.integrate(this, grandCentral);
+      this.#unsubscribe.push(unintegrate);
     }
     stop() {
       this.#unsubscribe.map((o) => o());
       this.#element.empty();
     }
     #installCanvas() {
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttributeNS(null, "style", "border: 1px solid gold;");
-      svg.setAttributeNS(null, "width", "100%");
-      svg.setAttributeNS(null, "height", "666");
-      this.#element.appendChild(svg);
+      const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg2.setAttributeNS(null, "style", "border: 1px solid gold;");
+      svg2.setAttributeNS(null, "width", "100%");
+      svg2.setAttributeNS(null, "height", "666");
+      this.#element.appendChild(svg2);
       const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      svg.appendChild(defs);
+      svg2.appendChild(defs);
       const lineargradient = document.createElementNS("http://www.w3.org/2000/svg", "lineargradient");
       lineargradient.setAttributeNS(null, "id", "Gradient2");
       defs.appendChild(lineargradient);
@@ -3638,7 +3697,7 @@
       stop2.setAttributeNS(null, "offset", "100%");
       stop2.setAttributeNS(null, "stop-color", "#1c293b");
       lineargradient.appendChild(stop2);
-      return svg;
+      return svg2;
     }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -3668,18 +3727,15 @@
       scene.appendChild(horizontal1);
       return scene;
     }
-    #deleteNode({ item }) {
-      this.#renderers.get(item.id).remove();
+    #deletePanel({ item }) {
+      this.#renderers.get(item.id).stop();
     }
-    #createNode({ item }) {
-      const node = new NodeRenderer(item, this, this.#scene);
-      this.#renderers.set(item.id, node);
-      node.start();
+    #createPanel({ item }) {
+      const panel = new Panel_default({ node: item, view: this, root: this.#scene });
+      this.#renderers.set(item.id, panel);
+      this.#scene.appendChild(panel.root);
+      panel.start();
     }
-    // #updateNode({ item, key, value }) {
-    // const element = this.#svg.getElementById(item.id);
-    // element.setAttributeNS(null, "transform", `translate(${item.horizontalPosition},${item.verticalPosition})`);
-    // }
   };
 
   // src/views/ViewCollection.js
@@ -3723,6 +3779,10 @@
         delete this.#monitors[id];
       };
     }
+    observe(key, observer) {
+      this.subscribe(key, observer);
+      observer(this[key]);
+    }
     subscribe(key, observer) {
       if (typeof observer !== "function")
         throw new TypeError("Observer must be a function.");
@@ -3730,7 +3790,6 @@
         this.#observers[key] = [];
       this.#observers[key].push(observer);
       const value = this[key];
-      observer(key, value);
       return () => {
         this.#unsubscribe(key, observer);
       };
@@ -3747,8 +3806,8 @@
     #type;
     #state;
     #unsubscribe = [];
-    Incoming = new IncomingCollection();
-    Outgoing = new OutgoingCollection();
+    Input = new IncomingCollection();
+    Reply = new OutgoingCollection();
     constructor(id, type, state = {}) {
       super();
       if (!type)
@@ -3776,14 +3835,14 @@
       if (!this.#type)
         throw new Error("You must initialize a node with a known type");
       const typeDeclaration = this.application.Types.find(this.#type);
-      console.log(`Node started (${typeDeclaration})`);
       if (typeDeclaration) {
-        this.Incoming.import(typeDeclaration.Incoming.export());
-        this.Outgoing.import(typeDeclaration.Outgoing.export());
+        this.Input.import(typeDeclaration.Input.export());
+        this.Reply.import(typeDeclaration.Reply.export());
       }
       let intervalID = setInterval(() => {
         this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + 50 : this.horizontalPosition - 50;
         this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + 50 : this.verticalPosition - 50;
+        this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
       }, 666 + 5e3 * Math.random());
     }
     stop() {
@@ -3827,10 +3886,10 @@
   var ReactiveObject = class {
     #application;
     #observers = {};
-    constructor(application2, obj) {
+    constructor(application, obj) {
       if (typeof obj !== "object")
         throw new TypeError("Argument must be an object.");
-      this.#application = application2;
+      this.#application = application;
       Object.entries(obj).forEach(([key, val]) => this.#defineReactiveProperty(key, val));
     }
     #defineReactiveProperty(key, val) {
@@ -3928,8 +3987,8 @@
     }
   };
 
-  // src/Application.js
-  var Application = class extends ApplicationReactivity {
+  // src/Core.js
+  var Core = class extends ApplicationReactivity {
     Theme;
     Types;
     Views;
@@ -3955,46 +4014,46 @@
     }
   };
 
-  // src/boot/registerTypes.js
-  function registerTypes_default(application2) {
-    const textType = application2.Types.create("text", "string");
-    textType.Incoming.create("string", { type: "string", description: "a string of letters" });
-    textType.Outgoing.create("output", () => {
+  // src/setup/registerTypes.js
+  function registerTypes_default(application) {
+    const textType = application.Types.create("text", "string");
+    textType.Input.create("string", { type: "string", description: "a string of letters" });
+    textType.Reply.create("output", () => {
       return this.string;
     });
-    const colorType = application2.Types.create("text", "color");
-    colorType.Incoming.create("color", { type: "string", description: "color" });
-    colorType.Incoming.create("model", { type: "string", description: "preferred model" });
-    colorType.Incoming.create("description", { type: "string", description: "description" });
-    colorType.Outgoing.create("output", () => {
+    const colorType = application.Types.create("text", "color");
+    colorType.Input.create("color", { type: "string", description: "color" });
+    colorType.Input.create("model", { type: "string", description: "preferred model" });
+    colorType.Input.create("description", { type: "string", description: "description" });
+    colorType.Reply.create("output", () => {
       return this.color;
     });
-    const uppercaseType = application2.Types.create("text", "case");
-    uppercaseType.Incoming.create("input");
-    uppercaseType.Incoming.create("template", { type: "string", description: "string template use $input to interpolate" });
-    uppercaseType.Incoming.create("description", { type: "string", description: "description" });
-    uppercaseType.Outgoing.create("upper", () => {
+    const uppercaseType = application.Types.create("text", "case");
+    uppercaseType.Input.create("input");
+    uppercaseType.Input.create("template", { type: "string", description: "string template use $input to interpolate" });
+    uppercaseType.Input.create("description", { type: "string", description: "description" });
+    uppercaseType.Reply.create("upper", () => {
       return this.input.toUpperCase();
     });
-    uppercaseType.Outgoing.create("lower", () => {
+    uppercaseType.Reply.create("lower", () => {
       return this.input.toLowerCase();
     });
   }
 
-  // src/signalcraft.js
-  var application = new Application();
-  globalThis.signalcraft = application;
-  application.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
-  application.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
-  registerTypes_default(application);
-  application.start();
-  for (let i = 0; i < 500; i++) {
+  // src/craft.js
+  var core = new Core();
+  globalThis.signalcraft = core;
+  core.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
+  core.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
+  registerTypes_default(core);
+  core.start();
+  for (let i = 0; i < 100; i++) {
     if (Math.random() < 0.3) {
-      application.Nodes.create(v4_default(), "text/string");
+      core.Nodes.create(v4_default(), "text/string");
     } else if (Math.random() < 0.6) {
-      application.Nodes.create(v4_default(), "text/case");
+      core.Nodes.create(v4_default(), "text/case");
     } else {
-      application.Nodes.create(v4_default(), "text/color");
+      core.Nodes.create(v4_default(), "text/color");
     }
   }
 })();

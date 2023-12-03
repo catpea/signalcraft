@@ -1,8 +1,8 @@
 import { v4 as uuid } from "uuid";
 
 import NodeReactivity from "./NodeReactivity.js";
-import IncomingCollection from "../incoming/IncomingCollection.js";
-import OutgoingCollection from "../outgoing/OutgoingCollection.js";
+import IncomingCollection from "../input/IncomingCollection.js";
+import OutgoingCollection from "../reply/OutgoingCollection.js";
 
 export default class Node extends NodeReactivity {
   application;
@@ -13,8 +13,8 @@ export default class Node extends NodeReactivity {
 
   #unsubscribe = [];
 
-  Incoming = new IncomingCollection();
-  Outgoing = new OutgoingCollection();
+  Input = new IncomingCollection();
+  Reply = new OutgoingCollection();
 
   constructor(id, type, state={}){
 
@@ -43,6 +43,7 @@ export default class Node extends NodeReactivity {
   get id(){
     return this.#id;
   }
+
   get type(){
     return this.#type;
   }
@@ -52,15 +53,17 @@ export default class Node extends NodeReactivity {
 
     const typeDeclaration = this.application.Types.find(this.#type);
 
-    console.log(`Node started (${typeDeclaration})`);
+    // console.log(`Node started (${typeDeclaration})`);
     if(typeDeclaration){
-      this.Incoming.import( typeDeclaration.Incoming.export() );
-      this.Outgoing.import( typeDeclaration.Outgoing.export() );
+      this.Input.import( typeDeclaration.Input.export() );
+      this.Reply.import( typeDeclaration.Reply.export() );
     }
 
     let intervalID = setInterval(() => {
       this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + 50 : this.horizontalPosition - 50;
       this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + 50 : this.verticalPosition - 50;
+      this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
+      
     }, 666+(5_000*Math.random()) );
 
   }

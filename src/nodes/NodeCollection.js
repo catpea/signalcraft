@@ -1,5 +1,5 @@
 import Node from "./Node.js";
-import SimpleCollection from '../struct/SimpleCollection.js';
+import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class NodeCollection extends SimpleCollection {
 

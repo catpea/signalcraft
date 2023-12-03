@@ -1,5 +1,5 @@
 import Outgoing from "./Outgoing.js";
-import SimpleCollection from '../struct/SimpleCollection.js';
+import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class OutgoingCollection extends SimpleCollection {
 

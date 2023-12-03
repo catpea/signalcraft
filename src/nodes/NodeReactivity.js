@@ -6,7 +6,7 @@ export default class NodeReactivity {
 
   defineReactiveProperty(key, val) {
     this.#state[key] = val;
-    
+
       Object.defineProperty(this, key, {
           get: () => this.#state[key],
           set: (newValue) => {
@@ -34,6 +34,11 @@ export default class NodeReactivity {
     return () => {delete this.#monitors[id]};
   }
 
+  observe(key, observer) { // triggers asap
+    this.subscribe(key, observer);
+    observer(this[key]);
+  }
+
   subscribe(key, observer) {
       // Ensure that observer is a function
       if(typeof observer !== 'function') throw new TypeError('Observer must be a function.');
@@ -42,7 +47,7 @@ export default class NodeReactivity {
       this.#observers[key].push(observer);
 
       const value = this[key];
-      observer(key, value);
+      // observer(value);
 
       // Return a function to unsubscribe this observer.
       return () => {
