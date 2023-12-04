@@ -67,14 +67,15 @@ export default class View {
     const gradientSpecification = {
       linearGradient: {
         background: {
-          primary: ["#193452", "#0f2342"],
+          primary: ["#382737", "#3b1f2e", "#241627"],
           secondary: ["#0f181f", "#172029"],
         },
         panel: {
-          primary: ["#193452", "#0f2342"],
+          primary: ["#382737", "#3b1f2e", "#241627"],
           secondary: ["#0f181f", "#172029"],
           caption: ["#0f181f", "#172029"],
           pod: ["#162b39", "#0f2f50"],
+          text:["#9f7c4d", "#c7994b"],
         },
         cable: {
           primary: ["#294666", "#1c293b"],
@@ -88,8 +89,8 @@ export default class View {
 
       radialGradient: {
         socket: {
-          primary: ["#d07c0c", "#e72a79", "#420f3f"],
-          error: ["#5dc316", "#075d39"],
+          primary: ["#ffbb73", "#ffbb73", "#ea3754", "#4f0f2a"],
+          error: ["#dc37eb", "#4a0f4f"],
         },
       },
 
@@ -143,6 +144,18 @@ export default class View {
     fedropshadow.setAttribute('dx', '1');
     fedropshadow.setAttribute('dy', '1');
     fedropshadow.setAttribute('stdDeviation', '32');
+    filter.appendChild(fedropshadow);
+    defs.appendChild(filter);
+    }
+
+    {
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'socket-shadow');
+    filter.setAttribute('filterUnits', 'userSpaceOnUse');
+    const fedropshadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+    fedropshadow.setAttribute('dx', '1');
+    fedropshadow.setAttribute('dy', '1');
+    fedropshadow.setAttribute('stdDeviation', '5');
     filter.appendChild(fedropshadow);
     defs.appendChild(filter);
     }

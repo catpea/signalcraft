@@ -87,7 +87,7 @@ class Component   {
   }
 
   start() {
-    // console.log('Calling start on ',  this.#node.type, this.#list);
+    // // console.log('Calling start on ',  this.#node.type, this.#list);
     this.draw();
      this.#list.map( o => o.start() )
   }
@@ -128,11 +128,16 @@ class Line extends Component {
     super(setup, {height: 32});
   }
   draw() {
-    this.el = svg.rect({ x:this.left , y:this.top, ry: 3, width: this.width, height: this.height, fill: `url(#panel-secondary)`,  });
-    this.el = svg.circle({ cx:this.left - 5, cy:this.top + (this.height/2), r: 8, height: this.height, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#glow-primary)`});
-
+    this.el = svg.rect({ x:this.left , y:this.top, ry: 3, width: this.width, height: this.height, fill:'transparent', Xfill: `url(#panel-primary)`,  });
     this.main.el.appendChild( this.el )
-    console.log(this.aboveAll);
+
+    let port;
+    if(this.data.direction == 'out'){
+      port = svg.circle({ cx:this.width + 10, cy:this.top + (this.height/2), r: 8, height: this.height, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
+    }else{
+      port = svg.circle({ cx:this.left - 5, cy:this.top + (this.height/2), r: 8, height: this.height, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
+   }
+    this.main.el.appendChild( port )
   }
 }
 
@@ -141,21 +146,27 @@ class Caption extends Component {
     super(setup, {height: 32});
   }
   draw() {
-    console.log('Caption', this.top);
+    // console.log('Caption', this.top);
     this.el = svg.rect({ x:this.left, y:this.top, ry: 3, width: this.node.nodeWidth-(this.padd*2), height: this.height, fill: `url(#panel-caption)`, });
+
+    const captionNode = svg.text({ x:this.left, y:this.top + (this.height - (this.height/10) ), style: 'font-size: 2rem;', fill: `url(#panel-text)`});
+    const cationText = document.createTextNode(this.node.type);
+    captionNode.appendChild(cationText);
+
     this.main.el.appendChild( this.el )
+    this.main.el.appendChild( captionNode )
   }
 }
 
 class Pod extends Component {
   constructor(setup) {
     super(setup);
-    this.data.forEach( (item,index) => this.append( new Line({...setup,  name:  `pod line ${index}`, item, height:32}) ));
+    this.data.forEach( (data,index) => this.append( new Line({...setup,  name:  `pod line ${index}`, data, height:32}) ));
   }
 
   draw() {
-    console.log('Pod!', this.top);
-    this.el = svg.rect({ x:this.left, y:this.top, ry: 3, width: this.node.nodeWidth-(this.padd*2), height: this.height, fill: `url(#panel-pod)`, stroke: 'black', });
+    // console.log('Pod!', this.top);
+    this.el = svg.rect({ x:this.left, y:this.top, ry: 3, width: this.node.nodeWidth-(this.padd*2), height: this.height, fill:'transparent', Xfill: `url(#panel-pod)`, stroke: 'black', });
     this.main.el.appendChild( this.el )
   }
 }
@@ -169,12 +180,13 @@ class Panel extends Component {
     const caption = new Caption({...setup, name:'caption bar', height:64});
     this.append(caption);
 
-    const inputPod = new Pod({...setup,  name:'input pod', data: setup.node.Input});
-    this.append(inputPod);
 
     const replyPod = new Pod({...setup,  name:'output pod', data: setup.node.Reply});
     this.append(replyPod);
 
+    const inputPod = new Pod({...setup,  name:'input pod', data: setup.node.Input});
+    this.append(inputPod);
+    
     // this.shadowRectangle = svg.rect({ x: 10, y:10, filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.height, fill:  'black', });
     // this.el.appendChild( this.shadowRectangle )
 
@@ -192,7 +204,7 @@ class Panel extends Component {
     // PLEASE NOTE the .observe will trigger instantly upon subscription to reliably deliver the value.
     this.wipe(      this.node.observe('horizontalPosition',      (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
     this.wipe(      this.node.observe('verticalPosition',        (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
-    this.wipe(      this.node.observe('backgroundColor',         (v)=>update( this.backgroundRectangle, {fill:v})   )  );
+    // this.wipe(      this.node.observe('backgroundColor',         (v)=>update( this.backgroundRectangle, {fill:v})   )  );
     this.wipe(      this.node.observe('nodeHeight',              (v)=>update( this.backgroundRectangle, {height: v}) ));
     this.wipe(      this.node.observe('nodeWidth',               (v)=>update( this.backgroundRectangle, {width: v}) ));
     this.wipe(      this.node.observe('depthLevel',              (v)=>update( this.el, {zIndex: v}) )); // mimic bring-to-top
@@ -222,7 +234,7 @@ class Composer {
     return this.#root.el;
   }
   start() {
-    console.log(`SIZE OF ${this.#node.type} is ${this.#root.height}`);
+    // console.log(`SIZE OF ${this.#node.type} is ${this.#root.height}`);
     this.#root.start();
   }
 }

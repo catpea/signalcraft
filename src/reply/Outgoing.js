@@ -1,5 +1,5 @@
 export default class Outgoing {
-
+  direction = "out"
   #id;
   #format;
   #label;
