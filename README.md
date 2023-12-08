@@ -15,7 +15,7 @@ npm install --save-exact --save-dev esbuild
 ### Design Ideas
 
 ![art/fui-0.jpg](art/fui-0.jpg)
-![art/fui-1.jpg](art/fui-0.jpg)
+![art/fui-1.jpg](art/fui-1.jpg)
 ![art/fui-2.jpg](art/fui-2.jpg)
 ![art/fui-3.jpg](art/fui-3.jpg)
 ![art/fui-4.jpg](art/fui-4.jpg)
