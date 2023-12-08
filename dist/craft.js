@@ -3332,7 +3332,7 @@
   }
   var v4_default = v4;
 
-  // src/setup/ApplicationReactivity.js
+  // src/brain/DataReactivity.js
   var ApplicationReactivity = class {
     #subscribers = {};
     #notify(type, data) {
@@ -3367,6 +3367,13 @@
           }
         }
       }
+    }
+  };
+
+  // src/dream/DreamInterface.js
+  var Dream = class {
+    application;
+    constructor() {
     }
   };
 
@@ -4185,8 +4192,9 @@
     }
   };
 
-  // src/Core.js
-  var Core = class extends ApplicationReactivity {
+  // src/Brain.js
+  var Brain = class extends ApplicationReactivity {
+    Dream;
     Theme;
     Types;
     Views;
@@ -4195,6 +4203,7 @@
     Edges;
     constructor() {
       super();
+      this.Dream = new Dream(this);
       this.Theme = new MidnightTheme(this);
       this.Types = new TypeCollection(this);
       this.Views = new ViewCollection(this);
@@ -4212,21 +4221,21 @@
     }
   };
 
-  // src/setup/registerTypes.js
-  function registerTypes_default(application) {
-    const textType = application.Types.create("text", "string");
+  // src/tasks/registerTypes.js
+  function registerTypes_default(core) {
+    const textType = core.Types.create("text", "string");
     textType.Reply.create("output", () => {
       return this.string;
     });
     textType.Input.create("string", { type: "string", description: "a string of letters" });
-    const colorType = application.Types.create("text", "color");
+    const colorType = core.Types.create("text", "color");
     colorType.Reply.create("output", () => {
       return this.color;
     });
     colorType.Input.create("color", { type: "string", description: "color" });
     colorType.Input.create("model", { type: "string", description: "preferred model" });
     colorType.Input.create("description", { type: "string", description: "description" });
-    const uppercaseType = application.Types.create("text", "case");
+    const uppercaseType = core.Types.create("text", "case");
     uppercaseType.Reply.create("upper", () => {
       return this.input.toUpperCase();
     });
@@ -4236,22 +4245,28 @@
     uppercaseType.Input.create("input");
     uppercaseType.Input.create("template", { type: "string", description: "string template use $input to interpolate" });
     uppercaseType.Input.create("description", { type: "string", description: "description" });
+    const templateType = core.Types.create("array", "join");
+    textType.Reply.create("output", ({ array, separator }) => {
+      return array.join(separator);
+    });
+    textType.Input.create("input", { type: "*", description: "data to join" });
+    textType.Input.create("separator", { type: "string", description: "separator to use" });
   }
 
   // src/craft.js
-  var core = new Core();
-  globalThis.signalcraft = core;
-  core.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
-  core.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
-  registerTypes_default(core);
-  core.start();
+  var brain = new Brain();
+  globalThis.signalcraft = brain;
+  brain.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
+  brain.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
+  registerTypes_default(brain);
+  brain.start();
   for (let i = 0; i < 100; i++) {
     if (Math.random() < 0.3) {
-      core.Nodes.create(v4_default(), "text/string");
+      brain.Nodes.create(v4_default(), "text/string");
     } else if (Math.random() < 0.6) {
-      core.Nodes.create(v4_default(), "text/case");
+      brain.Nodes.create(v4_default(), "text/case");
     } else {
-      core.Nodes.create(v4_default(), "text/color");
+      brain.Nodes.create(v4_default(), "text/color");
     }
   }
 })();

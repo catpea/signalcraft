@@ -1,4 +1,5 @@
-import ApplicationReactivity from "./setup/ApplicationReactivity.js";
+import DataReactivity from "./brain/DataReactivity.js";
+import DreamInterface from "./dream/DreamInterface.js";
 
 import TypeCollection from "./types/TypeCollection.js";
 import ViewCollection from "./views/ViewCollection.js";
@@ -10,8 +11,9 @@ import MightyMidnight from "./theme/MightyMidnight.js";
 // import ReactiveObject from "./library/ReactiveObject.js";
 // import EdgeCollection from "./node/EdgeCollection.js";
 
-export default class Core extends ApplicationReactivity {
+export default class Brain extends DataReactivity {
 
+  Dream;
   Theme;
   Types;
   Views;
@@ -21,6 +23,9 @@ export default class Core extends ApplicationReactivity {
 
   constructor() {
     super();
+    
+    this.Dream = new DreamInterface(this);
+
     this.Theme = new MightyMidnight(this);
     this.Types = new TypeCollection(this);
     this.Views = new ViewCollection(this);

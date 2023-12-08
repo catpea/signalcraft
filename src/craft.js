@@ -1,35 +1,41 @@
 // this is the central boot script - there is no easy wat to share data between multiple modules so we use a central file
 import { v4 as uuid } from "uuid";
 
-import Core from './Core.js';
+import Brain from './Brain.js';
 // import SignalcraftView from './element/signalcraft-view/index.js';
 
-import registerTypes from './setup/registerTypes.js';
+import registerTypes from './tasks/registerTypes.js';
 
-const core = new Core();
+const brain = new Brain();
 
-globalThis.signalcraft = core;
+globalThis.signalcraft = brain;
 
-core.Views.create('view-1', document.querySelector('.signalcraft-view-1'));
-core.Views.create('view-2', document.querySelector('.signalcraft-view-2'));
+brain.Views.create('view-1', document.querySelector('.signalcraft-view-1'));
+brain.Views.create('view-2', document.querySelector('.signalcraft-view-2'));
 
-registerTypes(core);
+registerTypes(brain);
 
 // Define Custom Elements
 // customElements.define("signalcraft-view", SignalcraftView);
 
-core.start();
+brain.start();
 
 // Tests
 
 for (let i = 0; i < 100; i++) {
   if( Math.random() < 0.3 ){
-    core.Nodes.create(uuid(), "text/string");
+    brain.Nodes.create(uuid(), "text/string");
   }else if( Math.random() < 0.6 ){
-    core.Nodes.create(uuid(), "text/case");
+    brain.Nodes.create(uuid(), "text/case");
   }else{
-    core.Nodes.create(uuid(), "text/color");
+    brain.Nodes.create(uuid(), "text/color");
   }
 }
 
-// core.Nodes.create("text/string");
+
+// const stringA = brain.node("text/string");
+// const stringB = brain.node("text/string");
+// const arrayJoin = brain.node("array/join");
+//
+// brain.edge(stringA, "output", arrayJoin, "input");
+// brain.edge(stringB, "output", arrayJoin, "input");
