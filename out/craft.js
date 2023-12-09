@@ -2156,7 +2156,7 @@
   var import_calculate_percent = __toESM(require_calculate_percent(), 1);
 
   // src/application/ui/view/Panel.js
-  var import_oneof2 = __toESM(require_oneof(), 1);
+  var import_oneof3 = __toESM(require_oneof(), 1);
 
   // src/application/ui/view/panel/tools/domek.js
   var svg = new Proxy({}, {
@@ -2219,6 +2219,36 @@
     get isRoot() {
       return this.#home == null;
     }
+    get name() {
+      return this.#name;
+    }
+    get padd() {
+      return this.#padd;
+    }
+    set home(v) {
+      this.#home = v;
+    }
+    get home() {
+      return this.#home;
+    }
+    set main(v) {
+      this.#main = v;
+    }
+    get main() {
+      return this.#main;
+    }
+    set list(v) {
+      this.#list = v;
+    }
+    get list() {
+      return this.#list;
+    }
+    get node() {
+      return this.#node;
+    }
+    get data() {
+      return this.#data;
+    }
     get containers() {
       if (this.isRoot)
         return [this];
@@ -2266,10 +2296,69 @@
     }
   };
 
+  // src/application/ui/view/panel/Caption.js
+  var Caption = class extends Component {
+    constructor(setup) {
+      super(setup, { size: 32 });
+    }
+    draw() {
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: `url(#panel-caption)` });
+      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
+      const cationText = document.createTextNode(this.node.type);
+      captionNode.appendChild(cationText);
+      this.main.el.appendChild(this.el);
+      this.main.el.appendChild(captionNode);
+    }
+  };
+
+  // src/application/ui/view/panel/Line.js
+  var import_oneof2 = __toESM(require_oneof(), 1);
+  var Line = class extends Component {
+    constructor(setup) {
+      super(setup, { size: 32 });
+    }
+    draw() {
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.size, fill: "transparent", Xfill: `url(#panel-primary)` });
+      this.main.el.appendChild(this.el);
+      let port;
+      if (this.data.direction == "input") {
+        const x = this.left - 5;
+        const y = this.top + this.size / 2;
+        this.data.x = x;
+        this.data.y = y;
+        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+      } else {
+        const x = this.width + 10;
+        const y = this.top + this.size / 2;
+        this.data.x = x;
+        this.data.y = y;
+        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+      }
+      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
+      const cationText = document.createTextNode(this.data.name);
+      captionNode.appendChild(cationText);
+      this.main.el.appendChild(captionNode);
+      this.main.el.appendChild(port);
+    }
+  };
+
+  // src/application/ui/view/panel/Pod.js
+  var Pod = class extends Component {
+    constructor(setup) {
+      super(setup);
+      this.data.forEach((data, index) => this.append(new Line({ ...setup, name: `pod line ${index}`, data, size: 32 })));
+    }
+    draw() {
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: "transparent", Xfill: `url(#panel-pod)`, stroke: "black" });
+      this.main.el.appendChild(this.el);
+    }
+  };
+
   // src/application/ui/view/Panel.js
   var Panel = class extends Component {
     constructor(setup) {
       super(setup);
+      console.log(setup);
       this.el = svg.g({ "transform": `translate(${this.node.x}, ${this.node.y})` });
       setup.main = this;
       const caption = new Caption({ ...setup, name: "caption bar", size: 64 });
@@ -2303,10 +2392,11 @@
     #scene;
     #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
-    constructor(name, element) {
+    constructor({ name, element, application: application2 }) {
       console.log({ name, element });
       this.#name = name;
       this.#element = element;
+      this.application = application2;
     }
     start() {
       this.#svg = this.#installCanvas();
@@ -2463,7 +2553,7 @@
     #createPanel({ item }) {
       const panel = new Panel({ node: item, view: this, root: this.#scene, name: "main panel", padd: 3 });
       this.#renderers.set(item.id, panel);
-      this.#scene.appendChild(panel.root);
+      this.#scene.appendChild(panel.el);
       panel.start();
     }
   };
@@ -2595,8 +2685,9 @@
   // src/craft.js
   var application = new Brain();
   setup_default(application);
-  application.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
-  application.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
+  application.Views.create({ name: "view-1", element: document.querySelector(".signalcraft-view-1") });
+  application.Views.create({ name: "view-2", element: document.querySelector(".signalcraft-view-2") });
+  application.start();
   console.info("Do not forget to start the application.");
   var api = application.Dream;
   usage_default(api);

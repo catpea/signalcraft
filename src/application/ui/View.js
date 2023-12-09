@@ -20,10 +20,11 @@ export default class View {
 
   #unsubscribe = [];
 
-  constructor(name, element) {
+  constructor({name, element, application}) {
     console.log({ name, element });
     this.#name = name;
     this.#element = element;
+    this.application = application;
   }
 
   start() {
@@ -222,7 +223,7 @@ export default class View {
   #createPanel({ item }) {
     const panel = new Panel({node: item, view:this, root:this.#scene, name:'main panel', padd: 3});
     this.#renderers.set( item.id, panel );
-    this.#scene.appendChild(panel.root);
+    this.#scene.appendChild(panel.el);
     panel.start();
   }
 

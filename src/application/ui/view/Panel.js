@@ -1,10 +1,15 @@
 import oneOf from "oneof";
 import { html, svg, text, list, update } from "./panel/tools/domek.js";
+
 import Component from "./panel/base/Component.js";
+
+import Caption from "./panel/Caption.js";
+import Pod from "./panel/Pod.js";
 
 export default class Panel extends Component {
   constructor(setup) {
     super(setup);
+    console.log(setup);
     this.el = svg.g({ 'transform': `translate(${this.node.x}, ${this.node.y})`, });
     setup.main = this;
 

@@ -8,11 +8,11 @@ const application = new Application();
 setup(application);
 
 // views display all the Nodes and Links as an SVG
-application.Views.create('view-1', document.querySelector('.signalcraft-view-1'));
-application.Views.create('view-2', document.querySelector('.signalcraft-view-2'));
+application.Views.create({name:'view-1', element:document.querySelector('.signalcraft-view-1')});
+application.Views.create({name:'view-2', element:document.querySelector('.signalcraft-view-2')});
 
 // start application
-// application.start();
+application.start();
 console.info('Do not forget to start the application.');
 
 // we hide eveything from the user now

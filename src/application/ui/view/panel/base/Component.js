@@ -37,6 +37,28 @@ export default class Component   {
   get isRoot(){ return this.#home == null;}
 
 
+
+
+
+
+  get name(){ return this.#name;}
+  get padd(){ return this.#padd;}
+
+  set home(v){ this.#home = v;}
+  get home(){ return this.#home;}
+
+  set main(v){ this.#main = v;}
+  get main(){ return this.#main;}
+
+  set list(v){ this.#list = v;}
+  get list(){ return this.#list;}
+
+  get node(){ return this.#node;}
+  get data(){ return this.#data;}
+
+
+
+
   get containers(){
     if(this.isRoot) return [this];
     return [ ...this.#home.containers,  this.#home ]

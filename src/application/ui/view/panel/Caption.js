@@ -1,4 +1,7 @@
-class Caption extends Component {
+import { html, svg, text, list, update } from "./tools/domek.js";
+import Component from "./base/Component.js";
+
+export default class Caption extends Component {
   constructor(setup) {
     super(setup, {size: 32});
   }
