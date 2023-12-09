@@ -13,9 +13,10 @@ application.Views.create('view-2', document.querySelector('.signalcraft-view-2')
 
 // start application
 // application.start();
+console.info('Do not forget to start the application.');
 
 // we hide eveything from the user now
-const api = brain.Dream;
+const api = application.Dream;
 
 // and simply give them the dream
 usage(api);

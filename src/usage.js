@@ -15,8 +15,8 @@ export default async function(api){
   console.info(Object.keys(api));
 
   // define your components
-  const stringA = api.addNode("text/string", {value: "a"} );
-  const stringB = api.addNode("text/string", {value: "b"} );
+  const stringA = api.addNode("text/string", { string: "Hello" } );
+  const stringB = api.addNode("text/string", { string: "World" } );
   const arrayJn = api.addNode("array/join");
 
   // create a flow between compoents
@@ -29,7 +29,7 @@ export default async function(api){
 
   // tst
   const actual = JSON.stringify(result);
-  const expect = JSON.stringify(['a', 'b']);
+  const expect = JSON.stringify(['Hello', 'World']);
   console.assert(actual==expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
 
 }

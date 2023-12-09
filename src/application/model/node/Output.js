@@ -4,11 +4,16 @@ import { v4 as uuid } from "uuid";
 
 export default class Output extends ReactiveObject {
 
+  application;
+  parent;
   #configuration;
   #setup;
 
   constructor(configuration){
     super();
+    this.application = configuration.application;
+    this.parent = configuration.parent;
+console.log('configuration',configuration);
     this.#configuration = configuration;
     const defaults = {
       id:uuid(),
@@ -28,7 +33,6 @@ export default class Output extends ReactiveObject {
 
 
   get configuration(){
-    // new ID
     return this.#configuration;
   }
 

@@ -2,36 +2,40 @@ import { v4 as uuid } from "uuid";
 import ReactiveObject from "../system/ReactiveObject.js";
 
 export default class Edge extends ReactiveObject {
-  application;
-  #id;
-  #type;
-
-  #sourceNode;
-  #targetNode;
-  #replyPort;
-  #inputPort;
-
+  #application;
   #unsubscribe = [];
 
-  constructor({id, type, sourceNode,replyPort, targetNode,inputPort}){
+  constructor({application, id, type, sourceNode, targetNode, sourcePort, targetPort }){
     super();
-
-    this.#id = id||uuid();
-    this.#type = type;
-
-    this.#sourceNode = sourceNode;
-    this.#targetNode = targetNode;
-    this.#replyPort = replyPort;
-    this.#inputPort = inputPort;
+    this.#application = application;
 
     //NOTE: once nodes are added to the system the x and y of edges are already calculated (sans the transformation).
 
     const props = {
+      id:id||uuid(),
+
+      type,
+      // source,target, // these are port ID numbers
+
+      sourceNode,
+      targetNode,
+      sourcePort,
+      targetPort,
+
+      // sourceNode,
+      // replyPort,
+      //
+      // targetNode,
+      // inputPort,
+
       backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-      horizontalPosition1: 10_000*Math.random(),
-      verticalPosition1: 8_000*Math.random(),
-      horizontalPosition2: 10_000*Math.random(),
-      verticalPosition2: 8_000*Math.random(),
+
+
+      x1: 10_000*Math.random(),
+      y1: 8_000*Math.random(),
+      x2: 10_000*Math.random(),
+      y2: 8_000*Math.random(),
+
       edgeWidth: 10,
       depthLevel: 0,
     };
@@ -45,13 +49,7 @@ export default class Edge extends ReactiveObject {
 
   }
 
-  get id(){
-    return this.#id;
-  }
 
-  get type(){
-    return this.#type;
-  }
 
   start(){
   }

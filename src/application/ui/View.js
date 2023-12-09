@@ -220,7 +220,7 @@ export default class View {
   }
 
   #createPanel({ item }) {
-    const panel = new Panel({node: item, view:this, root:this.#scene});
+    const panel = new Panel({node: item, view:this, root:this.#scene, name:'main panel', padd: 3});
     this.#renderers.set( item.id, panel );
     this.#scene.appendChild(panel.root);
     panel.start();

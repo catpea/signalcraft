@@ -3,12 +3,16 @@ import ReactiveObject from "../../system/ReactiveObject.js";
 import { v4 as uuid } from "uuid";
 
 export default class Input extends ReactiveObject {
-
+  application;
+  parent;
   #configuration;
   #setup;
 
   constructor(configuration){
     super();
+    this.application = configuration.application;
+    this.parent = configuration.parent;
+
     this.#configuration = configuration;
     const defaults = {
       id:uuid(),

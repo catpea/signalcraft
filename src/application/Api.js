@@ -2,20 +2,20 @@ import { v4 as uuid } from "uuid";
 
 export default class DreamInterface {
 
-  brain;
+  application;
 
-  constructor(brain){
-    this.brain = brain;
+  constructor(application){
+    this.application = application;
   }
 
-  addNode(type){
+  addNode(type, values){
     // Procedure Step 1: create a node of the desired type in the reactive collection
-    return this.brain.Nodes.create({type});
+    return this.application.Nodes.create({type, values});
   }
 
-  linkPorts(sourceNode, targetNode, options = {reply:'reply', input:'input'}){
-    const { reply:replyPort, input:inputPort } = options;
-    return this.brain.Links.create({sourceNode, targetNode, replyPort, inputPort});
+  linkPorts(sourceNode, targetNode, options = {output:'output', input:'input'}){
+    const { output:outputPort, input:inputPort } = options;
+    return this.application.Links.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.getPort(outputPort).id, targetPort: targetNode.getPort(inputPort).id, });
   }
 
   async execute(node, port='output'){

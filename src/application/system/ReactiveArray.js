@@ -1,4 +1,3 @@
-
 export default class ReactiveArray {
   #auto; // auto call .start() on all items
   #application;
@@ -6,7 +5,7 @@ export default class ReactiveArray {
   #Item = [];
   #content = [];
 
-  constructor({application, parent, Item, boot}) {
+  constructor({application, parent, Item, auto}) {
     if (!application) throw new TypeError("application is required");
     if (!Item) throw new TypeError("Item is required");
     this.#auto = !!auto;
@@ -16,6 +15,10 @@ export default class ReactiveArray {
   }
 
   [Symbol.iterator]() {
+     return this.#content[Symbol.iterator]();
+  }
+
+  dump() {
      return this.#content;
   }
 
@@ -27,8 +30,9 @@ export default class ReactiveArray {
     this.#content.filter((item) => !item.deleted).forEach(callback);
   }
 
-  create(...argv) {
-    const item = new this.#Item({...arg, application:this.#application});
+  create(argv) {
+
+    const item = new this.#Item({...argv, application:this.#application, parent:this.#parent});
     this.#content.push(item);
 
     if (this.#auto && item.start) item.start();
@@ -54,6 +58,11 @@ export default class ReactiveArray {
   find(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
     return this.#content.find(callback);
+  }
+
+  filter(callback) {
+    if (typeof callback !== "function") throw new TypeError("Find needs a function.");
+    return this.#content.filter(callback);
   }
 
   update(id, property, value) {

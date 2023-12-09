@@ -1,27 +1,35 @@
+import flattenDeep from 'lodash/flattenDeep';
+
 export default function(application){
 
-  const textType = application.Types.create({name:'text/string'});
-  textType.Output.push( {name:"output", generator:() => { return this.string; }} );
-  textType.Input.push( {name:"string", type: "string", description: "a string of letters"} );
+  const textType = application.Types.create({type:'text/string'});
+  textType.output.push( {name:"output", generator:({value, string}) => { return string }} );
+  textType.input.push( {name:"string", type: "string", description: "a string of letters", value: "default value"} );
 
-  const colorType = application.Types.create({name:'text/color'});
-  colorType.Output.push( {name:"output", generator:() => { return this.color; }} );
-  colorType.Input.push( {name:"color", type: "string", description: "color"} );
-  colorType.Input.push( {name:"model", type: "string", description: "preferred model"} );
-  colorType.Input.push( {name:"description", type: "string", description: "description"} );
+  const colorType = application.Types.create({type:'text/color'});
+  colorType.output.push( {name:"output", generator:() => { return 'TODO' }} );
+  colorType.input.push( {name:"color", type: "string", description: "color"} );
+  colorType.input.push( {name:"model", type: "string", description: "preferred model"} );
+  colorType.input.push( {name:"description", type: "string", description: "description"} );
 
-  const uppercaseType = application.Types.create({name:'text/case'});
-  uppercaseType.Output.push( {name:"upper", generator:() => { return this.input.toUpperCase(); }} );
-  uppercaseType.Output.push( {name:"lower", generator:() => { return this.input.toLowerCase(); }} );
-  uppercaseType.Input.push( {name:"input"} );
-  uppercaseType.Input.push( {name:"template", type: "string", description: "string template use $input to interpolate"} );
-  uppercaseType.Input.push( {name:"description", type: "string", description: "description"} );
+  const uppercaseType = application.Types.create({type:'text/case'});
+  uppercaseType.output.push( {name:"upper", generator:() => { return 'TODO' }} );
+  uppercaseType.output.push( {name:"lower", generator:() => { return 'TODO' }} );
+  uppercaseType.input.push( {name:"input"} );
+  uppercaseType.input.push( {name:"template", type: "string", description: "string template use $input to interpolate"} );
+  uppercaseType.input.push( {name:"description", type: "string", description: "description"} );
 
-  const arrayJoinType = application.Types.create({name:'array/join'});
-  arrayJoinType.Output.push( {name:"output", generator:({array, separator}) => { return array.join(separator); }} );
-  arrayJoinType.Input.push( {name:"input", type: "*", description: "data to join"} );
-  arrayJoinType.Input.push( {name:"separator", type: "string", description: "separator to use"} );
-  arrayJoinType.Input.push( {name:"duck", type: "string", description: "separator to use"} );
+  const arrayJoinType = application.Types.create({type:'array/join'});
+  // arrayJoinType.output.push( {name:"output", generator:({array, separator}) => { return array.join(separator); }} );
+  arrayJoinType.output.push( {
+    name:"output",
+    generator: ({input, separator}) => {
+      return flattenDeep(input); //separator.length?input.join( separator.join()):input;
+    }
+  });
+  arrayJoinType.input.push( {name:"input", type: "*", description: "data to join"} );
+  arrayJoinType.input.push( {name:"separator", type: "string", description: "separator to use"} );
+  arrayJoinType.input.push( {name:"duck", type: "string", description: "separator to use"} );
 
 
 }

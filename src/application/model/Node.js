@@ -12,28 +12,35 @@ export default class Node extends ReactiveObject {
   #application;
   #unsubscribe = [];
 
+  #values;
+
   Input;
   Output;
 
-  constructor({id, type, application}){
+  constructor({id, type, values, application}){
     super();
     this.#application = application;
+    this.#values = values || {};
+
+    if(!type) throw new Error('You must initialize a node with a known type, type was not specified');
 
     this.Input = new ReactiveArray({application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
     this.Output = new ReactiveArray({application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
 
     //NOTE: archetype is not a reactive object, same for archetype's .input and .reply
-    const archetype = application.Types.find(type);
-    if(!archetype) throw new Error('You must initialize a node with a known type, unknown type detected: ' + this.type);
+    const archetype = application.Types.find(o=>o.type==type);
+    console.log(application.Types.dump());
+    if(!archetype) throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
     archetype.input.forEach(o=>{ this.Input.create(o) })
     archetype.output.forEach(o=>{ this.Output.create(o) })
-
+    console.log('GG', archetype, type);
     const props = {
+
       id: id||uuid(),
       type,
       backgroundColor: oneOf([`url(#panel-primary)`,`url(#panel-secondary)`]), // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-      horizontalPosition: 10_000*Math.random(),
-      verticalPosition: 8_000*Math.random(),
+      x: 10_000*Math.random(),
+      y: 8_000*Math.random(),
       nodeWidth: 300,
       nodeHeight: 32,
       depthLevel: 0,
@@ -47,8 +54,8 @@ export default class Node extends ReactiveObject {
     const d = 133;
     let intervalID = setInterval(() => {
       this.depthLevel = Math.random() > 0.5 ? 1 : 0;
-      this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + d : this.horizontalPosition - d;
-      this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + d : this.verticalPosition - d;
+      this.x = Math.random() > 0.5 ? this.x + d : this.x - d;
+      this.y = Math.random() > 0.5 ? this.y + d : this.y - d;
       this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
     }, 10_000+(5_000*Math.random()) );
   }
@@ -57,23 +64,44 @@ export default class Node extends ReactiveObject {
     this.#unsubscribe.map((o) => o());
   }
 
-  async #upstream(){
-    const response = {BUG:'untested', TODO: 'you may still have to spider all the links, lol!'};
 
+  getPort(name){
+    const inputCandidate = this.Input.find(port=>port.name==name);
+    if(inputCandidate) return inputCandidate;
+    const outputCandidate = this.Output.find(port=>port.name==name);
+    if(outputCandidate) return outputCandidate;
+    if(!output) throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
+  }
+
+  async #upstream(){
+    const response = {};
     for (const localPort of this.Input) {
       // NOTE: edges do not link nodes, they link ports
       // NOTE: there can be multiple reply ports pointing to the input port, therefore array is used
+
       response[localPort.name] = [];
+
+
       // find links that have target set to inputProperty.id
-      const incomingLinks = this.#application.Links.filter(remoteLink=>remoteLink.target==localPort.id);
-      for (const incomingLink of incomingLinks) {
-        // get their parent node,
-        const parentNode = incomingLink.parent;
-        const connectedPort = parentNode.Output.find(item=>item.id==incomingLink.source);
-        // and get them executed (parent node is requred as it pnows the properties the funcion needs)
-        const result = parentNode.execute(connectedPort.name);
-        response[localPort.name].push(result);
+      const incomingLinks = this.#application.Links.filter(remoteLink=>remoteLink.targetPort==localPort.id);
+      const nothingConnected = incomingLinks.length == 0;
+
+      if(nothingConnected){
+        let currentValue = localPort.value; // DEFAULT VALUE
+        if(this.#values[localPort.name]) currentValue = this.#values[localPort.name] // USER PRESET/OVVERIDE
+        response[localPort.name].push(currentValue);
+      }else{
+        for (const incomingLink of incomingLinks) {
+          // get their parent node,
+          const parentNode = this.#application.Nodes.find( node => node.id == incomingLink.sourceNode );
+          const connectedPort = parentNode.Output.find(item=>item.id==incomingLink.sourcePort);
+          // and get them executed (parent node is requred as it pnows the properties the funcion needs)
+          const result = await parentNode.execute(connectedPort.name);
+          response[localPort.name].push(result);
+        }
       }
+
+
     }
     return response;
   }
@@ -81,8 +109,10 @@ export default class Node extends ReactiveObject {
   async execute(port){
     console.log('TODO: produce output from Output');
     const output = this.Output.find(item=>item.name==port);
+    if(!output) console.log(this);;
     if(!output) throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
-    const response = await output.generator(await this.#upstream())
+    console.log({output});
+    const response = await output.generator({...await this.#upstream(), value: output.value})
     return response;
   }
 

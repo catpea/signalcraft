@@ -1488,6 +1488,209 @@
     }
   });
 
+  // node_modules/lodash/_arrayPush.js
+  var require_arrayPush = __commonJS({
+    "node_modules/lodash/_arrayPush.js"(exports, module) {
+      function arrayPush(array, values) {
+        var index = -1, length = values.length, offset = array.length;
+        while (++index < length) {
+          array[offset + index] = values[index];
+        }
+        return array;
+      }
+      module.exports = arrayPush;
+    }
+  });
+
+  // node_modules/lodash/_freeGlobal.js
+  var require_freeGlobal = __commonJS({
+    "node_modules/lodash/_freeGlobal.js"(exports, module) {
+      var freeGlobal = typeof global == "object" && global && global.Object === Object && global;
+      module.exports = freeGlobal;
+    }
+  });
+
+  // node_modules/lodash/_root.js
+  var require_root = __commonJS({
+    "node_modules/lodash/_root.js"(exports, module) {
+      var freeGlobal = require_freeGlobal();
+      var freeSelf = typeof self == "object" && self && self.Object === Object && self;
+      var root = freeGlobal || freeSelf || Function("return this")();
+      module.exports = root;
+    }
+  });
+
+  // node_modules/lodash/_Symbol.js
+  var require_Symbol = __commonJS({
+    "node_modules/lodash/_Symbol.js"(exports, module) {
+      var root = require_root();
+      var Symbol2 = root.Symbol;
+      module.exports = Symbol2;
+    }
+  });
+
+  // node_modules/lodash/_getRawTag.js
+  var require_getRawTag = __commonJS({
+    "node_modules/lodash/_getRawTag.js"(exports, module) {
+      var Symbol2 = require_Symbol();
+      var objectProto = Object.prototype;
+      var hasOwnProperty = objectProto.hasOwnProperty;
+      var nativeObjectToString = objectProto.toString;
+      var symToStringTag = Symbol2 ? Symbol2.toStringTag : void 0;
+      function getRawTag(value) {
+        var isOwn = hasOwnProperty.call(value, symToStringTag), tag = value[symToStringTag];
+        try {
+          value[symToStringTag] = void 0;
+          var unmasked = true;
+        } catch (e) {
+        }
+        var result = nativeObjectToString.call(value);
+        if (unmasked) {
+          if (isOwn) {
+            value[symToStringTag] = tag;
+          } else {
+            delete value[symToStringTag];
+          }
+        }
+        return result;
+      }
+      module.exports = getRawTag;
+    }
+  });
+
+  // node_modules/lodash/_objectToString.js
+  var require_objectToString = __commonJS({
+    "node_modules/lodash/_objectToString.js"(exports, module) {
+      var objectProto = Object.prototype;
+      var nativeObjectToString = objectProto.toString;
+      function objectToString(value) {
+        return nativeObjectToString.call(value);
+      }
+      module.exports = objectToString;
+    }
+  });
+
+  // node_modules/lodash/_baseGetTag.js
+  var require_baseGetTag = __commonJS({
+    "node_modules/lodash/_baseGetTag.js"(exports, module) {
+      var Symbol2 = require_Symbol();
+      var getRawTag = require_getRawTag();
+      var objectToString = require_objectToString();
+      var nullTag = "[object Null]";
+      var undefinedTag = "[object Undefined]";
+      var symToStringTag = Symbol2 ? Symbol2.toStringTag : void 0;
+      function baseGetTag(value) {
+        if (value == null) {
+          return value === void 0 ? undefinedTag : nullTag;
+        }
+        return symToStringTag && symToStringTag in Object(value) ? getRawTag(value) : objectToString(value);
+      }
+      module.exports = baseGetTag;
+    }
+  });
+
+  // node_modules/lodash/isObjectLike.js
+  var require_isObjectLike = __commonJS({
+    "node_modules/lodash/isObjectLike.js"(exports, module) {
+      function isObjectLike(value) {
+        return value != null && typeof value == "object";
+      }
+      module.exports = isObjectLike;
+    }
+  });
+
+  // node_modules/lodash/_baseIsArguments.js
+  var require_baseIsArguments = __commonJS({
+    "node_modules/lodash/_baseIsArguments.js"(exports, module) {
+      var baseGetTag = require_baseGetTag();
+      var isObjectLike = require_isObjectLike();
+      var argsTag = "[object Arguments]";
+      function baseIsArguments(value) {
+        return isObjectLike(value) && baseGetTag(value) == argsTag;
+      }
+      module.exports = baseIsArguments;
+    }
+  });
+
+  // node_modules/lodash/isArguments.js
+  var require_isArguments = __commonJS({
+    "node_modules/lodash/isArguments.js"(exports, module) {
+      var baseIsArguments = require_baseIsArguments();
+      var isObjectLike = require_isObjectLike();
+      var objectProto = Object.prototype;
+      var hasOwnProperty = objectProto.hasOwnProperty;
+      var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+      var isArguments = baseIsArguments(/* @__PURE__ */ function() {
+        return arguments;
+      }()) ? baseIsArguments : function(value) {
+        return isObjectLike(value) && hasOwnProperty.call(value, "callee") && !propertyIsEnumerable.call(value, "callee");
+      };
+      module.exports = isArguments;
+    }
+  });
+
+  // node_modules/lodash/isArray.js
+  var require_isArray = __commonJS({
+    "node_modules/lodash/isArray.js"(exports, module) {
+      var isArray = Array.isArray;
+      module.exports = isArray;
+    }
+  });
+
+  // node_modules/lodash/_isFlattenable.js
+  var require_isFlattenable = __commonJS({
+    "node_modules/lodash/_isFlattenable.js"(exports, module) {
+      var Symbol2 = require_Symbol();
+      var isArguments = require_isArguments();
+      var isArray = require_isArray();
+      var spreadableSymbol = Symbol2 ? Symbol2.isConcatSpreadable : void 0;
+      function isFlattenable(value) {
+        return isArray(value) || isArguments(value) || !!(spreadableSymbol && value && value[spreadableSymbol]);
+      }
+      module.exports = isFlattenable;
+    }
+  });
+
+  // node_modules/lodash/_baseFlatten.js
+  var require_baseFlatten = __commonJS({
+    "node_modules/lodash/_baseFlatten.js"(exports, module) {
+      var arrayPush = require_arrayPush();
+      var isFlattenable = require_isFlattenable();
+      function baseFlatten(array, depth, predicate, isStrict, result) {
+        var index = -1, length = array.length;
+        predicate || (predicate = isFlattenable);
+        result || (result = []);
+        while (++index < length) {
+          var value = array[index];
+          if (depth > 0 && predicate(value)) {
+            if (depth > 1) {
+              baseFlatten(value, depth - 1, predicate, isStrict, result);
+            } else {
+              arrayPush(result, value);
+            }
+          } else if (!isStrict) {
+            result[result.length] = value;
+          }
+        }
+        return result;
+      }
+      module.exports = baseFlatten;
+    }
+  });
+
+  // node_modules/lodash/flattenDeep.js
+  var require_flattenDeep = __commonJS({
+    "node_modules/lodash/flattenDeep.js"(exports, module) {
+      var baseFlatten = require_baseFlatten();
+      var INFINITY = 1 / 0;
+      function flattenDeep2(array) {
+        var length = array == null ? 0 : array.length;
+        return length ? baseFlatten(array, INFINITY) : [];
+      }
+      module.exports = flattenDeep2;
+    }
+  });
+
   // src/application/system/ReactiveArray.js
   var ReactiveArray = class {
     #auto;
@@ -1496,7 +1699,7 @@
     #parent;
     #Item = [];
     #content = [];
-    constructor({ application: application2, parent, Item, boot }) {
+    constructor({ application: application2, parent, Item, auto }) {
       if (!application2)
         throw new TypeError("application is required");
       if (!Item)
@@ -1507,6 +1710,9 @@
       this.#Item = Item;
     }
     [Symbol.iterator]() {
+      return this.#content[Symbol.iterator]();
+    }
+    dump() {
       return this.#content;
     }
     size() {
@@ -1515,8 +1721,8 @@
     forEach(callback) {
       this.#content.filter((item) => !item.deleted).forEach(callback);
     }
-    create(...argv) {
-      const item = new this.#Item({ ...arg, application: this.#application });
+    create(argv) {
+      const item = new this.#Item({ ...argv, application: this.#application, parent: this.#parent });
       this.#content.push(item);
       if (this.#auto && item.start)
         item.start();
@@ -1539,6 +1745,11 @@
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
       return this.#content.find(callback);
+    }
+    filter(callback) {
+      if (typeof callback !== "function")
+        throw new TypeError("Find needs a function.");
+      return this.#content.filter(callback);
     }
     update(id, property, value) {
       const item = this.#content.find((item2) => item2.id === id);
@@ -1573,12 +1784,12 @@
       );
     }
     // Lifecycle
-    start(auto2 = true) {
-      this.#auto = auto2;
+    start(auto = true) {
+      this.#auto = auto;
       this.#content.filter((item) => !item.deleted).forEach((item) => item.start());
     }
-    stop(auto2 = false) {
-      this.#auto = auto2;
+    stop(auto = false) {
+      this.#auto = auto;
       this.#content.filter((item) => !item.deleted).forEach((item) => item.stop());
     }
   };
@@ -1686,23 +1897,23 @@
 
   // src/application/Api.js
   var DreamInterface = class {
-    brain;
-    constructor(brain2) {
-      this.brain = brain2;
+    application;
+    constructor(application2) {
+      this.application = application2;
     }
-    addNode(type) {
-      return this.brain.Nodes.create({ type });
+    addNode(type, values) {
+      return this.application.Nodes.create({ type, values });
     }
-    linkPorts(sourceNode, targetNode, options = { reply: "reply", input: "input" }) {
-      const { reply: replyPort, input: inputPort } = options;
-      return this.brain.Links.create({ sourceNode, targetNode, replyPort, inputPort });
+    linkPorts(sourceNode, targetNode, options = { output: "output", input: "input" }) {
+      const { output: outputPort, input: inputPort } = options;
+      return this.application.Links.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.getPort(outputPort).id, targetPort: targetNode.getPort(inputPort).id });
     }
     async execute(node, port = "output") {
       if (!node)
         throw new Error("you must specify which node to execute");
-      const output = await node.execute(port);
-      console.log(`Output on port ${port} of node ${node.id}`, output);
-      return output;
+      const output2 = await node.execute(port);
+      console.log(`Output on port ${port} of node ${node.id}`, output2);
+      return output2;
     }
   };
 
@@ -1724,13 +1935,13 @@
   // src/application/model/Type.js
   var Type = class {
     id;
-    name;
+    type;
     // used in setting up reactive arrays in node (this could be upgraded to a real reactive object but outside of project scope atm)
     input = [];
-    reply = [];
-    constructor({ id, name, application: application2 }) {
-      this.id = id || uuid();
-      this.name = name;
+    output = [];
+    constructor({ id, type, application: application2 }) {
+      this.id = id || v4_default();
+      this.type = type;
     }
   };
 
@@ -1739,10 +1950,14 @@
 
   // src/application/model/node/Input.js
   var Input = class extends ReactiveObject {
+    application;
+    parent;
     #configuration;
     #setup;
     constructor(configuration) {
       super();
+      this.application = configuration.application;
+      this.parent = configuration.parent;
       this.#configuration = configuration;
       const defaults = {
         id: v4_default(),
@@ -1769,10 +1984,15 @@
 
   // src/application/model/node/Output.js
   var Output = class extends ReactiveObject {
+    application;
+    parent;
     #configuration;
     #setup;
     constructor(configuration) {
       super();
+      this.application = configuration.application;
+      this.parent = configuration.parent;
+      console.log("configuration", configuration);
       this.#configuration = configuration;
       const defaults = {
         id: v4_default(),
@@ -1801,29 +2021,35 @@
   var Node = class extends ReactiveObject {
     #application;
     #unsubscribe = [];
+    #values;
     Input;
     Output;
-    constructor({ id, type, application: application2 }) {
+    constructor({ id, type, values, application: application2 }) {
       super();
       this.#application = application2;
+      this.#values = values || {};
+      if (!type)
+        throw new Error("You must initialize a node with a known type, type was not specified");
       this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
       this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
-      const archetype = application2.Types.find(type);
+      const archetype = application2.Types.find((o) => o.type == type);
+      console.log(application2.Types.dump());
       if (!archetype)
-        throw new Error("You must initialize a node with a known type, unknown type detected: " + this.type);
+        throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
       archetype.input.forEach((o) => {
         this.Input.create(o);
       });
       archetype.output.forEach((o) => {
         this.Output.create(o);
       });
+      console.log("GG", archetype, type);
       const props = {
         id: id || v4_default(),
         type,
         backgroundColor: (0, import_oneof.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
         // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-        horizontalPosition: 1e4 * Math.random(),
-        verticalPosition: 8e3 * Math.random(),
+        x: 1e4 * Math.random(),
+        y: 8e3 * Math.random(),
         nodeWidth: 300,
         nodeHeight: 32,
         depthLevel: 0
@@ -1834,72 +2060,89 @@
       const d = 133;
       let intervalID = setInterval(() => {
         this.depthLevel = Math.random() > 0.5 ? 1 : 0;
-        this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + d : this.horizontalPosition - d;
-        this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + d : this.verticalPosition - d;
+        this.x = Math.random() > 0.5 ? this.x + d : this.x - d;
+        this.y = Math.random() > 0.5 ? this.y + d : this.y - d;
         this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
       }, 1e4 + 5e3 * Math.random());
     }
     stop() {
       this.#unsubscribe.map((o) => o());
     }
+    getPort(name) {
+      const inputCandidate = this.Input.find((port) => port.name == name);
+      if (inputCandidate)
+        return inputCandidate;
+      const outputCandidate = this.Output.find((port) => port.name == name);
+      if (outputCandidate)
+        return outputCandidate;
+      if (!output)
+        throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
+    }
     async #upstream() {
-      const response = { BUG: "untested", TODO: "you may still have to spider all the links, lol!" };
+      const response = {};
       for (const localPort of this.Input) {
         response[localPort.name] = [];
-        const incomingLinks = this.#application.Links.filter((remoteLink) => remoteLink.target == localPort.id);
-        for (const incomingLink of incomingLinks) {
-          const parentNode = incomingLink.parent;
-          const connectedPort = parentNode.Output.find((item) => item.id == incomingLink.source);
-          const result = parentNode.execute(connectedPort.name);
-          response[localPort.name].push(result);
+        const incomingLinks = this.#application.Links.filter((remoteLink) => remoteLink.targetPort == localPort.id);
+        const nothingConnected = incomingLinks.length == 0;
+        if (nothingConnected) {
+          let currentValue = localPort.value;
+          if (this.#values[localPort.name])
+            currentValue = this.#values[localPort.name];
+          response[localPort.name].push(currentValue);
+        } else {
+          for (const incomingLink of incomingLinks) {
+            const parentNode = this.#application.Nodes.find((node) => node.id == incomingLink.sourceNode);
+            const connectedPort = parentNode.Output.find((item) => item.id == incomingLink.sourcePort);
+            const result = await parentNode.execute(connectedPort.name);
+            response[localPort.name].push(result);
+          }
         }
       }
       return response;
     }
     async execute(port) {
       console.log("TODO: produce output from Output");
-      const output = this.Output.find((item) => item.name == port);
-      if (!output)
+      const output2 = this.Output.find((item) => item.name == port);
+      if (!output2)
+        console.log(this);
+      ;
+      if (!output2)
         throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
-      const response = await output.generator(await this.#upstream());
+      console.log({ output: output2 });
+      const response = await output2.generator({ ...await this.#upstream(), value: output2.value });
       return response;
     }
   };
 
   // src/application/model/Edge.js
   var Edge = class extends ReactiveObject {
-    application;
-    #id;
-    #type;
-    #sourceNode;
-    #targetNode;
-    #replyPort;
-    #inputPort;
+    #application;
     #unsubscribe = [];
-    constructor({ id, type, sourceNode, replyPort, targetNode, inputPort }) {
+    constructor({ application: application2, id, type, sourceNode, targetNode, sourcePort, targetPort }) {
       super();
-      this.#id = id || v4_default();
-      this.#type = type;
-      this.#sourceNode = sourceNode;
-      this.#targetNode = targetNode;
-      this.#replyPort = replyPort;
-      this.#inputPort = inputPort;
+      this.#application = application2;
       const props = {
+        id: id || v4_default(),
+        type,
+        // source,target, // these are port ID numbers
+        sourceNode,
+        targetNode,
+        sourcePort,
+        targetPort,
+        // sourceNode,
+        // replyPort,
+        //
+        // targetNode,
+        // inputPort,
         backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-        horizontalPosition1: 1e4 * Math.random(),
-        verticalPosition1: 8e3 * Math.random(),
-        horizontalPosition2: 1e4 * Math.random(),
-        verticalPosition2: 8e3 * Math.random(),
+        x1: 1e4 * Math.random(),
+        y1: 8e3 * Math.random(),
+        x2: 1e4 * Math.random(),
+        y2: 8e3 * Math.random(),
         edgeWidth: 10,
         depthLevel: 0
       };
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
-    }
-    get id() {
-      return this.#id;
-    }
-    get type() {
-      return this.#type;
     }
     start() {
     }
@@ -1915,7 +2158,7 @@
   // src/application/ui/view/Panel.js
   var import_oneof2 = __toESM(require_oneof(), 1);
 
-  // src/tools/domek.js
+  // src/application/ui/view/panel/tools/domek.js
   var svg = new Proxy({}, {
     get: function(target, property) {
       return function(properties) {
@@ -1941,11 +2184,93 @@
     }
   };
 
+  // src/application/ui/view/panel/base/Component.js
+  var Component = class {
+    el;
+    #name = null;
+    // name, spaces allowed
+    #main = null;
+    // root parent object
+    #data = null;
+    #home = null;
+    #size = -1;
+    #padd = -1;
+    #list = [];
+    #view = null;
+    #node = null;
+    #root = null;
+    #wipe = [];
+    constructor(conf) {
+      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, size: 0, data: null, main: null, name: null }, conf);
+      this.#name = setup.name;
+      this.#main = setup.main;
+      this.#home = setup.home;
+      this.#data = setup.data;
+      this.#size = setup.size;
+      this.#padd = setup.padd;
+      this.#view = setup.view;
+      this.#node = setup.node;
+      this.#root = setup.root;
+    }
+    append(component) {
+      component.home = this;
+      this.#list.push(component);
+    }
+    get isRoot() {
+      return this.#home == null;
+    }
+    get containers() {
+      if (this.isRoot)
+        return [this];
+      return [...this.#home.containers, this.#home];
+    }
+    get aboveAll() {
+      if (this.isRoot)
+        return [this];
+      return [...this.#home.aboveAll, ...this.#home.list.slice(0, this.#home.list.indexOf(this))];
+    }
+    get above() {
+      if (this.isRoot)
+        return [];
+      return [...this.#home.list.slice(0, this.#home.list.indexOf(this))];
+    }
+    get top() {
+      if (this.isRoot)
+        return 0;
+      const topPadding = this.#padd;
+      const sizeOfAllAbove = this.above.reduce((total, item) => total + item.size, 0);
+      const paddOfAllAbove = this.above.length * this.#padd;
+      return this.#home.top + topPadding + sizeOfAllAbove + paddOfAllAbove;
+    }
+    get size() {
+      return this.#size + this.#list.reduce((total, child) => total + child.size, 0) + this.#padd * (this.#list.length + 1);
+    }
+    get width() {
+      return this.node.nodeWidth - this.containers.slice(1).reduce((total, item) => total + item.padd * 2, 0);
+    }
+    get left() {
+      return this.containers.slice(1).reduce((total, item) => total + item.padd, 0);
+    }
+    start() {
+      this.draw();
+      this.#list.map((o) => o.start());
+    }
+    draw() {
+    }
+    stop() {
+      this.el.remove();
+      this.#wipe.map((x) => x());
+    }
+    wipe(...arg) {
+      this.#wipe.push(...arg);
+    }
+  };
+
   // src/application/ui/view/Panel.js
   var Panel = class extends Component {
     constructor(setup) {
       super(setup);
-      this.el = svg.g({ "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` });
+      this.el = svg.g({ "transform": `translate(${this.node.x}, ${this.node.y})` });
       setup.main = this;
       const caption = new Caption({ ...setup, name: "caption bar", size: 64 });
       this.append(caption);
@@ -1959,8 +2284,8 @@
       this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Output.observe("created", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Output.observe("removed", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
-      this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
+      this.wipe(this.node.observe("x", (v) => update(this.el, { "transform": `translate(${this.node.x}, ${this.node.y})` })));
+      this.wipe(this.node.observe("y", (v) => update(this.el, { "transform": `translate(${this.node.x}, ${this.node.y})` })));
       this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { size: v })));
       this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
       this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
@@ -1968,24 +2293,6 @@
     draw() {
     }
   };
-  var Composer = class {
-    #root;
-    #node;
-    #view;
-    constructor(setup) {
-      this.#node = setup.node;
-      this.#view = setup.view;
-      this.#root = setup.root;
-      this.#root = new Panel({ ...setup, name: "main panel", padd: 3 });
-    }
-    get root() {
-      return this.#root.el;
-    }
-    start() {
-      this.#root.start();
-    }
-  };
-  var Panel_default = Composer;
 
   // src/application/ui/View.js
   var View = class {
@@ -2154,7 +2461,7 @@
       this.#renderers.get(item.id).stop();
     }
     #createPanel({ item }) {
-      const panel = new Panel_default({ node: item, view: this, root: this.#scene });
+      const panel = new Panel({ node: item, view: this, root: this.#scene, name: "main panel", padd: 3 });
       this.#renderers.set(item.id, panel);
       this.#scene.appendChild(panel.root);
       panel.start();
@@ -2234,50 +2541,54 @@
   };
 
   // src/setup.js
+  var import_flattenDeep = __toESM(require_flattenDeep(), 1);
   function setup_default(application2) {
-    const textType = application2.Types.create({ name: "text/string" });
-    textType.Output.push({ name: "output", generator: () => {
-      return this.string;
+    const textType = application2.Types.create({ type: "text/string" });
+    textType.output.push({ name: "output", generator: ({ value, string }) => {
+      return string;
     } });
-    textType.Input.push({ name: "string", type: "string", description: "a string of letters" });
-    const colorType = application2.Types.create({ name: "text/color" });
-    colorType.Output.push({ name: "output", generator: () => {
-      return this.color;
+    textType.input.push({ name: "string", type: "string", description: "a string of letters", value: "default value" });
+    const colorType = application2.Types.create({ type: "text/color" });
+    colorType.output.push({ name: "output", generator: () => {
+      return "TODO";
     } });
-    colorType.Input.push({ name: "color", type: "string", description: "color" });
-    colorType.Input.push({ name: "model", type: "string", description: "preferred model" });
-    colorType.Input.push({ name: "description", type: "string", description: "description" });
-    const uppercaseType = application2.Types.create({ name: "text/case" });
-    uppercaseType.Output.push({ name: "upper", generator: () => {
-      return this.input.toUpperCase();
+    colorType.input.push({ name: "color", type: "string", description: "color" });
+    colorType.input.push({ name: "model", type: "string", description: "preferred model" });
+    colorType.input.push({ name: "description", type: "string", description: "description" });
+    const uppercaseType = application2.Types.create({ type: "text/case" });
+    uppercaseType.output.push({ name: "upper", generator: () => {
+      return "TODO";
     } });
-    uppercaseType.Output.push({ name: "lower", generator: () => {
-      return this.input.toLowerCase();
+    uppercaseType.output.push({ name: "lower", generator: () => {
+      return "TODO";
     } });
-    uppercaseType.Input.push({ name: "input" });
-    uppercaseType.Input.push({ name: "template", type: "string", description: "string template use $input to interpolate" });
-    uppercaseType.Input.push({ name: "description", type: "string", description: "description" });
-    const arrayJoinType = application2.Types.create({ name: "array/join" });
-    arrayJoinType.Output.push({ name: "output", generator: ({ array, separator }) => {
-      return array.join(separator);
-    } });
-    arrayJoinType.Input.push({ name: "input", type: "*", description: "data to join" });
-    arrayJoinType.Input.push({ name: "separator", type: "string", description: "separator to use" });
-    arrayJoinType.Input.push({ name: "duck", type: "string", description: "separator to use" });
+    uppercaseType.input.push({ name: "input" });
+    uppercaseType.input.push({ name: "template", type: "string", description: "string template use $input to interpolate" });
+    uppercaseType.input.push({ name: "description", type: "string", description: "description" });
+    const arrayJoinType = application2.Types.create({ type: "array/join" });
+    arrayJoinType.output.push({
+      name: "output",
+      generator: ({ input, separator }) => {
+        return (0, import_flattenDeep.default)(input);
+      }
+    });
+    arrayJoinType.input.push({ name: "input", type: "*", description: "data to join" });
+    arrayJoinType.input.push({ name: "separator", type: "string", description: "separator to use" });
+    arrayJoinType.input.push({ name: "duck", type: "string", description: "separator to use" });
   }
 
   // src/usage.js
   async function usage_default(api2) {
     console.info(Object.keys(api2));
-    const stringA = api2.addNode("text/string", { value: "a" });
-    const stringB = api2.addNode("text/string", { value: "b" });
+    const stringA = api2.addNode("text/string", { string: "Hello" });
+    const stringB = api2.addNode("text/string", { string: "World" });
     const arrayJn = api2.addNode("array/join");
     api2.linkPorts(stringA, arrayJn);
     api2.linkPorts(stringB, arrayJn);
     const result = await api2.execute(arrayJn);
     console.log("usage.js api.execute said: ", result);
     const actual = JSON.stringify(result);
-    const expect = JSON.stringify(["a", "b"]);
+    const expect = JSON.stringify(["Hello", "World"]);
     console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
   }
 
@@ -2286,6 +2597,7 @@
   setup_default(application);
   application.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
   application.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
-  var api = brain.Dream;
+  console.info("Do not forget to start the application.");
+  var api = application.Dream;
   usage_default(api);
 })();

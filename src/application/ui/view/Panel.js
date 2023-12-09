@@ -1,10 +1,11 @@
 import oneOf from "oneof";
-import { html, svg, text, list, update } from "../../../tools/domek.js";
+import { html, svg, text, list, update } from "./panel/tools/domek.js";
+import Component from "./panel/base/Component.js";
 
-class Panel extends Component {
+export default class Panel extends Component {
   constructor(setup) {
     super(setup);
-    this.el = svg.g({ 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, });
+    this.el = svg.g({ 'transform': `translate(${this.node.x}, ${this.node.y})`, });
     setup.main = this;
 
     const caption = new Caption({...setup, name:'caption bar', size:64});
@@ -32,8 +33,8 @@ class Panel extends Component {
     this.wipe(      this.node.Output.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
 
     // PLEASE NOTE the .observe will trigger instantly upon subscription to reliably deliver the value.
-    this.wipe(      this.node.observe('horizontalPosition',      (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
-    this.wipe(      this.node.observe('verticalPosition',        (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
+    this.wipe(      this.node.observe('x',      (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
+    this.wipe(      this.node.observe('y',        (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
     // this.wipe(      this.node.observe('backgroundColor',         (v)=>update( this.backgroundRectangle, {fill:v})   )  );
     this.wipe(      this.node.observe('nodeHeight',              (v)=>update( this.backgroundRectangle, {size: v}) ));
     this.wipe(      this.node.observe('nodeWidth',               (v)=>update( this.backgroundRectangle, {width: v}) ));
@@ -49,24 +50,3 @@ class Panel extends Component {
   }
 
 }
-
-class Composer {
-  #root;
-  #node;
-  #view;
-  constructor(setup) {
-    this.#node = setup.node;
-    this.#view = setup.view;
-    this.#root = setup.root;
-    this.#root = new Panel({...setup, name:'main panel', padd: 3});
-  }
-  get root() {
-    return this.#root.el;
-  }
-  start() {
-    // console.log(`SIZE OF ${this.#node.type} is ${this.#root.size}`);
-    this.#root.start();
-  }
-}
-
-export default Composer;
