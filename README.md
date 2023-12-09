@@ -10,7 +10,7 @@ npm install --save-exact --save-dev esbuild
 - then create a view, which is a UI, an SVG
 - then you addNode(type) the view will update to show that node
 - then you linkNodes to create a flow (see src/usage.js)
-- then you .run(node), you have to specify a node you want to spuder up and execute pauload on
+- then you .run(node), you have to specify a node you want to spider up and execute payload on
 
 ## How It Really Works
 
