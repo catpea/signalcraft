@@ -7,7 +7,7 @@ import usage from './usage.js';
 const application = new Application();
 setup(application);
 
-// views display all the Nodes and Edges as an SVG
+// views display all the Nodes and Links as an SVG
 application.Views.create('view-1', document.querySelector('.signalcraft-view-1'));
 application.Views.create('view-2', document.querySelector('.signalcraft-view-2'));
 

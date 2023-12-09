@@ -1,8 +1,8 @@
-import InputReactivity from "./InputReactivity.js";
+import ReactiveObject from "../../system/ReactiveObject.js";
 
 import { v4 as uuid } from "uuid";
 
-export default class Input extends InputReactivity {
+export default class Input extends ReactiveObject {
 
   #configuration;
   #setup;

@@ -1,14 +1,5 @@
 import oneOf from "oneof";
-import { html, svg, text, list, update } from "../domek/domek.js";
-
-
-
-
-
-
-
-
-
+import { html, svg, text, list, update } from "../../../tools/domek.js";
 
 class Panel extends Component {
   constructor(setup) {
@@ -20,8 +11,8 @@ class Panel extends Component {
     this.append(caption);
 
 
-    const replyPod = new Pod({...setup,  name:'output pod', data: setup.node.Reply});
-    this.append(replyPod);
+    const outputPod = new Pod({...setup,  name:'output pod', data: setup.node.Output});
+    this.append(outputPod);
 
     const inputPod = new Pod({...setup,  name:'input pod', data: setup.node.Input});
     this.append(inputPod);
@@ -37,8 +28,8 @@ class Panel extends Component {
     // PLEASE NOTE THAT THIS WRITES TO THE NODE, after measuring the rectangle size
     this.wipe(      this.node.Input.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
     this.wipe(      this.node.Input.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Reply.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Reply.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
+    this.wipe(      this.node.Output.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
+    this.wipe(      this.node.Output.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
 
     // PLEASE NOTE the .observe will trigger instantly upon subscription to reliably deliver the value.
     this.wipe(      this.node.observe('horizontalPosition',      (v)=>update(this.el, { 'transform': `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})`, }))     );
@@ -49,7 +40,7 @@ class Panel extends Component {
     this.wipe(      this.node.observe('depthLevel',              (v)=>update( this.el, {zIndex: v}) )); // mimic bring-to-top
 
     // ANNOy
-    // console.info('TODO: Hey, maybe Pods should be measured here, and store in in input/reply???')
+    // console.info('TODO: Hey, maybe Pods should be measured here, and store in in input/output???')
     // console.info('TODO: make me draggable, mimic bring to top')
 
   }

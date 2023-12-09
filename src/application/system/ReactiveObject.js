@@ -24,6 +24,11 @@ export default class ReactiveObject {
           this.#observers[key].forEach(observer => observer(value));
   }
 
+
+
+
+
+
   #notifyMonitors(key, value) {
     Object.values(this.#monitors).forEach(callback => callback(key, value, this));
   }
@@ -34,10 +39,16 @@ export default class ReactiveObject {
     return () => {delete this.#monitors[id]};
   }
 
+
+
+
+
+
   observe(key, observer) { // triggers asap
     this.subscribe(key, observer);
     observer(this[key]);
   }
+
 
   subscribe(key, observer) {
       // Ensure that observer is a function

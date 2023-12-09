@@ -2,6 +2,16 @@
 
 import * as esbuild from 'esbuild'
 
+let examplePlugin = {
+  name: 'example',
+  setup(build) {
+    build.onEnd(result => {
+      console.log(`build ended with ${result.errors.length} errors`)
+      console.log('-'.repeat(80), '\n\n')
+    })
+  },
+}
+
 let ctx = await esbuild.context({
   bundle: true,
    // jsxFactory: 'h',
@@ -11,10 +21,11 @@ let ctx = await esbuild.context({
      '.html': 'text',
      '.js': 'jsx',
    },
+  plugins: [examplePlugin],
 })
 
-await ctx.watch()
-
+const xxx = await ctx.watch(function(){console.log('XXX');})
+console.log(xxx);
 let { host, port } = await ctx.serve({
     host:'127.0.0.1',
     servedir: '.',

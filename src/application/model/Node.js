@@ -1,34 +1,36 @@
 import { v4 as uuid } from "uuid";
 import oneOf from "oneof";
 
-import NodeReactivity from "./NodeReactivity.js";
-import InputCollection from "../input/InputCollection.js";
-import ReplyCollection from "../reply/ReplyCollection.js";
+import ReactiveObject from "../system/ReactiveObject.js";
+import ReactiveArray  from "../system/ReactiveArray.js";
 
-export default class Node extends NodeReactivity {
-  application;
+import Input from "./node/Input.js";
+import Output from "./node/Output.js";
 
-  #id;
-  #type;
+export default class Node extends ReactiveObject {
 
-
+  #application;
   #unsubscribe = [];
 
-  Input = new InputCollection();
-  Reply = new ReplyCollection();
+  Input;
+  Output;
 
-  constructor({id, type}){
-
+  constructor({id, type, application}){
     super();
+    this.#application = application;
 
-    if(!type) throw new Error('You must initialize a node with a known type');
+    this.Input = new ReactiveArray({application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
+    this.Output = new ReactiveArray({application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
 
-    this.#id = id||uuid();
-    this.#type = type;
-
-
+    //NOTE: archetype is not a reactive object, same for archetype's .input and .reply
+    const archetype = application.Types.find(type);
+    if(!archetype) throw new Error('You must initialize a node with a known type, unknown type detected: ' + this.type);
+    archetype.input.forEach(o=>{ this.Input.create(o) })
+    archetype.output.forEach(o=>{ this.Output.create(o) })
 
     const props = {
+      id: id||uuid(),
+      type,
       backgroundColor: oneOf([`url(#panel-primary)`,`url(#panel-secondary)`]), // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
       horizontalPosition: 10_000*Math.random(),
       verticalPosition: 8_000*Math.random(),
@@ -39,63 +41,49 @@ export default class Node extends NodeReactivity {
 
     Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
 
-
-  }
-
-  get id(){
-    return this.#id;
-  }
-
-  get type(){
-    return this.#type;
   }
 
   start(){
-    const typeDeclaration = this.application.Types.find(this.#type);
-    if(!typeDeclaration) throw new Error('You must initialize a node with a known type, unknown type: ' + this.#type);
-
-
-    // console.log(`Node started (${typeDeclaration})`);
-    if(typeDeclaration){
-      console.log('THIS IS COPIED WRONG');
-
-       typeDeclaration.Input.forEach(o=>{
-         console.log('o.clone()', o.configuration)
-         this.Input.create(o.configuration)
-         // this.monitor( (...arg)=>console.log('MONITOR', arg) )
-         //
-         console.log('MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2');
-       })
-       typeDeclaration.Reply.forEach(o=>{
-         console.log('o.clone()', o.configuration)
-         this.Reply.create(o.configuration)
-         // this.monitor( (...arg)=>console.log('MONITOR', arg) )
-         //
-         console.log('MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2');
-       })
-
-
-    }
-
     const d = 133;
     let intervalID = setInterval(() => {
       this.depthLevel = Math.random() > 0.5 ? 1 : 0;
       this.horizontalPosition = Math.random() > 0.5 ? this.horizontalPosition + d : this.horizontalPosition - d;
       this.verticalPosition = Math.random() > 0.5 ? this.verticalPosition + d : this.verticalPosition - d;
       this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
-
     }, 10_000+(5_000*Math.random()) );
-
   }
 
   stop() {
     this.#unsubscribe.map((o) => o());
-    // this.#element.empty();
   }
 
-  async output(){
-    console.log('TODO: produce output from Reply/output');
-    return null;
+  async #upstream(){
+    const response = {BUG:'untested', TODO: 'you may still have to spider all the links, lol!'};
+
+    for (const localPort of this.Input) {
+      // NOTE: edges do not link nodes, they link ports
+      // NOTE: there can be multiple reply ports pointing to the input port, therefore array is used
+      response[localPort.name] = [];
+      // find links that have target set to inputProperty.id
+      const incomingLinks = this.#application.Links.filter(remoteLink=>remoteLink.target==localPort.id);
+      for (const incomingLink of incomingLinks) {
+        // get their parent node,
+        const parentNode = incomingLink.parent;
+        const connectedPort = parentNode.Output.find(item=>item.id==incomingLink.source);
+        // and get them executed (parent node is requred as it pnows the properties the funcion needs)
+        const result = parentNode.execute(connectedPort.name);
+        response[localPort.name].push(result);
+      }
+    }
+    return response;
+  }
+
+  async execute(port){
+    console.log('TODO: produce output from Output');
+    const output = this.Output.find(item=>item.name==port);
+    if(!output) throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
+    const response = await output.generator(await this.#upstream())
+    return response;
   }
 
 }

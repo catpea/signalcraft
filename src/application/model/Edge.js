@@ -1,8 +1,7 @@
 import { v4 as uuid } from "uuid";
+import ReactiveObject from "../system/ReactiveObject.js";
 
-import EdgeReactivity from "./EdgeReactivity.js";
-
-export default class Edge extends EdgeReactivity {
+export default class Edge extends ReactiveObject {
   application;
   #id;
   #type;

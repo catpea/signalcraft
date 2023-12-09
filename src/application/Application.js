@@ -7,7 +7,7 @@ import UserTheme from "../Theme.js";
 import Type from './model/Type.js';
 import Node from './model/Node.js';
 import Input from './model/node/Input.js';
-import Reply from './model/node/Reply.js';
+import Output from './model/node/Output.js';
 import Edge from './model/Edge.js';
 import View from './ui/View.js';
 
@@ -17,7 +17,7 @@ export default class Brain extends ReactiveObject {
   Theme; // Color/UI Theme
   Types; // Node Library
   Nodes; // Node Instances
-  Edges; // Node Connections
+  Links; // Port Connections, remember it is not that are connected but the ports of a node
   Views; // Node UI
   Dream; // User API
 
@@ -33,7 +33,7 @@ export default class Brain extends ReactiveObject {
     // Data Structure
     Node,
       Input,
-      Reply,
+      Output,
     Edge,
 
     // Rendering Of Data Structure
@@ -43,10 +43,10 @@ export default class Brain extends ReactiveObject {
 
   constructor() {
     super();
-    this.Types = new ReactiveArray({root:this, Item:Type, auto:false }); // This is where node library resides
-    this.Nodes = new ReactiveArray({root:this, Item:Node, auto:true }); // all nodes the user is working with
-    this.Edges = new ReactiveArray({root:this, Item:Edge, auto:true }); // all edges that connect nodes
-    this.Views = new ReactiveArray({root:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
+    this.Types = new ReactiveArray({application:this, Item:Type, auto:false }); // This is where node library resides
+    this.Nodes = new ReactiveArray({application:this, Item:Node, auto:true }); // all nodes the user is working with
+    this.Links = new ReactiveArray({application:this, Item:Edge, auto:true }); // all links (edges) that connect nodes
+    this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
     this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
     this.Theme = new UserTheme(this); // Theme Of Choice
     this.Dream = new Api(this); // Pretty Dream API *FOR USER ONLY* eveything must be informative!
@@ -62,7 +62,7 @@ export default class Brain extends ReactiveObject {
     //TODO: destroy all listeners
     this.Views.stop();
     this.Nodes.stop();
-    this.Edges.stop();
+    this.Links.stop();
   }
 
 
@@ -85,8 +85,8 @@ export default class Brain extends ReactiveObject {
           case "Nodes":
             this.Nodes.subscribe(eventName, handlerFunction.bind(that));
             break;
-          case "Edges":
-            this.Edges.subscribe(eventName, handlerFunction.bind(that));
+          case "Links":
+            this.Links.subscribe(eventName, handlerFunction.bind(that));
             break;
           default:
         }

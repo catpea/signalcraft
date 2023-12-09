@@ -1,15 +1,22 @@
 
 export default class ReactiveArray {
   #auto; // auto call .start() on all items
-  #root;
+  #application;
+  #parent;
   #Item = [];
+  #content = [];
 
-  constructor({root, Item, boot}) {
-    if (!root) throw new TypeError("root is required");
+  constructor({application, parent, Item, boot}) {
+    if (!application) throw new TypeError("application is required");
     if (!Item) throw new TypeError("Item is required");
     this.#auto = !!auto;
-    this.#root = root;
+    this.#application = application; // application is mandatory, evytrhing need to link back to the source for convenience
+    this.#parent = parent; // parent is optional but it allows for trees
     this.#Item = Item;
+  }
+
+  [Symbol.iterator]() {
+     return this.#content;
   }
 
   size(){
@@ -21,7 +28,7 @@ export default class ReactiveArray {
   }
 
   create(...argv) {
-    const item = new this.#Item({...arg, root:this.#root});
+    const item = new this.#Item({...arg, application:this.#application});
     this.#content.push(item);
 
     if (this.#auto && item.start) item.start();
@@ -44,8 +51,9 @@ export default class ReactiveArray {
     this.#content = this.#content.filter((item) => !item.deleted);
   }
 
-  find(id) {
-    return this.#content.find((item) => item.id === id);
+  find(callback) {
+    if (typeof callback !== "function") throw new TypeError("Find needs a function.");
+    return this.#content.find(callback);
   }
 
   update(id, property, value) {
@@ -56,6 +64,19 @@ export default class ReactiveArray {
       this.#notify("updated", { item, property, value, old });
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   #observers = {};
   #notify(eventName, eventData) {
@@ -87,11 +108,24 @@ export default class ReactiveArray {
     );
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
   // Lifecycle
 
   start(auto=true) {
     this.#auto = auto; // start all from now on
     this.#content
+      .filter((item) => !item.deleted)
       .forEach(item=>item.start());
   }
 

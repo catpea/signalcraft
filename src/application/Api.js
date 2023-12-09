@@ -15,13 +15,13 @@ export default class DreamInterface {
 
   linkPorts(sourceNode, targetNode, options = {reply:'reply', input:'input'}){
     const { reply:replyPort, input:inputPort } = options;
-    return this.brain.Edges.create({sourceNode, targetNode, replyPort, inputPort});
+    return this.brain.Links.create({sourceNode, targetNode, replyPort, inputPort});
   }
 
-  async run(node){
-    if(!node) throw new Error('you must specify which node to run');
-    const output = await node.output();
-    console.log(`Output of node ${node.id}`, output)
+  async execute(node, port='output'){
+    if(!node) throw new Error('you must specify which node to execute');
+    const output = await node.execute(port);
+    console.log(`Output on port ${port} of node ${node.id}`, output)
     return output;
   }
 

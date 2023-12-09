@@ -2,8 +2,8 @@ import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
 // import React from "jsx-dom";
 
-import Panel from '../panel/Panel.js';
-import Cable from '../cable/Cable.js';
+import Panel from './view/Panel.js';
+import Cable from './view/Cable.js';
 
 // import NodeRenderer from './NodeRenderer.js';
 
