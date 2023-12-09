@@ -13,9 +13,9 @@ export default class DreamInterface {
     return this.brain.Nodes.create({type});
   }
 
-  linkPorts(sourceNode, targetNode, options = {output:'output', input:'input'}){
-    const { output, input } = options;
-    // return this.brain.Edges.create(uuid(), nodeType);
+  linkPorts(sourceNode, targetNode, options = {reply:'reply', input:'input'}){
+    const { reply:replyPort, input:inputPort } = options;
+    return this.brain.Edges.create({sourceNode, targetNode, replyPort, inputPort});
   }
 
   async run(node){

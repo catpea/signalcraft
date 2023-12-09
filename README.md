@@ -23,19 +23,16 @@ npm install --save-exact --save-dev esbuild
 
 - ```types```: node types, or node definition
 - ```panel```: visual (SVG) representation of a node
-  - ```nodes```:
+  - ```nodes```: how the apps are made
     - ```input```: these are the data objects that represent properties that the user can plug into
     - ```reply```: data objects the user can connect to input of anoter node
 - ```cable```: visual (SVG) representation of an edge
   - ```edges```: Objects that connect nodes
 
-### Helpers
+### Util
 
 - ```domek```: DOM helper that does set attribute for us
 - ```tools```: development tools
-
-
-
 
 ## How It Works
 
@@ -56,6 +53,9 @@ npm install --save-exact --save-dev esbuild
 - Reactivity Links everything together.
 
 ## TODO
+
+- INput/Reply must be reactive as they will give cable its x and y
+- CRITICAL: SimpleCollection.export needs to make proper copies,
 
 - use Krita to create system diagram
 - implement cables/wires

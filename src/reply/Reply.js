@@ -1,21 +1,41 @@
-export default class Reply {
-  direction = "out"
-  #id;
-  #format;
-  #label;
-  #generator;
+import ReplyReactivity from "./ReplyReactivity.js";
 
-  constructor(id, format, label, generator){
+import { v4 as uuid } from "uuid";
 
-    this.#id = id;
-    this.#format = format;
-    this.#label = label;
-    this.#generator = generator;
+export default class Reply extends ReplyReactivity {
+
+  #configuration;
+  #setup;
+
+  constructor(configuration){
+    super();
+    this.#configuration = configuration;
+    const defaults = {
+      id:uuid(),
+      name:'unnamed',
+      direction: "reply",
+      type:'string',
+      description:"none",
+      x:0,
+      y:0,
+      generator: ()=>({}),
+    };
+    this.#setup = Object.assign({}, defaults, configuration);
+    Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    // this.monitor( (...arg)=>console.log('MONITOR', arg) )
   }
 
-  read(){
+
+
+  get configuration(){
+    // new ID
+    return this.#configuration;
+  }
+
+  read(){ // called by primary node's output function downstream
     // decode links
-    return this.#generator();
+    // get output from links
+    return {/*...*/};
   }
 
 }

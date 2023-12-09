@@ -17,7 +17,8 @@ export default class SimpleCollection {
   }
 
   export(){
-    return cloneDeep(this.#content)
+    return this.#content;
+    // return cloneDeep(this.#content)
   }
 
   forEach(callback) {

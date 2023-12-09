@@ -3379,8 +3379,9 @@
     addNode(type) {
       return this.brain.Nodes.create({ type });
     }
-    linkPorts(sourceNode, targetNode, options = { output: "output", input: "input" }) {
-      const { output, input } = options;
+    linkPorts(sourceNode, targetNode, options = { reply: "reply", input: "input" }) {
+      const { reply: replyPort, input: inputPort } = options;
+      return this.brain.Edges.create({ sourceNode, targetNode, replyPort, inputPort });
     }
     async run(node) {
       if (!node)
@@ -3391,16 +3392,81 @@
     }
   };
 
+  // src/input/InputReactivity.js
+  var InputReactivity = class {
+    #monitors = {};
+    #observers = {};
+    #state = {};
+    defineReactiveProperty(key, val) {
+      this.#state[key] = val;
+      Object.defineProperty(this, key, {
+        get: () => this.#state[key],
+        set: (newValue) => {
+          const oldValue = this.#state[key];
+          if (newValue === oldValue)
+            return;
+          this.#state[key] = newValue;
+          this.#notifyObservers(key, newValue, oldValue);
+          this.#notifyMonitors(key, newValue, oldValue);
+        }
+      });
+    }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
+    }
+    #notifyMonitors(key, value) {
+      Object.values(this.#monitors).forEach((callback) => callback(key, value, this));
+    }
+    monitor(observer) {
+      const id = Math.random().toString(36).substring(2);
+      this.#monitors[id] = observer;
+      return () => {
+        delete this.#monitors[id];
+      };
+    }
+    observe(key, observer) {
+      this.subscribe(key, observer);
+      observer(this[key]);
+    }
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      const value = this[key];
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
+    }
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
+    }
+  };
+
   // src/input/Input.js
-  var Input = class {
-    direction = "in";
-    #id;
-    #format;
-    #label;
-    constructor(id, format, label) {
-      this.#id = id;
-      this.#format = format;
-      this.#label = label;
+  var Input = class extends InputReactivity {
+    #configuration;
+    #setup;
+    constructor(configuration) {
+      super();
+      this.#configuration = configuration;
+      const defaults = {
+        id: v4_default(),
+        name: "unnamed",
+        direction: "input",
+        type: "string",
+        description: "none",
+        x: 0,
+        y: 0,
+        generator: () => ({})
+      };
+      this.#setup = Object.assign({}, defaults, configuration);
+      Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    }
+    get configuration() {
+      return this.#configuration;
     }
     read() {
       return {
@@ -3424,7 +3490,7 @@
       this.#content = data;
     }
     export() {
-      return (0, import_cloneDeep.default)(this.#content);
+      return this.#content;
     }
     forEach(callback) {
       this.#content.filter((item) => !item.deleted).forEach(callback);
@@ -3492,35 +3558,100 @@
 
   // src/input/InputCollection.js
   var InputCollection = class extends SimpleCollection {
-    instantiate(id, format, label) {
-      const input = new Input(id, format, label);
+    instantiate(...arg) {
+      const input = new Input(...arg);
       return input;
     }
   };
 
+  // src/reply/ReplyReactivity.js
+  var ReplyReactivity = class {
+    #monitors = {};
+    #observers = {};
+    #state = {};
+    defineReactiveProperty(key, val) {
+      this.#state[key] = val;
+      Object.defineProperty(this, key, {
+        get: () => this.#state[key],
+        set: (newValue) => {
+          const oldValue = this.#state[key];
+          if (newValue === oldValue)
+            return;
+          this.#state[key] = newValue;
+          this.#notifyObservers(key, newValue, oldValue);
+          this.#notifyMonitors(key, newValue, oldValue);
+        }
+      });
+    }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
+    }
+    #notifyMonitors(key, value) {
+      Object.values(this.#monitors).forEach((callback) => callback(key, value, this));
+    }
+    monitor(observer) {
+      const id = Math.random().toString(36).substring(2);
+      this.#monitors[id] = observer;
+      return () => {
+        delete this.#monitors[id];
+      };
+    }
+    observe(key, observer) {
+      this.subscribe(key, observer);
+      observer(this[key]);
+    }
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      const value = this[key];
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
+    }
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
+    }
+  };
+
   // src/reply/Reply.js
-  var Reply = class {
-    direction = "out";
-    #id;
-    #format;
-    #label;
-    #generator;
-    constructor(id, format, label, generator) {
-      this.#id = id;
-      this.#format = format;
-      this.#label = label;
-      this.#generator = generator;
+  var Reply = class extends ReplyReactivity {
+    #configuration;
+    #setup;
+    constructor(configuration) {
+      super();
+      this.#configuration = configuration;
+      const defaults = {
+        id: v4_default(),
+        name: "unnamed",
+        direction: "reply",
+        type: "string",
+        description: "none",
+        x: 0,
+        y: 0,
+        generator: () => ({})
+      };
+      this.#setup = Object.assign({}, defaults, configuration);
+      Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    }
+    get configuration() {
+      return this.#configuration;
     }
     read() {
-      return this.#generator();
+      return {
+        /*...*/
+      };
     }
   };
 
   // src/reply/ReplyCollection.js
   var ReplyCollection = class extends SimpleCollection {
-    instantiate(id, format, label, generator) {
-      const output = new Reply(id, format, label, generator);
-      return output;
+    instantiate(...arg) {
+      const reply = new Reply(...arg);
+      return reply;
     }
   };
 
@@ -3543,8 +3674,8 @@
 
   // src/types/TypeCollection.js
   var TypeCollection = class extends SimpleCollection {
-    instantiate(category, name) {
-      const type = new Type(category, name);
+    instantiate(...arg) {
+      const type = new Type(...arg);
       return type;
     }
   };
@@ -3701,11 +3832,23 @@
       this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.size, fill: "transparent", Xfill: `url(#panel-primary)` });
       this.main.el.appendChild(this.el);
       let port;
-      if (this.data.direction == "out") {
-        port = svg.circle({ cx: this.width + 10, cy: this.top + this.size / 2, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+      if (this.data.direction == "input") {
+        const x = this.left - 5;
+        const y = this.top + this.size / 2;
+        this.data.x = x;
+        this.data.y = y;
+        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       } else {
-        port = svg.circle({ cx: this.left - 5, cy: this.top + this.size / 2, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        const x = this.width + 10;
+        const y = this.top + this.size / 2;
+        this.data.x = x;
+        this.data.y = y;
+        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       }
+      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
+      const cationText = document.createTextNode(this.data.name);
+      captionNode.appendChild(cationText);
+      this.main.el.appendChild(captionNode);
       this.main.el.appendChild(port);
     }
   };
@@ -4047,12 +4190,21 @@
       return this.#type;
     }
     start() {
-      if (!this.#type)
-        throw new Error("You must initialize a node with a known type");
       const typeDeclaration = this.application.Types.find(this.#type);
+      if (!typeDeclaration)
+        throw new Error("You must initialize a node with a known type, unknown type: " + this.#type);
       if (typeDeclaration) {
-        this.Input.import(typeDeclaration.Input.export());
-        this.Reply.import(typeDeclaration.Reply.export());
+        console.log("THIS IS COPIED WRONG");
+        typeDeclaration.Input.forEach((o) => {
+          console.log("o.clone()", o.configuration);
+          this.Input.create(o.configuration);
+          console.log("MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2");
+        });
+        typeDeclaration.Reply.forEach((o) => {
+          console.log("o.clone()", o.configuration);
+          this.Reply.create(o.configuration);
+          console.log("MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2");
+        });
       }
       const d = 133;
       let intervalID = setInterval(() => {
@@ -4079,21 +4231,98 @@
     }
   };
 
+  // src/edges/EdgeReactivity.js
+  var NodeReactivity2 = class {
+    #monitors = {};
+    #observers = {};
+    #state = {};
+    defineReactiveProperty(key, val) {
+      this.#state[key] = val;
+      Object.defineProperty(this, key, {
+        get: () => this.#state[key],
+        set: (newValue) => {
+          const oldValue = this.#state[key];
+          if (newValue === oldValue)
+            return;
+          this.#state[key] = newValue;
+          this.#notifyObservers(key, newValue, oldValue);
+          this.#notifyMonitors(key, newValue, oldValue);
+        }
+      });
+    }
+    #notifyObservers(key, value) {
+      if (Array.isArray(this.#observers[key]))
+        this.#observers[key].forEach((observer) => observer(value));
+    }
+    #notifyMonitors(key, value) {
+      Object.values(this.#monitors).forEach((callback) => callback(key, value, this));
+    }
+    monitor(observer) {
+      const id = Math.random().toString(36).substring(2);
+      this.#monitors[id] = observer;
+      return () => {
+        delete this.#monitors[id];
+      };
+    }
+    observe(key, observer) {
+      this.subscribe(key, observer);
+      observer(this[key]);
+    }
+    subscribe(key, observer) {
+      if (typeof observer !== "function")
+        throw new TypeError("Observer must be a function.");
+      if (!Array.isArray(this.#observers[key]))
+        this.#observers[key] = [];
+      this.#observers[key].push(observer);
+      const value = this[key];
+      return () => {
+        this.#unsubscribe(key, observer);
+      };
+    }
+    #unsubscribe(key, observer) {
+      this.#observers[key] = this.#observers[key].filter((obs) => obs !== observer);
+    }
+  };
+
   // src/edges/Edge.js
-  var Edge = class {
+  var Edge = class extends NodeReactivity2 {
+    application;
     #id;
     #type;
-    #source;
-    #target;
-    constructor(id, type, source, target) {
-      this.#id = id;
+    #sourceNode;
+    #targetNode;
+    #replyPort;
+    #inputPort;
+    #unsubscribe = [];
+    constructor({ id, type, sourceNode, replyPort, targetNode, inputPort }) {
+      super();
+      this.#id = id || v4_default();
       this.#type = type;
-      this.#source = source;
-      this.#target = target;
+      this.#sourceNode = sourceNode;
+      this.#targetNode = targetNode;
+      this.#replyPort = replyPort;
+      this.#inputPort = inputPort;
+      const props = {
+        backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
+        horizontalPosition1: 1e4 * Math.random(),
+        verticalPosition1: 8e3 * Math.random(),
+        horizontalPosition2: 1e4 * Math.random(),
+        verticalPosition2: 8e3 * Math.random(),
+        edgeWidth: 10,
+        depthLevel: 0
+      };
+      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    }
+    get id() {
+      return this.#id;
+    }
+    get type() {
+      return this.#type;
     }
     start() {
     }
     stop() {
+      this.#unsubscribe.map((o) => o());
     }
   };
 
@@ -4242,33 +4471,34 @@
   // src/tasks/registerTypes.js
   function registerTypes_default(core) {
     const textType = core.Types.create("text", "string");
-    textType.Reply.create("output", () => {
+    textType.Reply.create({ name: "output", generator: () => {
       return this.string;
-    });
-    textType.Input.create("string", { type: "string", description: "a string of letters" });
+    } });
+    textType.Input.create({ name: "string", type: "string", description: "a string of letters" });
     const colorType = core.Types.create("text", "color");
-    colorType.Reply.create("output", () => {
+    colorType.Reply.create({ name: "output", generator: () => {
       return this.color;
-    });
-    colorType.Input.create("color", { type: "string", description: "color" });
-    colorType.Input.create("model", { type: "string", description: "preferred model" });
-    colorType.Input.create("description", { type: "string", description: "description" });
+    } });
+    colorType.Input.create({ name: "color", type: "string", description: "color" });
+    colorType.Input.create({ name: "model", type: "string", description: "preferred model" });
+    colorType.Input.create({ name: "description", type: "string", description: "description" });
     const uppercaseType = core.Types.create("text", "case");
-    uppercaseType.Reply.create("upper", () => {
+    uppercaseType.Reply.create({ name: "upper", generator: () => {
       return this.input.toUpperCase();
-    });
-    uppercaseType.Reply.create("lower", () => {
+    } });
+    uppercaseType.Reply.create({ name: "lower", generator: () => {
       return this.input.toLowerCase();
-    });
-    uppercaseType.Input.create("input");
-    uppercaseType.Input.create("template", { type: "string", description: "string template use $input to interpolate" });
-    uppercaseType.Input.create("description", { type: "string", description: "description" });
-    const templateType = core.Types.create("array", "join");
-    textType.Reply.create("output", ({ array, separator }) => {
+    } });
+    uppercaseType.Input.create({ name: "input" });
+    uppercaseType.Input.create({ name: "template", type: "string", description: "string template use $input to interpolate" });
+    uppercaseType.Input.create({ name: "description", type: "string", description: "description" });
+    const arrayJoinType = core.Types.create("array", "join");
+    arrayJoinType.Reply.create({ name: "output", generator: ({ array, separator }) => {
       return array.join(separator);
-    });
-    textType.Input.create("input", { type: "*", description: "data to join" });
-    textType.Input.create("separator", { type: "string", description: "separator to use" });
+    } });
+    arrayJoinType.Input.create({ name: "input", type: "*", description: "data to join" });
+    arrayJoinType.Input.create({ name: "separator", type: "string", description: "separator to use" });
+    arrayJoinType.Input.create({ name: "duck", type: "string", description: "separator to use" });
   }
 
   // src/usage.js

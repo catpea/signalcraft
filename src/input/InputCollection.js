@@ -3,8 +3,8 @@ import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class InputCollection extends SimpleCollection {
 
-  instantiate(id, format, label){
-    const input = new Input(id, format, label);
+  instantiate(...arg){
+    const input = new Input(...arg);
     return input;
   }
 

@@ -1,15 +1,34 @@
-export default class Input {
-  direction = "in";
-  #id;
-  #format;
-  #label;
+import InputReactivity from "./InputReactivity.js";
 
-  constructor(id, format, label){
+import { v4 as uuid } from "uuid";
 
-    this.#id = id;
-    this.#format = format;
-    this.#label = label;
+export default class Input extends InputReactivity {
 
+  #configuration;
+  #setup;
+
+  constructor(configuration){
+    super();
+    this.#configuration = configuration;
+    const defaults = {
+      id:uuid(),
+      name:'unnamed',
+      direction: "input",
+      type:'string',
+      description:"none",
+      x:0,
+      y:0,
+      generator: ()=>({}),
+    };
+    this.#setup = Object.assign({}, defaults, configuration);
+    Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+  }
+
+
+
+  get configuration(){
+    // new ID
+    return this.#configuration;
   }
 
   read(){ // called by primary node's output function downstream

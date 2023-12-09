@@ -132,11 +132,25 @@ class Line extends Component {
     this.main.el.appendChild( this.el )
 
     let port;
-    if(this.data.direction == 'out'){
-      port = svg.circle({ cx:this.width + 10, cy:this.top + (this.size/2), r: 8, height: this.size, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
+    if(this.data.direction == 'input'){
+      const x = this.left - 5;
+      const y = this.top + (this.size/2);
+      this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
+      this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
+      port = svg.circle({ cx:x, cy:y, r: 8, height: this.size, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
     }else{
-      port = svg.circle({ cx:this.left - 5, cy:this.top + (this.size/2), r: 8, height: this.size, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
+      const x = this.width + 10;
+      const y = this.top + (this.size/2);
+      this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
+      this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
+      port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: oneOf([`url(#socket-primary)`,`url(#socket-error)`]),  filter: `url(#socket-shadow)`});
    }
+
+   const captionNode = svg.text({ x:this.left, y:this.top + (this.size - (this.size/10) ), style: 'font-size: 2rem;', fill: `url(#panel-text)`});
+   const cationText = document.createTextNode(this.data.name);
+   captionNode.appendChild(cationText);
+   this.main.el.appendChild( captionNode )
+
     this.main.el.appendChild( port )
   }
 }

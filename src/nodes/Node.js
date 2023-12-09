@@ -26,7 +26,7 @@ export default class Node extends NodeReactivity {
     this.#id = id||uuid();
     this.#type = type;
 
- 
+
 
     const props = {
       backgroundColor: oneOf([`url(#panel-primary)`,`url(#panel-secondary)`]), // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
@@ -51,14 +51,30 @@ export default class Node extends NodeReactivity {
   }
 
   start(){
-    if(!this.#type) throw new Error('You must initialize a node with a known type');
-
     const typeDeclaration = this.application.Types.find(this.#type);
+    if(!typeDeclaration) throw new Error('You must initialize a node with a known type, unknown type: ' + this.#type);
+
 
     // console.log(`Node started (${typeDeclaration})`);
     if(typeDeclaration){
-      this.Input.import( typeDeclaration.Input.export() );
-      this.Reply.import( typeDeclaration.Reply.export() );
+      console.log('THIS IS COPIED WRONG');
+
+       typeDeclaration.Input.forEach(o=>{
+         console.log('o.clone()', o.configuration)
+         this.Input.create(o.configuration)
+         // this.monitor( (...arg)=>console.log('MONITOR', arg) )
+         //
+         console.log('MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2');
+       })
+       typeDeclaration.Reply.forEach(o=>{
+         console.log('o.clone()', o.configuration)
+         this.Reply.create(o.configuration)
+         // this.monitor( (...arg)=>console.log('MONITOR', arg) )
+         //
+         console.log('MONITOR POSITION OF DOT, COMBINE WITH MONITORING OF POSITION OF NODE ... wire must know position of this dot to sex x1x2');
+       })
+
+
     }
 
     const d = 133;
