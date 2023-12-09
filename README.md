@@ -4,8 +4,27 @@ A tiny visual programming language.
 ## Building
 npm install --save-exact --save-dev esbuild
 
+## How It Works
+
+- you define node types first
+- then create a view, which is a UI, an SVG
+- then you addNode(type) the view will update to show that node
+- then you linkNodes to create a flow (see src/usage.js)
+- then you .run(node), you have to specify a node you want to spuder up and execute pauload on
+
+## How It Really Works
+
+- System Is Reactive, Full Time Travel
+- When defining Types, you really just specify Input Dots and Reply Dots.
+- Input is the Property of a Node that you can link to
+- Reply is the Function of a Node that gets executed via a downstream node
+- Nodes are decorated as Panels
+- Edges are decorated as Cables
+- Reactivity Links everything together.
+
 ## TODO
 
+- use Krita to create system diagram
 - implement cables/wires
 - cables should be type sensitive numbers, strings, objects
 - Paint edges
