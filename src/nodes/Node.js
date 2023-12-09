@@ -2,22 +2,22 @@ import { v4 as uuid } from "uuid";
 import oneOf from "oneof";
 
 import NodeReactivity from "./NodeReactivity.js";
-import IncomingCollection from "../input/IncomingCollection.js";
-import OutgoingCollection from "../reply/OutgoingCollection.js";
+import InputCollection from "../input/InputCollection.js";
+import ReplyCollection from "../reply/ReplyCollection.js";
 
 export default class Node extends NodeReactivity {
   application;
 
   #id;
   #type;
-  #state;
+
 
   #unsubscribe = [];
 
-  Input = new IncomingCollection();
-  Reply = new OutgoingCollection();
+  Input = new InputCollection();
+  Reply = new ReplyCollection();
 
-  constructor(id, type, state={}){
+  constructor({id, type}){
 
     super();
 
@@ -26,7 +26,9 @@ export default class Node extends NodeReactivity {
     this.#id = id||uuid();
     this.#type = type;
 
-    const defaults = {
+ 
+
+    const props = {
       backgroundColor: oneOf([`url(#panel-primary)`,`url(#panel-secondary)`]), // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
       horizontalPosition: 10_000*Math.random(),
       verticalPosition: 8_000*Math.random(),
@@ -35,8 +37,7 @@ export default class Node extends NodeReactivity {
       depthLevel: 0,
     };
 
-    this.#state = Object.assign({}, state, defaults);
-    Object.entries(this.#state).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
 
 
   }
@@ -76,5 +77,9 @@ export default class Node extends NodeReactivity {
     // this.#element.empty();
   }
 
+  async output(){
+    console.log('TODO: produce output from Reply/output');
+    return null;
+  }
 
 }

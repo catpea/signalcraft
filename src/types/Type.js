@@ -1,5 +1,5 @@
-import IncomingCollection from "../input/IncomingCollection.js";
-import OutgoingCollection from "../reply/OutgoingCollection.js";
+import InputCollection from "../input/InputCollection.js";
+import ReplyCollection from "../reply/ReplyCollection.js";
 
 /*
   A type is a Visual Programming Node: When creating a vpl node you are actually creating an instance of a type.
@@ -12,8 +12,8 @@ export default class Type {
   #category;
   #name;
 
-  Input = new IncomingCollection();
-  Reply = new OutgoingCollection();
+  Input = new InputCollection();
+  Reply = new ReplyCollection();
 
   get id(){
     return this.#id;

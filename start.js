@@ -6,7 +6,7 @@ let ctx = await esbuild.context({
   bundle: true,
    // jsxFactory: 'h',
   entryPoints: ['src/craft.js'],
-  outdir: 'dist',
+  outdir: 'out',
   loader: {
      '.html': 'text',
      '.js': 'jsx',

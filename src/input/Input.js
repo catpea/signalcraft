@@ -1,4 +1,4 @@
-export default class Incoming {
+export default class Input {
   direction = "in";
   #id;
   #format;

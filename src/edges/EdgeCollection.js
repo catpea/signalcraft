@@ -3,8 +3,8 @@ import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class EdgeCollection extends SimpleCollection {
 
-  instantiate(id, type){
-    const edge = new Edge(id, type);
+  instantiate(...arg){
+    const edge = new Edge(...arg);
     return edge;
   }
 

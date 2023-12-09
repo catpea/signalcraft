@@ -3284,6 +3284,44 @@
     }
   });
 
+  // src/brain/DataReactivity.js
+  var ApplicationReactivity = class {
+    #subscribers = {};
+    #notify(type, data) {
+      Object.values(this.#subscribers).forEach(
+        (callback) => callback(type, data)
+      );
+    }
+    subscribe(callback) {
+      const id = Math.random().toString(36).substring(2);
+      this.#subscribers[id] = callback;
+      return () => this.unsubscribe(id);
+    }
+    unsubscribe(id) {
+      delete this.#subscribers[id];
+    }
+    integrate(that, map) {
+      for (const key in map) {
+        if (map.hasOwnProperty(key)) {
+          const [objectName, eventName, fluff] = key.split(" ");
+          const handlerFunction = map[key];
+          switch (objectName) {
+            case "Setup":
+              this.Setup.subscribe(eventName, handlerFunction.bind(that));
+              break;
+            case "Nodes":
+              this.Nodes.subscribe(eventName, handlerFunction.bind(that));
+              break;
+            case "Edges":
+              this.Edges.subscribe(eventName, handlerFunction.bind(that));
+              break;
+            default:
+          }
+        }
+      }
+    }
+  };
+
   // node_modules/uuid/dist/esm-browser/rng.js
   var getRandomValues;
   var rnds8 = new Uint8Array(16);
@@ -3332,53 +3370,29 @@
   }
   var v4_default = v4;
 
-  // src/brain/DataReactivity.js
-  var ApplicationReactivity = class {
-    #subscribers = {};
-    #notify(type, data) {
-      Object.values(this.#subscribers).forEach(
-        (callback) => callback(type, data)
-      );
-    }
-    subscribe(callback) {
-      const id = Math.random().toString(36).substring(2);
-      this.#subscribers[id] = callback;
-      return () => this.unsubscribe(id);
-    }
-    unsubscribe(id) {
-      delete this.#subscribers[id];
-    }
-    integrate(that, map) {
-      for (const key in map) {
-        if (map.hasOwnProperty(key)) {
-          const [objectName, eventName, fluff] = key.split(" ");
-          const handlerFunction = map[key];
-          switch (objectName) {
-            case "Setup":
-              this.Setup.subscribe(eventName, handlerFunction.bind(that));
-              break;
-            case "Nodes":
-              this.Nodes.subscribe(eventName, handlerFunction.bind(that));
-              break;
-            case "Edges":
-              this.Edges.subscribe(eventName, handlerFunction.bind(that));
-              break;
-            default:
-          }
-        }
-      }
-    }
-  };
-
   // src/dream/DreamInterface.js
-  var Dream = class {
-    application;
-    constructor() {
+  var DreamInterface = class {
+    brain;
+    constructor(brain2) {
+      this.brain = brain2;
+    }
+    addNode(type) {
+      return this.brain.Nodes.create({ type });
+    }
+    linkPorts(sourceNode, targetNode, options = { output: "output", input: "input" }) {
+      const { output, input } = options;
+    }
+    async run(node) {
+      if (!node)
+        throw new Error("you must specify which node to run");
+      const output = await node.output();
+      console.log(`Output of node ${node.id}`, output);
+      return output;
     }
   };
 
-  // src/input/Incoming.js
-  var Incoming = class {
+  // src/input/Input.js
+  var Input = class {
     direction = "in";
     #id;
     #format;
@@ -3476,16 +3490,16 @@
     }
   };
 
-  // src/input/IncomingCollection.js
-  var IncomingCollection = class extends SimpleCollection {
+  // src/input/InputCollection.js
+  var InputCollection = class extends SimpleCollection {
     instantiate(id, format, label) {
-      const input = new Incoming(id, format, label);
+      const input = new Input(id, format, label);
       return input;
     }
   };
 
-  // src/reply/Outgoing.js
-  var Outgoing = class {
+  // src/reply/Reply.js
+  var Reply = class {
     direction = "out";
     #id;
     #format;
@@ -3502,10 +3516,10 @@
     }
   };
 
-  // src/reply/OutgoingCollection.js
-  var OutgoingCollection = class extends SimpleCollection {
+  // src/reply/ReplyCollection.js
+  var ReplyCollection = class extends SimpleCollection {
     instantiate(id, format, label, generator) {
-      const output = new Outgoing(id, format, label, generator);
+      const output = new Reply(id, format, label, generator);
       return output;
     }
   };
@@ -3515,8 +3529,8 @@
     #id;
     #category;
     #name;
-    Input = new IncomingCollection();
-    Reply = new OutgoingCollection();
+    Input = new InputCollection();
+    Reply = new ReplyCollection();
     get id() {
       return this.#id;
     }
@@ -3577,7 +3591,7 @@
     // root parent object
     #data = null;
     #home = null;
-    #height = -1;
+    #size = -1;
     #padd = -1;
     #list = [];
     #view = null;
@@ -3585,12 +3599,12 @@
     #root = null;
     #wipe = [];
     constructor(conf) {
-      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, height: 0, data: null, main: null, name: null }, conf);
+      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, size: 0, data: null, main: null, name: null }, conf);
       this.#name = setup.name;
       this.#main = setup.main;
       this.#home = setup.home;
       this.#data = setup.data;
-      this.#height = setup.height;
+      this.#size = setup.size;
       this.#padd = setup.padd;
       this.#view = setup.view;
       this.#node = setup.node;
@@ -3652,12 +3666,12 @@
       if (this.isRoot)
         return 0;
       const topPadding = this.#padd;
-      const heightOfAllAbove = this.above.reduce((total, item) => total + item.height, 0);
+      const sizeOfAllAbove = this.above.reduce((total, item) => total + item.size, 0);
       const paddOfAllAbove = this.above.length * this.#padd;
-      return this.#home.top + topPadding + heightOfAllAbove + paddOfAllAbove;
+      return this.#home.top + topPadding + sizeOfAllAbove + paddOfAllAbove;
     }
-    get height() {
-      return this.#height + this.#list.reduce((total, child) => total + child.height, 0) + this.#padd * (this.#list.length + 1);
+    get size() {
+      return this.#size + this.#list.reduce((total, child) => total + child.size, 0) + this.#padd * (this.#list.length + 1);
     }
     get width() {
       return this.node.nodeWidth - this.containers.slice(1).reduce((total, item) => total + item.padd * 2, 0);
@@ -3681,27 +3695,27 @@
   };
   var Line = class extends Component {
     constructor(setup) {
-      super(setup, { height: 32 });
+      super(setup, { size: 32 });
     }
     draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.height, fill: "transparent", Xfill: `url(#panel-primary)` });
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.size, fill: "transparent", Xfill: `url(#panel-primary)` });
       this.main.el.appendChild(this.el);
       let port;
       if (this.data.direction == "out") {
-        port = svg.circle({ cx: this.width + 10, cy: this.top + this.height / 2, r: 8, height: this.height, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        port = svg.circle({ cx: this.width + 10, cy: this.top + this.size / 2, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       } else {
-        port = svg.circle({ cx: this.left - 5, cy: this.top + this.height / 2, r: 8, height: this.height, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        port = svg.circle({ cx: this.left - 5, cy: this.top + this.size / 2, r: 8, height: this.size, fill: (0, import_oneof.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       }
       this.main.el.appendChild(port);
     }
   };
   var Caption = class extends Component {
     constructor(setup) {
-      super(setup, { height: 32 });
+      super(setup, { size: 32 });
     }
     draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.height, fill: `url(#panel-caption)` });
-      const captionNode = svg.text({ x: this.left, y: this.top + (this.height - this.height / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: `url(#panel-caption)` });
+      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
       const cationText = document.createTextNode(this.node.type);
       captionNode.appendChild(cationText);
       this.main.el.appendChild(this.el);
@@ -3711,10 +3725,10 @@
   var Pod = class extends Component {
     constructor(setup) {
       super(setup);
-      this.data.forEach((data, index) => this.append(new Line({ ...setup, name: `pod line ${index}`, data, height: 32 })));
+      this.data.forEach((data, index) => this.append(new Line({ ...setup, name: `pod line ${index}`, data, size: 32 })));
     }
     draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.height, fill: "transparent", Xfill: `url(#panel-pod)`, stroke: "black" });
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: "transparent", Xfill: `url(#panel-pod)`, stroke: "black" });
       this.main.el.appendChild(this.el);
     }
   };
@@ -3723,21 +3737,21 @@
       super(setup);
       this.el = svg.g({ "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` });
       setup.main = this;
-      const caption = new Caption({ ...setup, name: "caption bar", height: 64 });
+      const caption = new Caption({ ...setup, name: "caption bar", size: 64 });
       this.append(caption);
       const replyPod = new Pod({ ...setup, name: "output pod", data: setup.node.Reply });
       this.append(replyPod);
       const inputPod = new Pod({ ...setup, name: "input pod", data: setup.node.Input });
       this.append(inputPod);
-      this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.height, fill: this.node.backgroundColor, stroke: "black" });
+      this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
       this.el.appendChild(this.backgroundRectangle);
-      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.height));
-      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.height));
-      this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.height));
-      this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.height));
+      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Reply.observe("created", (v) => this.node.nodeHeight = this.size));
+      this.wipe(this.node.Reply.observe("removed", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.observe("horizontalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
       this.wipe(this.node.observe("verticalPosition", (v) => update(this.el, { "transform": `translate(${this.node.horizontalPosition}, ${this.node.verticalPosition})` })));
-      this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { height: v })));
+      this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { size: v })));
       this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
       this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
     }
@@ -3939,8 +3953,8 @@
 
   // src/views/ViewCollection.js
   var ViewCollection = class extends SimpleCollection {
-    instantiate(id, element) {
-      const view = new View(id, element);
+    instantiate(...arg) {
+      const view = new View(...arg);
       return view;
     }
   };
@@ -4006,17 +4020,16 @@
     application;
     #id;
     #type;
-    #state;
     #unsubscribe = [];
-    Input = new IncomingCollection();
-    Reply = new OutgoingCollection();
-    constructor(id, type, state = {}) {
+    Input = new InputCollection();
+    Reply = new ReplyCollection();
+    constructor({ id, type }) {
       super();
       if (!type)
         throw new Error("You must initialize a node with a known type");
       this.#id = id || v4_default();
       this.#type = type;
-      const defaults = {
+      const props = {
         backgroundColor: (0, import_oneof2.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
         // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
         horizontalPosition: 1e4 * Math.random(),
@@ -4025,8 +4038,7 @@
         nodeHeight: 32,
         depthLevel: 0
       };
-      this.#state = Object.assign({}, state, defaults);
-      Object.entries(this.#state).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     get id() {
       return this.#id;
@@ -4053,12 +4065,16 @@
     stop() {
       this.#unsubscribe.map((o) => o());
     }
+    async output() {
+      console.log("TODO: produce output from Reply/output");
+      return null;
+    }
   };
 
   // src/nodes/NodeCollection.js
   var NodeCollection = class extends SimpleCollection {
-    instantiate(id, type) {
-      const node = new Node(id, type);
+    instantiate(...arg) {
+      const node = new Node(...arg);
       return node;
     }
   };
@@ -4077,12 +4093,14 @@
     }
     start() {
     }
+    stop() {
+    }
   };
 
   // src/edges/EdgeCollection.js
   var EdgeCollection = class extends SimpleCollection {
-    instantiate(id, type) {
-      const edge = new Edge(id, type);
+    instantiate(...arg) {
+      const edge = new Edge(...arg);
       return edge;
     }
   };
@@ -4203,7 +4221,7 @@
     Edges;
     constructor() {
       super();
-      this.Dream = new Dream(this);
+      this.Dream = new DreamInterface(this);
       this.Theme = new MidnightTheme(this);
       this.Types = new TypeCollection(this);
       this.Views = new ViewCollection(this);
@@ -4253,20 +4271,27 @@
     textType.Input.create("separator", { type: "string", description: "separator to use" });
   }
 
+  // src/usage.js
+  async function usage_default(app2) {
+    const stringA = app2.addNode("text/string", { value: "a" });
+    const stringB = app2.addNode("text/string", { value: "b" });
+    const arrayJn = app2.addNode("array/join");
+    app2.linkPorts(stringA, arrayJn);
+    app2.linkPorts(stringB, arrayJn);
+    const result = await app2.run(arrayJn);
+    console.log("usage.js app.run said: ", result);
+    const actual = JSON.stringify(result);
+    const expect = JSON.stringify(["a", "b"]);
+    console.assert(actual == expect, `./src/usage.js: Yay! the program failed to run correctly, expected ${expect} but got "${actual}" instead.`);
+  }
+
   // src/craft.js
   var brain = new Brain();
   globalThis.signalcraft = brain;
+  registerTypes_default(brain);
   brain.Views.create("view-1", document.querySelector(".signalcraft-view-1"));
   brain.Views.create("view-2", document.querySelector(".signalcraft-view-2"));
-  registerTypes_default(brain);
   brain.start();
-  for (let i = 0; i < 100; i++) {
-    if (Math.random() < 0.3) {
-      brain.Nodes.create(v4_default(), "text/string");
-    } else if (Math.random() < 0.6) {
-      brain.Nodes.create(v4_default(), "text/case");
-    } else {
-      brain.Nodes.create(v4_default(), "text/color");
-    }
-  }
+  var app = brain.Dream;
+  usage_default(app);
 })();

@@ -5,7 +5,7 @@ import calculatePercent from 'calculate-percent';
 import Panel from '../panel/Panel.js';
 import Cable from '../cable/Cable.js';
 
-import NodeRenderer from './NodeRenderer.js';
+// import NodeRenderer from './NodeRenderer.js';
 
 export default class View {
   application;

@@ -3,8 +3,8 @@ import SimpleCollection from '../setup/SimpleCollection.js';
 
 export default class NodeCollection extends SimpleCollection {
 
-  instantiate(id, type){
-    const node = new Node(id, type);
+  instantiate(...arg){
+    const node = new Node(...arg);
     return node;
   }
 

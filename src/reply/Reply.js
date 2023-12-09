@@ -1,4 +1,4 @@
-export default class Outgoing {
+export default class Reply {
   direction = "out"
   #id;
   #format;

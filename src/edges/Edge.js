@@ -13,10 +13,9 @@ export default class Edge {
   }
 
   start(){
-    // const div = document.createElement("div");
-    // const txt = document.createTextNode(`HELLO: ${this.#name}`);
-    // div.appendChild(txt);
-    // this.#element.appendChild(div);
+  }
+
+  stop(){
   }
 
 }
