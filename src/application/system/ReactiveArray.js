@@ -1,24 +1,19 @@
-import cloneDeep from 'lodash/cloneDeep';
 
-export default class SimpleCollection {
-  #application;
-  #content = [];
+export default class ReactiveArray {
+  #auto; // auto call .start() on all items
+  #root;
+  #Item = [];
 
-  constructor(application) {
-    this.#application = application;
+  constructor({root, Item, boot}) {
+    if (!root) throw new TypeError("root is required");
+    if (!Item) throw new TypeError("Item is required");
+    this.#auto = !!auto;
+    this.#root = root;
+    this.#Item = Item;
   }
 
   size(){
     return this.#content.filter(item=>!item.deleted).length;
-  }
-
-  import(data){
-    this.#content = data;
-  }
-
-  export(){
-    return this.#content;
-    // return cloneDeep(this.#content)
   }
 
   forEach(callback) {
@@ -26,13 +21,15 @@ export default class SimpleCollection {
   }
 
   create(...argv) {
-    const item = this.instantiate(...argv);
+    const item = new this.#Item({...arg, root:this.#root});
     this.#content.push(item);
-    item.application = this.#application;
-    if (item.start) item.start();
+
+    if (this.#auto && item.start) item.start();
+
     this.#notify("created", { item });
     return item;
   }
+
 
   remove(id) {
     const item = this.#content.find((item) => item.id === id);
@@ -74,8 +71,7 @@ export default class SimpleCollection {
 
   subscribe(eventName, observer) {
     // Ensure that observer is a function
-    if (typeof observer !== "function")
-      throw new TypeError("Observer must be a function.");
+    if (typeof observer !== "function") throw new TypeError("Observer must be a function.");
     // If there isn't an observers array for this key yet, create it
     if (!Array.isArray(this.#observers[eventName]))
       this.#observers[eventName] = [];
@@ -91,6 +87,19 @@ export default class SimpleCollection {
     );
   }
 
-  // USER INTERFACE
-  instantiate() {}
+  // Lifecycle
+
+  start(auto=true) {
+    this.#auto = auto; // start all from now on
+    this.#content
+      .forEach(item=>item.start());
+  }
+
+  stop(auto=false) {
+    this.#auto = auto; // do not autostart
+    this.#content
+      .filter((item) => !item.deleted)
+      .forEach(item=>item.stop());
+  }
+
 }

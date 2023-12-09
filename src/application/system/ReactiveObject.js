@@ -1,4 +1,4 @@
-export default class NodeReactivity {
+export default class ReactiveObject {
   #monitors = {};
   #observers = {};
 

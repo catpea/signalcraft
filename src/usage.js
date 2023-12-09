@@ -1,7 +1,18 @@
-
 // Hello user, you are provided a simple app object
 // see src/dream/DreamInterface.js for functions - this is all you need to know.
+
+  //                  use the app object, just the app object
+  //                           |
+  //                           v
 export default async function(app){
+  //                           |
+  //                           |        .loadFile() .saveFile()
+  //                           |        .addNode() ............................. type and value
+  //                           |        .linkPorts() ........................... source taget input/output ports presumed
+  //                           |        .run()
+  //                           v
+
+  console.info(Object.keys(app));
 
   // define your components
   const stringA = app.addNode("text/string", {value: "a"} );

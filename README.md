@@ -1,39 +1,6 @@
 # signalcraft
 A tiny visual programming language.
-
-## Building
-npm install --save-exact --save-dev esbuild
-
-## Sub Systems
-
-- ```Brain.js``` main class
-- ```craft.js``` instantiation of main class
-  - ```tasks```: boot up the system
-- ```usage.js``` just the part that the user should see, so that they don't get confused
-
-### Core
-
-- ```brain```: main application stuff
-  - ```dream```: API for the user
-  - ```setup```: core data structures
-  - ```theme```: theme setup
-  - ```views```: GUI, this is where the GUI gets booted up
-
-### Data
-
-- ```types```: node types, or node definition
-- ```panel```: visual (SVG) representation of a node
-  - ```nodes```: how the apps are made
-    - ```input```: these are the data objects that represent properties that the user can plug into
-    - ```reply```: data objects the user can connect to input of anoter node
-- ```cable```: visual (SVG) representation of an edge
-  - ```edges```: Objects that connect nodes
-
-### Util
-
-- ```domek```: DOM helper that does set attribute for us
-- ```tools```: development tools
-
+ 
 ## How It Works
 
 - you define node types first
@@ -63,6 +30,9 @@ npm install --save-exact --save-dev esbuild
 - Paint edges
 - Add Drag & Drop
 - Add Selection Manager (maybe groups)
+
+## Building
+npm install --save-exact --save-dev esbuild
 
 ### Design Ideas
 
