@@ -8,7 +8,7 @@ import Type from './model/Type.js';
 import Node from './model/Node.js';
 import Input from './model/node/Input.js';
 import Output from './model/node/Output.js';
-import Edge from './model/Edge.js';
+import Link from './model/Link.js';
 import View from './ui/View.js';
 
 export default class Brain extends ReactiveObject {
@@ -21,31 +21,11 @@ export default class Brain extends ReactiveObject {
   Views; // Node UI
   Dream; // User API
 
-  // All the classes used throughout the system are stored here
-  Object = {
-    // Basics
-    ReactiveArray,
-    ReactiveObject,
-
-    // Installation
-    Type,
-
-    // Data Structure
-    Node,
-      Input,
-      Output,
-    Edge,
-
-    // Rendering Of Data Structure
-    View,
-
-  };
-
   constructor() {
     super();
     this.Types = new ReactiveArray({application:this, Item:Type, auto:false }); // This is where node library resides
     this.Nodes = new ReactiveArray({application:this, Item:Node, auto:true }); // all nodes the user is working with
-    this.Links = new ReactiveArray({application:this, Item:Edge, auto:true }); // all links (edges) that connect nodes
+    this.Links = new ReactiveArray({application:this, Item:Link, auto:true }); // all links (edges) that connect nodes
     this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
     this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
     this.Theme = new UserTheme(this); // Theme Of Choice

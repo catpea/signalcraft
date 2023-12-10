@@ -2114,26 +2114,20 @@
     }
   };
 
-  // src/application/model/Edge.js
+  // src/application/model/Link.js
   var Edge = class extends ReactiveObject {
-    #application;
+    application;
     #unsubscribe = [];
     constructor({ application: application2, id, type, sourceNode, targetNode, sourcePort, targetPort }) {
       super();
-      this.#application = application2;
+      this.application = application2;
       const props = {
         id: id || v4_default(),
         type,
-        // source,target, // these are port ID numbers
         sourceNode,
         targetNode,
         sourcePort,
         targetPort,
-        // sourceNode,
-        // replyPort,
-        //
-        // targetNode,
-        // inputPort,
         backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
         x1: 1e4 * Math.random(),
         y1: 8e3 * Math.random(),
@@ -2158,7 +2152,7 @@
   // src/application/ui/view/Panel.js
   var import_oneof3 = __toESM(require_oneof(), 1);
 
-  // src/application/ui/view/panel/tools/domek.js
+  // src/application/ui/view/tools/domek.js
   var svg = new Proxy({}, {
     get: function(target, property) {
       return function(properties) {
@@ -2383,6 +2377,50 @@
     }
   };
 
+  // src/application/ui/view/Cable.js
+  var Cable = class {
+    #application;
+    #wipe = [];
+    #link;
+    #view;
+    #root;
+    #name;
+    #size;
+    #main;
+    #home;
+    #padd;
+    constructor(setup) {
+      this.#application = setup.link.application;
+      this.#link = setup.link;
+      this.#view = setup.view;
+      this.#root = setup.root;
+      this.#name = setup.name;
+      this.#size = setup.size;
+      this.#main = setup.main;
+      this.#home = setup.home;
+      this.#padd = setup.padd;
+      const sourceNode = this.#application.Nodes.find((node) => node.id == this.#link.sourceNode);
+      const sourcePort = sourceNode.Output.find((port) => port.id == this.#link.sourcePort);
+      const targetNode = this.#application.Nodes.find((node) => node.id == this.#link.targetNode);
+      const targetPort = targetNode.Input.find((port) => port.id == this.#link.targetPort);
+      let x1 = sourceNode.x + sourcePort.x;
+      let y1 = sourceNode.y + sourcePort.y;
+      let x2 = targetNode.x + targetPort.x;
+      let y2 = targetNode.y + targetPort.y;
+      this.el = svg.line({ x1, y1, x2, y2, stroke: "white" });
+      console.log("TODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)");
+    }
+    start() {
+    }
+    stop() {
+      this.el.remove();
+      this.#wipe.map((x) => x());
+    }
+    wipe(...arg) {
+      this.#wipe.push(...arg);
+    }
+  };
+
   // src/application/ui/View.js
   var View = class {
     application;
@@ -2403,11 +2441,16 @@
       this.#scene = this.#installScene();
       (0, import_panzoom.default)(this.#scene, { smoothScroll: false });
       this.application.Nodes.forEach((node) => this.#createPanel(node));
+      this.application.Links.forEach((node) => this.#createCable(node));
       const grandCentral = {
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
         "Nodes created ...": this.#createPanel,
         //   NOTE:
-        "Nodes deleted ...": this.#deletePanel
+        "Nodes deleted ...": this.#deletePanel,
+        //   the node updates it self, here we only ensure it exists, or is removed as needed
+        "Links created ...": this.#createCable,
+        //   NOTE:
+        "Links deleted ...": this.#deleteCable
         //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
       const unintegrate = this.application.integrate(this, grandCentral);
@@ -2556,6 +2599,15 @@
       this.#scene.appendChild(panel.el);
       panel.start();
     }
+    #deleteCable({ item }) {
+      this.#renderers.get(item.id).stop();
+    }
+    #createCable({ item }) {
+      const cable = new Cable({ link: item, view: this, root: this.#scene, name: "cable", size: 3 });
+      this.#renderers.set(item.id, cable);
+      this.#scene.appendChild(cable.el);
+      cable.start();
+    }
   };
 
   // src/application/Application.js
@@ -2574,21 +2626,6 @@
     // Node UI
     Dream;
     // User API
-    // All the classes used throughout the system are stored here
-    Object = {
-      // Basics
-      ReactiveArray,
-      ReactiveObject,
-      // Installation
-      Type,
-      // Data Structure
-      Node,
-      Input,
-      Output,
-      Edge,
-      // Rendering Of Data Structure
-      View
-    };
     constructor() {
       super();
       this.Types = new ReactiveArray({ application: this, Item: Type, auto: false });

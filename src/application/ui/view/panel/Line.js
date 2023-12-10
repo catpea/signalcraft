@@ -1,6 +1,6 @@
 import oneOf from "oneof";
 
-import { html, svg, text, list, update } from "./tools/domek.js";
+import { html, svg, text, list, update } from "../tools/domek.js";
 import Component from "./base/Component.js";
 
 export default class Line extends Component {

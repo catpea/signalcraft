@@ -1,8 +1,7 @@
 import oneOf from "oneof";
-import { html, svg, text, list, update } from "./panel/tools/domek.js";
+import { html, svg, text, list, update } from "./tools/domek.js";
 
 import Component from "./panel/base/Component.js";
-
 import Caption from "./panel/Caption.js";
 import Pod from "./panel/Pod.js";
 

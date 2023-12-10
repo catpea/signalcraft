@@ -2,12 +2,12 @@ import { v4 as uuid } from "uuid";
 import ReactiveObject from "../system/ReactiveObject.js";
 
 export default class Edge extends ReactiveObject {
-  #application;
+  application;
   #unsubscribe = [];
 
   constructor({application, id, type, sourceNode, targetNode, sourcePort, targetPort }){
     super();
-    this.#application = application;
+    this.application = application;
 
     //NOTE: once nodes are added to the system the x and y of edges are already calculated (sans the transformation).
 
@@ -15,18 +15,11 @@ export default class Edge extends ReactiveObject {
       id:id||uuid(),
 
       type,
-      // source,target, // these are port ID numbers
 
       sourceNode,
       targetNode,
       sourcePort,
       targetPort,
-
-      // sourceNode,
-      // replyPort,
-      //
-      // targetNode,
-      // inputPort,
 
       backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
 

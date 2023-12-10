@@ -36,12 +36,18 @@ export default class View {
 
     // setup all th einstances of nodes
     this.application.Nodes.forEach( node=>this.#createPanel(node) );
+    this.application.Links.forEach( node=>this.#createCable(node) ); // reminder: Links contain strings with IDs of sourceNode, targetNode, sourcePort, targetPort,
 
     // ...and keep an eye on changes
     const grandCentral = {
       "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
+
       'Nodes created ...': this.#createPanel, //   NOTE:
       'Nodes deleted ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
+      'Links created ...': this.#createCable, //   NOTE:
+      'Links deleted ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
+
+
     };
     const unintegrate = this.application.integrate(this, grandCentral);
     this.#unsubscribe.push(unintegrate);
@@ -219,12 +225,23 @@ export default class View {
   #deletePanel({ item }) {
     this.#renderers.get( item.id ).stop();
   }
-
   #createPanel({ item }) {
     const panel = new Panel({node: item, view:this, root:this.#scene, name:'main panel', padd: 3});
     this.#renderers.set( item.id, panel );
     this.#scene.appendChild(panel.el);
     panel.start();
+  }
+
+
+
+  #deleteCable({ item }) {
+    this.#renderers.get( item.id ).stop();
+  }
+  #createCable({ item }) {
+    const cable = new Cable({link: item, view:this, root:this.#scene, name:'cable', size: 3});
+    this.#renderers.set( item.id, cable );
+    this.#scene.appendChild(cable.el);
+    cable.start();
   }
 
 
