@@ -6,7 +6,18 @@ export default class Caption extends Component {
 
   constructor(setup) {
     super(setup, {size: 32});
-    this.el = svg.rect({ x:this.left, y:this.top, ry: 3, width: this.node.nodeWidth-(this.padd*2), height: this.size, fill: `url(#panel-caption)`, });
+    this.el = svg.rect({
+
+      class: `caption`,
+
+      x:this.left,
+      y:this.top,
+      ry: 3,
+
+      width: this.node.nodeWidth-(this.padd*2),
+      height: this.size,
+
+      fill: `url(#panel-caption)`, });
   }
   draw() {
     // console.log('Caption', this.top);

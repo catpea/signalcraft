@@ -34,6 +34,7 @@ export default class View {
     this.#svg = this.#installCanvas();
     this.#scene = this.#installScene();
     this.#panzoom = panzoom(this.#scene, {
+
       smoothScroll: false, // this is the sluggish post  scrolling effect
       transformOrigin: {x: 0.5, y: 0.5},
 
@@ -44,11 +45,8 @@ export default class View {
       initialZoom: .5,
 
       beforeMouseDown: function(e) {
-        // allow mouse-down panning only if altKey is down. Otherwise - ignore
-        var shouldIgnore = !e.altKey;
-        return shouldIgnore;
+        return !!e.target.classList.contains('caption');
       }
-
 
     });
 

@@ -2338,7 +2338,15 @@
     el;
     constructor(setup) {
       super(setup, { size: 32 });
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: `url(#panel-caption)` });
+      this.el = svg.rect({
+        class: `caption`,
+        x: this.left,
+        y: this.top,
+        ry: 3,
+        width: this.node.nodeWidth - this.padd * 2,
+        height: this.size,
+        fill: `url(#panel-caption)`
+      });
     }
     draw() {
       const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem; pointer-events: none;", fill: `url(#panel-text)` });
@@ -2508,8 +2516,7 @@
         initialY: 500,
         initialZoom: 0.5,
         beforeMouseDown: function(e) {
-          var shouldIgnore = !e.altKey;
-          return shouldIgnore;
+          return !!e.target.classList.contains("caption");
         }
       });
       this.#panzoom.on("transform", (e) => {

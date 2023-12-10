@@ -3,24 +3,23 @@ A tiny visual programming language.
 
 ## TODO
 
-    Property Editor (YAML First)
+- Property Editor (YAML First)
 
-    Add Drag & Drop
-    Cable To Port Dragging
+- Cable To Port Dragging
+- Cable Delete & Remove
 
-    Cable Delete & Remove
-    Remove Node w/t Cable Cleanup
+- Remove Node w/t Cable Clean-up
 
-    Update Theme + Multiple Themes
-    Input/Output Line where both I/O ports visually align for neat programs
+- Update Theme + Multiple Themes
+- Input/Output Line where both I/O ports visually align for neat programs
 
-    Alignment And Z-Order Tools
+- Alignment And Z-Order Tools
 
-    Scale Tracking For ZUI
-    ForeignObject in ZUI Mode
+- Scale Tracking For ZUI
+- ForeignObject in ZUI Mode
 
-    Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
-    Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
+- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
+- Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
 
 
 ## How It Works
