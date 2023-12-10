@@ -30,7 +30,7 @@ export default class Panel extends Component {
 
 
     const draggable = new Draggable({
-      container: setup.root, // <g> element representing an SVG scene
+      container: window, // <g> element representing an SVG scene
       draggable: this.el, // <g> element that contains the window
       handle: caption.el, // <rect> that is the caption of a window meant to be dragged
       node: this.node,

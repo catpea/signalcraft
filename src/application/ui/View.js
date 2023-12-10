@@ -222,8 +222,8 @@ export default class View {
     rect2.setAttributeNS(null, "class", "background");
     rect2.setAttributeNS(null, "x", "0");
     rect2.setAttributeNS(null, "y", "0");
-    rect2.setAttributeNS(null, "width", 1000);
-    rect2.setAttributeNS(null, "height", 1000);
+    rect2.setAttributeNS(null, "width", 11_000);
+    rect2.setAttributeNS(null, "height", 8_500);
     rect2.setAttributeNS(null, "fill", "url(#background-primary)");
     scene.appendChild(rect2);
 

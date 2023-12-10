@@ -2415,7 +2415,7 @@
       this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
       this.el.appendChild(this.backgroundRectangle);
       const draggable = new Draggable({
-        container: setup.root,
+        container: window,
         // <g> element representing an SVG scene
         draggable: this.el,
         // <g> element that contains the window
@@ -2654,8 +2654,8 @@
       rect2.setAttributeNS(null, "class", "background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
-      rect2.setAttributeNS(null, "width", 1e3);
-      rect2.setAttributeNS(null, "height", 1e3);
+      rect2.setAttributeNS(null, "width", 11e3);
+      rect2.setAttributeNS(null, "height", 8500);
       rect2.setAttributeNS(null, "fill", "url(#background-primary)");
       scene.appendChild(rect2);
       const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
