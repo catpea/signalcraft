@@ -2045,8 +2045,8 @@
         type,
         backgroundColor: (0, import_oneof.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
         // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-        x: 1e4 * Math.random(),
-        y: 8e3 * Math.random(),
+        x: 999 * Math.random(),
+        y: 999 * Math.random(),
         nodeWidth: 300,
         nodeHeight: 32,
         depthLevel: 0
@@ -2054,13 +2054,6 @@
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
-      const d = 133;
-      let intervalID = setInterval(() => {
-        this.depthLevel = Math.random() > 0.5 ? 1 : 0;
-        this.x = Math.random() > 0.5 ? this.x + d : this.x - d;
-        this.y = Math.random() > 0.5 ? this.y + d : this.y - d;
-        this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
-      }, 1e4 + 5e3 * Math.random());
     }
     stop() {
       this.#unsubscribe.map((o) => o());
@@ -2170,6 +2163,61 @@
   var update = function(el, properties) {
     for (const key in properties) {
       el.setAttributeNS(null, key, properties[key]);
+    }
+  };
+
+  // src/application/ui/view/tools/Draggable.js
+  var Draggable = class {
+    // Private Class Fields
+    #container;
+    #draggable;
+    #handle;
+    #mouseDownHandler;
+    #mouseMoveHandler;
+    #mouseUpHandler;
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    #scale;
+    #node;
+    constructor({ container, draggable, handle, scale, node }) {
+      this.#container = container;
+      this.#draggable = draggable;
+      this.#handle = handle;
+      this.#scale = scale;
+      this.#node = node;
+      this.#mouseDownHandler = (e) => {
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+        this.#dragging = true;
+        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#mouseMoveHandler = (e) => {
+        let dx = 0;
+        let dy = 0;
+        dx = e.clientX - this.#initialPosition.x;
+        dy = e.clientY - this.#initialPosition.y;
+        dx = dx + this.#node.x * this.#scale();
+        dy = dy + this.#node.y * this.#scale();
+        dx = dx / this.#scale();
+        dy = dy / this.#scale();
+        this.#node.x = dx;
+        this.#node.y = dy;
+        dx = 0;
+        dy = 0;
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+      };
+      this.#mouseUpHandler = (e) => {
+        this.#dragging = false;
+        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
     }
   };
 
@@ -2287,12 +2335,13 @@
 
   // src/application/ui/view/panel/Caption.js
   var Caption = class extends Component {
+    el;
     constructor(setup) {
       super(setup, { size: 32 });
+      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: `url(#panel-caption)` });
     }
     draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: `url(#panel-caption)` });
-      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
+      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem; pointer-events: none;", fill: `url(#panel-text)` });
       const cationText = document.createTextNode(this.node.type);
       captionNode.appendChild(cationText);
       this.main.el.appendChild(this.el);
@@ -2357,6 +2406,17 @@
       this.append(inputPod);
       this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
       this.el.appendChild(this.backgroundRectangle);
+      const draggable = new Draggable({
+        container: setup.root,
+        // <g> element representing an SVG scene
+        draggable: this.el,
+        // <g> element that contains the window
+        handle: caption.el,
+        // <rect> that is the caption of a window meant to be dragged
+        node: this.node,
+        // events
+        scale: (o) => setup.view.transform.scale
+      });
       this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Output.observe("created", (v) => this.node.nodeHeight = this.size));
@@ -2426,6 +2486,8 @@
     #element;
     #svg;
     #scene;
+    #panzoom;
+    #transform;
     #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
     constructor({ name, element, application: application2 }) {
@@ -2436,7 +2498,25 @@
     start() {
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
-      (0, import_panzoom.default)(this.#scene, { smoothScroll: false });
+      this.#panzoom = (0, import_panzoom.default)(this.#scene, {
+        smoothScroll: false,
+        // this is the sluggish post  scrolling effect
+        transformOrigin: { x: 0.5, y: 0.5 },
+        maxZoom: 10,
+        minZoom: 0.1,
+        initialX: 500,
+        initialY: 500,
+        initialZoom: 0.5,
+        beforeMouseDown: function(e) {
+          var shouldIgnore = !e.altKey;
+          return shouldIgnore;
+        }
+      });
+      this.#panzoom.on("transform", (e) => {
+        const { x, y, scale } = this.#panzoom.getTransform();
+        this.#transform = { x, y, scale };
+        console.log(`New transform:`, { x, y, scale });
+      });
       this.application.Nodes.forEach((node) => this.#createPanel(node));
       this.application.Links.forEach((node) => this.#createCable(node));
       const grandCentral = {
@@ -2460,7 +2540,7 @@
     #installCanvas() {
       const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg2.setAttributeNS(null, "width", "100%");
-      svg2.setAttributeNS(null, "height", "666");
+      svg2.setAttributeNS(null, "height", "1000");
       this.#element.appendChild(svg2);
       const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
       const gradientSpecification = {
@@ -2567,8 +2647,8 @@
       rect2.setAttributeNS(null, "class", "background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
-      rect2.setAttributeNS(null, "width", 11e3);
-      rect2.setAttributeNS(null, "height", 8e3);
+      rect2.setAttributeNS(null, "width", 1e3);
+      rect2.setAttributeNS(null, "height", 1e3);
       rect2.setAttributeNS(null, "fill", "url(#background-primary)");
       scene.appendChild(rect2);
       const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -2604,6 +2684,9 @@
       this.#renderers.set(item.id, cable);
       this.#scene.appendChild(cable.el);
       cable.start();
+    }
+    get transform() {
+      return this.#transform;
     }
   };
 

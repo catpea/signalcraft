@@ -15,6 +15,8 @@ export default class View {
   #element;
   #svg;
   #scene;
+  #panzoom;
+  #transform;
 
   #renderers = new Map();
 
@@ -31,7 +33,34 @@ export default class View {
     // setup the pre-requisites
     this.#svg = this.#installCanvas();
     this.#scene = this.#installScene();
-    panzoom(this.#scene, { smoothScroll: false });
+    this.#panzoom = panzoom(this.#scene, {
+      smoothScroll: false, // this is the sluggish post  scrolling effect
+      transformOrigin: {x: 0.5, y: 0.5},
+
+      maxZoom: 10,
+      minZoom: 0.1,
+      initialX: 500,
+      initialY: 500,
+      initialZoom: .5,
+
+      beforeMouseDown: function(e) {
+        // allow mouse-down panning only if altKey is down. Otherwise - ignore
+        var shouldIgnore = !e.altKey;
+        return shouldIgnore;
+      }
+
+
+    });
+
+
+    this.#panzoom.on('transform',  (e) =>{
+      const {x, y, scale} = this.#panzoom.getTransform();
+      this.#transform = {x, y, scale};
+      console.log(`New transform:`, {x, y, scale});
+    });
+
+    // this.#unsubscribe.push(this.#panzoom.dispose());
+
 
     // setup all th einstances of nodes
     this.application.Nodes.forEach( node=>this.#createPanel(node) );
@@ -61,7 +90,7 @@ export default class View {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     // svg.setAttributeNS(null, "style", "border: 1px solid gold;");
     svg.setAttributeNS(null, "width", "100%");
-    svg.setAttributeNS(null, "height", "666");
+    svg.setAttributeNS(null, "height", "1000");
 
     this.#element.appendChild(svg);
 
@@ -195,8 +224,8 @@ export default class View {
     rect2.setAttributeNS(null, "class", "background");
     rect2.setAttributeNS(null, "x", "0");
     rect2.setAttributeNS(null, "y", "0");
-    rect2.setAttributeNS(null, "width", 11_000);
-    rect2.setAttributeNS(null, "height", 8_000);
+    rect2.setAttributeNS(null, "width", 1000);
+    rect2.setAttributeNS(null, "height", 1000);
     rect2.setAttributeNS(null, "fill", "url(#background-primary)");
     scene.appendChild(rect2);
 
@@ -243,5 +272,7 @@ export default class View {
     cable.start();
   }
 
+
+  get transform(){return this.#transform;}
 
 }

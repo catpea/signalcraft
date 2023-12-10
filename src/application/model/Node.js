@@ -37,8 +37,8 @@ export default class Node extends ReactiveObject {
       id: id||uuid(),
       type,
       backgroundColor: oneOf([`url(#panel-primary)`,`url(#panel-secondary)`]), // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-      x: 10_000*Math.random(),
-      y: 8_000*Math.random(),
+      x: 999*Math.random(),
+      y: 999*Math.random(),
       nodeWidth: 300,
       nodeHeight: 32,
       depthLevel: 0,
@@ -49,13 +49,13 @@ export default class Node extends ReactiveObject {
   }
 
   start(){
-    const d = 133;
-    let intervalID = setInterval(() => {
-      this.depthLevel = Math.random() > 0.5 ? 1 : 0;
-      this.x = Math.random() > 0.5 ? this.x + d : this.x - d;
-      this.y = Math.random() > 0.5 ? this.y + d : this.y - d;
-      this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
-    }, 10_000+(5_000*Math.random()) );
+    // const d = 133;
+    // let intervalID = setInterval(() => {
+    //   this.depthLevel = Math.random() > 0.5 ? 1 : 0;
+    //   this.x = Math.random() > 0.5 ? this.x + d : this.x - d;
+    //   this.y = Math.random() > 0.5 ? this.y + d : this.y - d;
+    //   this.backgroundColor = `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`;
+    // }, 10_000+(5_000*Math.random()) );
   }
 
   stop() {
