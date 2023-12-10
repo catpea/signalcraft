@@ -12,7 +12,6 @@ export default class Input extends ReactiveObject {
     super();
     this.application = configuration.application;
     this.parent = configuration.parent;
-
     this.#configuration = configuration;
     const defaults = {
       id:uuid(),

@@ -13,7 +13,6 @@ export default class Output extends ReactiveObject {
     super();
     this.application = configuration.application;
     this.parent = configuration.parent;
-console.log('configuration',configuration);
     this.#configuration = configuration;
     const defaults = {
       id:uuid(),

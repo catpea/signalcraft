@@ -13,7 +13,6 @@ application.Views.create({name:'view-2', element:document.querySelector('.signal
 
 // start application
 application.start();
-console.info('Do not forget to start the application.');
 
 // we hide eveything from the user now
 const api = application.Dream;

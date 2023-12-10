@@ -1992,7 +1992,6 @@
       super();
       this.application = configuration.application;
       this.parent = configuration.parent;
-      console.log("configuration", configuration);
       this.#configuration = configuration;
       const defaults = {
         id: v4_default(),
@@ -2033,7 +2032,6 @@
       this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
       this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
       const archetype = application2.Types.find((o) => o.type == type);
-      console.log(application2.Types.dump());
       if (!archetype)
         throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
       archetype.input.forEach((o) => {
@@ -2042,7 +2040,6 @@
       archetype.output.forEach((o) => {
         this.Output.create(o);
       });
-      console.log("GG", archetype, type);
       const props = {
         id: id || v4_default(),
         type,
@@ -2101,14 +2098,12 @@
       return response;
     }
     async execute(port) {
-      console.log("TODO: produce output from Output");
       const output2 = this.Output.find((item) => item.name == port);
       if (!output2)
         console.log(this);
       ;
       if (!output2)
         throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
-      console.log({ output: output2 });
       const response = await output2.generator({ ...await this.#upstream(), value: output2.value });
       return response;
     }
@@ -2352,7 +2347,6 @@
   var Panel = class extends Component {
     constructor(setup) {
       super(setup);
-      console.log(setup);
       this.el = svg.g({ "transform": `translate(${this.node.x}, ${this.node.y})` });
       setup.main = this;
       const caption = new Caption({ ...setup, name: "caption bar", size: 64 });
@@ -2408,7 +2402,7 @@
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
       this.el = svg.line({ x1, y1, x2, y2, stroke: "white" });
-      console.log("TODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)");
+      console.log("%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)", "color: gold; background: red;");
     }
     start() {
     }
@@ -2431,7 +2425,6 @@
     #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
     constructor({ name, element, application: application2 }) {
-      console.log({ name, element });
       this.#name = name;
       this.#element = element;
       this.application = application2;
@@ -2706,7 +2699,6 @@
 
   // src/usage.js
   async function usage_default(api2) {
-    console.info(Object.keys(api2));
     const stringA = api2.addNode("text/string", { string: "Hello" });
     const stringB = api2.addNode("text/string", { string: "World" });
     const arrayJn = api2.addNode("array/join");
@@ -2725,7 +2717,6 @@
   application.Views.create({ name: "view-1", element: document.querySelector(".signalcraft-view-1") });
   application.Views.create({ name: "view-2", element: document.querySelector(".signalcraft-view-2") });
   application.start();
-  console.info("Do not forget to start the application.");
   var api = application.Dream;
   usage_default(api);
 })();

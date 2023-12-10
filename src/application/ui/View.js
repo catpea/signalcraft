@@ -21,7 +21,6 @@ export default class View {
   #unsubscribe = [];
 
   constructor({name, element, application}) {
-    console.log({ name, element });
     this.#name = name;
     this.#element = element;
     this.application = application;

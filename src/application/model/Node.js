@@ -29,11 +29,9 @@ export default class Node extends ReactiveObject {
 
     //NOTE: archetype is not a reactive object, same for archetype's .input and .reply
     const archetype = application.Types.find(o=>o.type==type);
-    console.log(application.Types.dump());
     if(!archetype) throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
     archetype.input.forEach(o=>{ this.Input.create(o) })
     archetype.output.forEach(o=>{ this.Output.create(o) })
-    console.log('GG', archetype, type);
     const props = {
 
       id: id||uuid(),
@@ -78,10 +76,7 @@ export default class Node extends ReactiveObject {
     for (const localPort of this.Input) {
       // NOTE: edges do not link nodes, they link ports
       // NOTE: there can be multiple reply ports pointing to the input port, therefore array is used
-
       response[localPort.name] = [];
-
-
       // find links that have target set to inputProperty.id
       const incomingLinks = this.#application.Links.filter(remoteLink=>remoteLink.targetPort==localPort.id);
       const nothingConnected = incomingLinks.length == 0;
@@ -107,11 +102,9 @@ export default class Node extends ReactiveObject {
   }
 
   async execute(port){
-    console.log('TODO: produce output from Output');
     const output = this.Output.find(item=>item.name==port);
     if(!output) console.log(this);;
     if(!output) throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
-    console.log({output});
     const response = await output.generator({...await this.#upstream(), value: output.value})
     return response;
   }

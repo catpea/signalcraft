@@ -42,7 +42,7 @@ export default class Cable {
 
     this.el = svg.line({ x1, y1, x2, y2, stroke: "white"});
 
-    console.log('TODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)');
+    console.log('%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)', "color: gold; background: red;");
 
     // this.backgroundRectangle = svg.rect({ class: 'interactive', filter: `url(#shadow-primary)` , ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: 'black', });
     // this.el.appendChild( this.backgroundRectangle )

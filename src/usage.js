@@ -12,8 +12,6 @@ export default async function(api){
   //                           |        .run()
   //                           v
 
-  console.info(Object.keys(api));
-
   // define your components
   const stringA = api.addNode("text/string", { string: "Hello" } );
   const stringB = api.addNode("text/string", { string: "World" } );
