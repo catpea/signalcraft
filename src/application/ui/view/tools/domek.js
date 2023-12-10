@@ -43,7 +43,7 @@ const text = function(){}
 
 const update = function(el, properties){
   for (const key in properties) {
-    el.setAttribute(key, properties[key]);
+    el.setAttributeNS(null, key, properties[key]);
   }
 
 }

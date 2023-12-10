@@ -2169,7 +2169,7 @@
   });
   var update = function(el, properties) {
     for (const key in properties) {
-      el.setAttribute(key, properties[key]);
+      el.setAttributeNS(null, key, properties[key]);
     }
   };
 
@@ -2374,7 +2374,7 @@
   // src/application/ui/view/Cable.js
   var Cable = class {
     #application;
-    #wipe = [];
+    #cleanup = [];
     #link;
     #view;
     #root;
@@ -2402,16 +2402,20 @@
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
       this.el = svg.line({ x1, y1, x2, y2, stroke: "white" });
-      console.log("%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)", "color: gold; background: red;");
+      this.#cleanup.push(sourceNode.observe("x", (v) => update(this.el, { x1: v + sourcePort.x })));
+      this.#cleanup.push(sourceNode.observe("y", (v) => update(this.el, { y1: v + sourcePort.y })));
+      this.#cleanup.push(targetNode.observe("x", (v) => update(this.el, { x2: v + targetPort.x })));
+      this.#cleanup.push(targetNode.observe("y", (v) => update(this.el, { y2: v + targetPort.y })));
+      this.#cleanup.push(sourcePort.observe("x", (v) => update(this.el, { x1: sourceNode.x + v })));
+      this.#cleanup.push(sourcePort.observe("y", (v) => update(this.el, { y1: sourceNode.y + v })));
+      this.#cleanup.push(targetPort.observe("x", (v) => update(this.el, { x2: targetNode.x + v })));
+      this.#cleanup.push(targetPort.observe("y", (v) => update(this.el, { y2: targetNode.y + v })));
     }
     start() {
     }
     stop() {
       this.el.remove();
-      this.#wipe.map((x) => x());
-    }
-    wipe(...arg) {
-      this.#wipe.push(...arg);
+      this.#cleanup.map((x) => x());
     }
   };
 

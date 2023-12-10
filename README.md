@@ -1,6 +1,6 @@
 # signalcraft
 A tiny visual programming language.
- 
+
 ## How It Works
 
 - you define node types first
@@ -21,15 +21,18 @@ A tiny visual programming language.
 
 ## TODO
 
-- INput/Reply must be reactive as they will give cable its x and y
-- CRITICAL: SimpleCollection.export needs to make proper copies,
-
-- use Krita to create system diagram
-- implement cables/wires
-- cables should be type sensitive numbers, strings, objects
-- Paint edges
+- Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
 - Add Drag & Drop
-- Add Selection Manager (maybe groups)
+- Cable To Port Dragging
+- Cable Delete & Remove
+- Alignment And Z-Order Tools
+- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
+- Update Theme + Multiple Themes
+- Remove Node w/t Cable Cleanup
+- Input/Output Line where both I/O ports visially align for neat programs
+- Property Editor (YAML First)
+- Scale Tracking For ZUI
+- ForeignObject in ZUI Mode
 
 ## Building
 npm install --save-exact --save-dev esbuild

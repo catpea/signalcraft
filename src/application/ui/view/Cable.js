@@ -3,7 +3,7 @@ import { html, svg, text, list, update } from "./tools/domek.js";
 export default class Cable {
   #application;
 
-  #wipe = [];
+  #cleanup = [];
   #link;
   #view;
   #root;
@@ -26,9 +26,6 @@ export default class Cable {
     this.#home = setup.home;
     this.#padd = setup.padd;
 
-    //'transform': `translate(${this.node.x}, ${this.node.y})`,
-
-    // const { sourceNode:sourceNodeId, targetNode:targetNodeId, sourcePort:sourcePortId, targetPort:targetPortId } = this.#link;
     const sourceNode = this.#application.Nodes.find(node=>node.id == this.#link.sourceNode);
     const sourcePort = sourceNode.Output.find(port=>port.id==this.#link.sourcePort);
     const targetNode = this.#application.Nodes.find(node=>node.id == this.#link.targetNode);
@@ -36,44 +33,31 @@ export default class Cable {
 
     let x1 = sourceNode.x + sourcePort.x;
     let y1 = sourceNode.y + sourcePort.y;
-
     let x2 = targetNode.x + targetPort.x;
     let y2 = targetNode.y + targetPort.y;
 
     this.el = svg.line({ x1, y1, x2, y2, stroke: "white"});
 
-    console.log('%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)', "color: gold; background: red;");
+    this.#cleanup.push(      sourceNode.observe('x',      (v)=>update(this.el, { x1:v+sourcePort.x }))     );
+    this.#cleanup.push(      sourceNode.observe('y',      (v)=>update(this.el, { y1:v+sourcePort.y }))     );
+    this.#cleanup.push(      targetNode.observe('x',      (v)=>update(this.el, { x2:v+targetPort.x }))     );
+    this.#cleanup.push(      targetNode.observe('y',      (v)=>update(this.el, { y2:v+targetPort.y }))     );
 
-    // this.backgroundRectangle = svg.rect({ class: 'interactive', filter: `url(#shadow-primary)` , ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: 'black', });
-    // this.el.appendChild( this.backgroundRectangle )
+    // This is untested, adding ports live was advanced functionality untested at development.
+    this.#cleanup.push(      sourcePort.observe('x',      (v)=>update(this.el, { x1:sourceNode.x+v }))     );
+    this.#cleanup.push(      sourcePort.observe('y',      (v)=>update(this.el, { y1:sourceNode.y+v }))     );
+    this.#cleanup.push(      targetPort.observe('x',      (v)=>update(this.el, { x2:targetNode.x+v }))     );
+    this.#cleanup.push(      targetPort.observe('y',      (v)=>update(this.el, { y2:targetNode.y+v }))     );
 
-    // PLEASE NOTE the .observe will trigger instantly upon subscription to reliably deliver the value.
-    // this.wipe(      this.node.observe('x',      (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
-    // this.wipe(      this.node.observe('y',        (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
-    //
-
-    // // PLEASE NOTE THAT THIS WRITES TO THE NODE, after measuring the rectangle size
-    // this.wipe(      this.node.Input.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
-    // this.wipe(      this.node.Input.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
-    //
-    // this.wipe(      this.node.Output.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
-    // this.wipe(      this.node.Output.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
-
-
-
+    // console.log('%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)', "color: gold; background: red;");
   }
 
   start() {
-   // this.#list.map( o => o.start() )
   }
 
   stop() {
     this.el.remove()
-    this.#wipe.map(x=>x());
-  }
-
-  wipe(...arg){
-    this.#wipe.push(...arg);
+    this.#cleanup.map(x=>x());
   }
 
 }
