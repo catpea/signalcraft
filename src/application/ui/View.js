@@ -46,7 +46,10 @@ export default class View {
       initialZoom: .5,
 
       beforeMouseDown: function(e) {
-        return !!e.target.classList.contains('caption');
+        // console.log( e.target );
+        if(e.target.classList.contains('caption')) return true;
+        if(e.target.classList.contains('ant-trail')) return true;
+        if(e.target.classList.contains('port')) return true;
       }
 
     });

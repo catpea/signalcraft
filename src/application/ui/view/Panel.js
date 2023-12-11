@@ -37,7 +37,9 @@ export default class Panel extends Component {
       // events
       scale: o => setup.view.transform.scale,
     });
-    // later draggable.stop(); // to remove all event listeners
+
+    this.wipe( draggable.stop );
+
 
     // PLEASE NOTE THAT THIS WRITES TO THE NODE, after measuring the rectangle size
     this.wipe(      this.node.Input.observe('created', (v)=>this.node.nodeHeight = this.size   )  );

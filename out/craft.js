@@ -2256,6 +2256,9 @@
     get isRoot() {
       return this.#home == null;
     }
+    get view() {
+      return this.#view;
+    }
     get name() {
       return this.#name;
     }
@@ -2359,6 +2362,84 @@
 
   // src/application/ui/view/panel/Line.js
   var import_oneof2 = __toESM(require_oneof(), 1);
+
+  // src/application/ui/view/panel/base/DraggableConnector.js
+  var DraggableConnector = class {
+    // Private Class Fields
+    #container;
+    #draggable;
+    #handle;
+    #mouseDownHandler;
+    #mouseMoveHandler;
+    #mouseUpHandler;
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    #scale;
+    #node;
+    #line;
+    #data;
+    #main;
+    constructor({ container, draggable, handle, scale, node, data, main }) {
+      this.#data = data;
+      this.#main = main;
+      this.#container = container;
+      this.#draggable = draggable;
+      this.#handle = handle;
+      this.#scale = scale;
+      this.#node = node;
+      this.#mouseDownHandler = (e) => {
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+        this.#dragging = true;
+        console.log("this.#dragging");
+        this.#line = svg.line({
+          class: "ant-trail",
+          stroke: "green",
+          fill: "transparent",
+          "stroke-width": 2,
+          "vector-effect": "non-scaling-stroke"
+        });
+        this.#main.el.appendChild(this.#line);
+        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#mouseMoveHandler = (e) => {
+        let dx = 0;
+        let dy = 0;
+        dx = e.clientX - this.#initialPosition.x;
+        dy = e.clientY - this.#initialPosition.y;
+        dx = dx + this.#data.x * this.#scale();
+        dy = dy + this.#data.y * this.#scale();
+        dx = dx / this.#scale();
+        dy = dy / this.#scale();
+        const geometry = {
+          x1: this.#data.x,
+          y1: this.#data.y,
+          x2: dx,
+          y2: dy
+        };
+        update(this.#line, geometry);
+        console.log(this.#line);
+        console.log(geometry);
+        dx = 0;
+        dy = 0;
+      };
+      this.#mouseUpHandler = (e) => {
+        this.#dragging = false;
+        if (this.#line)
+          this.#line.remove();
+        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
+  // src/application/ui/view/panel/Line.js
   var Line = class extends Component {
     constructor(setup) {
       super(setup, { size: 32 });
@@ -2372,19 +2453,36 @@
         const y = this.top + this.size / 2;
         this.data.x = x;
         this.data.y = y;
-        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        port = svg.circle({ class: "port", cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       } else {
         const x = this.width + 10;
         const y = this.top + this.size / 2;
         this.data.x = x;
         this.data.y = y;
-        port = svg.circle({ cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        port = svg.circle({ class: "port", cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       }
       const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
       const cationText = document.createTextNode(this.data.name);
       captionNode.appendChild(cationText);
       this.main.el.appendChild(captionNode);
       this.main.el.appendChild(port);
+      this.makeInteractive(port);
+    }
+    makeInteractive(port) {
+      const draggable = new DraggableConnector({
+        container: window,
+        // <g> element representing an SVG scene
+        draggable: this.el,
+        // <g> element that contains the window
+        handle: port,
+        // <rect> that is the caption of a window meant to be dragged
+        main: this.main,
+        node: this.node,
+        data: this.data,
+        // events
+        scale: (o) => this.view.transform.scale
+      });
+      this.wipe(draggable.stop);
     }
   };
 
@@ -2425,6 +2523,7 @@
         // events
         scale: (o) => setup.view.transform.scale
       });
+      this.wipe(draggable.stop);
       this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
       this.wipe(this.node.Output.observe("created", (v) => this.node.nodeHeight = this.size));
@@ -2526,7 +2625,12 @@
         initialY: 500,
         initialZoom: 0.5,
         beforeMouseDown: function(e) {
-          return !!e.target.classList.contains("caption");
+          if (e.target.classList.contains("caption"))
+            return true;
+          if (e.target.classList.contains("ant-trail"))
+            return true;
+          if (e.target.classList.contains("port"))
+            return true;
         }
       });
       this.#panzoom.on("transform", (e) => {

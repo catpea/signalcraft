@@ -41,6 +41,7 @@ export default class Component   {
 
 
 
+  get view(){ return this.#view;}
   get name(){ return this.#name;}
   get padd(){ return this.#padd;}
 
