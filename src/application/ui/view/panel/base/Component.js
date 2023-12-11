@@ -93,7 +93,6 @@ export default class Component   {
   }
 
   start() {
-    // // console.log('Calling start on ',  this.#node.type, this.#list);
     this.draw();
      this.#list.map( o => o.start() )
   }

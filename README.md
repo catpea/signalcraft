@@ -3,24 +3,19 @@ A tiny visual programming language.
 
 ## TODO
 
-- Property Editor (YAML First)
+- Node Property Editor (YAML First)
 
-- Cable To Port Dragging
 - Cable Delete & Remove
 
 - Remove Node w/t Cable Clean-up
+- Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
+- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
 
 - Update Theme + Multiple Themes
-- Input/Output Line where both I/O ports visually align for neat programs
+- Input/Output Line where both I/O ports visually align for neat programs (Line.js)
 
-- Alignment And Z-Order Tools
-
-- Scale Tracking For ZUI
-- ForeignObject in ZUI Mode
-
-- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
-- Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
-
+- Node Alignment And Z-Order Tools (Bring To Front, Send To Back)
+- ForeignObjects in ZUI Mode
 
 ## How It Works
 
@@ -58,3 +53,4 @@ A tiny visual programming language.
 ### Current State
 ![art/fui-x.jpg](art/fui-x.jpg)
 ![art/fui-y.jpg](art/fui-y.jpg)
+![art/fui-z.jpg](art/fui-z.jpg)

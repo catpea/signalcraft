@@ -2365,7 +2365,7 @@
 
   // src/application/ui/view/panel/base/DraggableConnector.js
   var DraggableConnector = class {
-    // Private Class Fields
+    #application;
     #container;
     #draggable;
     #handle;
@@ -2379,9 +2379,10 @@
     #line;
     #data;
     #main;
-    constructor({ container, draggable, handle, scale, node, data, main }) {
+    constructor({ application: application2, container, draggable, handle, scale, node, data, main }) {
       this.#data = data;
       this.#main = main;
+      this.#application = application2;
       this.#container = container;
       this.#draggable = draggable;
       this.#handle = handle;
@@ -2391,7 +2392,6 @@
         this.#initialPosition.x = e.clientX;
         this.#initialPosition.y = e.clientY;
         this.#dragging = true;
-        console.log("this.#dragging");
         this.#line = svg.line({
           class: "ant-trail",
           stroke: "green",
@@ -2418,15 +2418,23 @@
           y2: dy
         };
         update(this.#line, geometry);
-        console.log(this.#line);
-        console.log(geometry);
         dx = 0;
         dy = 0;
       };
       this.#mouseUpHandler = (e) => {
-        this.#dragging = false;
+        if (this.#dragging && e.target && e.target.classList.contains("port")) {
+          const portAddress = e.target.dataset.portAddress;
+          const [targetNodeId, targetPortId] = portAddress.split(":");
+          this.#application.Links.create({
+            sourceNode: this.#node.id,
+            sourcePort: this.#data.id,
+            targetNode: targetNodeId,
+            targetPort: targetPortId
+          });
+        }
         if (this.#line)
           this.#line.remove();
+        this.#dragging = false;
         this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
@@ -2461,6 +2469,7 @@
         this.data.y = y;
         port = svg.circle({ class: "port", cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
       }
+      port.dataset.portAddress = [this.node.id, this.data.id].join(":");
       const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
       const cationText = document.createTextNode(this.data.name);
       captionNode.appendChild(cationText);
@@ -2470,6 +2479,8 @@
     }
     makeInteractive(port) {
       const draggable = new DraggableConnector({
+        application: this.view.application,
+        // <g> element representing an SVG scene
         container: window,
         // <g> element representing an SVG scene
         draggable: this.el,
@@ -2637,9 +2648,7 @@
         const { x, y, scale } = this.#panzoom.getTransform();
         this.#transform = { x, y, scale };
         const foo = document.getElementById("value-scale");
-        console.log(foo);
         foo.textContent = scale;
-        console.log(`New transform:`, { x, y, scale });
       });
       this.application.Nodes.forEach((node) => this.#createPanel(node));
       this.application.Links.forEach((node) => this.#createCable(node));

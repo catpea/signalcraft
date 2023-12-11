@@ -58,11 +58,8 @@ export default class View {
     this.#panzoom.on('transform',  (e) =>{
       const {x, y, scale} = this.#panzoom.getTransform();
       this.#transform = {x, y, scale};
-
       const foo = document.getElementById("value-scale");
-      console.log(foo);
       foo.textContent = scale ;
-      console.log(`New transform:`, {x, y, scale});
     });
 
     // this.#unsubscribe.push(this.#panzoom.dispose());

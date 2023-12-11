@@ -28,6 +28,8 @@ export default class Line extends Component {
 			port = svg.circle({ class:'port', cx: x, cy: y, r: 8, height: this.size, fill: oneOf([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
 		}
 
+		port.dataset.portAddress = [this.node.id, this.data.id].join(':');
+
 		const captionNode = svg.text({ x: this.left, y: this.top + (this.size - (this.size / 10)), style: 'font-size: 2rem;', fill: `url(#panel-text)` });
 		const cationText = document.createTextNode(this.data.name);
 		captionNode.appendChild(cationText);
@@ -41,6 +43,7 @@ export default class Line extends Component {
 	makeInteractive(port){
 
 		const draggable = new DraggableConnector({
+			application: this.view.application, // <g> element representing an SVG scene
 			container: window, // <g> element representing an SVG scene
 			draggable: this.el, // <g> element that contains the window
 			handle: port, // <rect> that is the caption of a window meant to be dragged
