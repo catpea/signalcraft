@@ -2469,7 +2469,17 @@
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
-      this.el = svg.line({ x1, y1, x2, y2, stroke: "white" });
+      this.el = svg.line({
+        class: "ant-trail",
+        x1,
+        y1,
+        x2,
+        y2,
+        stroke: "white",
+        fill: "transparent",
+        "stroke-width": 2,
+        "vector-effect": "non-scaling-stroke"
+      });
       this.#cleanup.push(sourceNode.observe("x", (v) => update(this.el, { x1: v + sourcePort.x })));
       this.#cleanup.push(sourceNode.observe("y", (v) => update(this.el, { y1: v + sourcePort.y })));
       this.#cleanup.push(targetNode.observe("x", (v) => update(this.el, { x2: v + targetPort.x })));
@@ -2522,6 +2532,9 @@
       this.#panzoom.on("transform", (e) => {
         const { x, y, scale } = this.#panzoom.getTransform();
         this.#transform = { x, y, scale };
+        const foo = document.getElementById("value-scale");
+        console.log(foo);
+        foo.textContent = scale;
         console.log(`New transform:`, { x, y, scale });
       });
       this.application.Nodes.forEach((node) => this.#createPanel(node));
@@ -2795,6 +2808,7 @@
   async function usage_default(api2) {
     const stringA = api2.addNode("text/string", { string: "Hello" });
     const stringB = api2.addNode("text/string", { string: "World" });
+    const stringC = api2.addNode("text/string", { string: "Meow!" });
     const arrayJn = api2.addNode("array/join");
     api2.linkPorts(stringA, arrayJn);
     api2.linkPorts(stringB, arrayJn);

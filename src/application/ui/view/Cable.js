@@ -36,7 +36,14 @@ export default class Cable {
     let x2 = targetNode.x + targetPort.x;
     let y2 = targetNode.y + targetPort.y;
 
-    this.el = svg.line({ x1, y1, x2, y2, stroke: "white"});
+    this.el = svg.line({
+      class:'ant-trail',
+      x1, y1, x2, y2,
+      stroke: "white",
+      fill: 'transparent',
+      'stroke-width': 2,
+      'vector-effect': 'non-scaling-stroke',
+    });
 
     this.#cleanup.push(      sourceNode.observe('x',      (v)=>update(this.el, { x1:v+sourcePort.x }))     );
     this.#cleanup.push(      sourceNode.observe('y',      (v)=>update(this.el, { y1:v+sourcePort.y }))     );

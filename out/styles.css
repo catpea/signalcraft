@@ -1,3 +1,14 @@
 .cursor-grab {
   cursor: grab;
 }
+
+.ant-trail {
+  stroke-dasharray: 10; /* length of dash + gap = 20 */
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20; /* offset = length to 'move' the dash by its own length */
+  }
+}

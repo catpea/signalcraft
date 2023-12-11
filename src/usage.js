@@ -15,6 +15,7 @@ export default async function(api){
   // define your components
   const stringA = api.addNode("text/string", { string: "Hello" } );
   const stringB = api.addNode("text/string", { string: "World" } );
+  const stringC = api.addNode("text/string", { string: "Meow!" } );
   const arrayJn = api.addNode("array/join");
 
   // create a flow between compoents

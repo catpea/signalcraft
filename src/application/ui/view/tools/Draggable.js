@@ -62,7 +62,7 @@ export class Draggable {
       dx = 0;
       dy = 0;
 
-      // Reset
+      // Reset, because the cursor has moved and is in a new position now.
       this.#initialPosition.x = e.clientX;
       this.#initialPosition.y = e.clientY;
      };

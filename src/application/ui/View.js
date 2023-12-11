@@ -5,6 +5,7 @@ import calculatePercent from 'calculate-percent';
 import Panel from './view/Panel.js';
 import Cable from './view/Cable.js';
 
+
 // import NodeRenderer from './NodeRenderer.js';
 
 export default class View {
@@ -54,6 +55,10 @@ export default class View {
     this.#panzoom.on('transform',  (e) =>{
       const {x, y, scale} = this.#panzoom.getTransform();
       this.#transform = {x, y, scale};
+
+      const foo = document.getElementById("value-scale");
+      console.log(foo);
+      foo.textContent = scale ;
       console.log(`New transform:`, {x, y, scale});
     });
 
