@@ -1,67 +1,75 @@
 import oneOf from "oneof";
-import { html, svg, text, list, update } from "./tools/domek.js";
-import { Draggable } from   "./tools/Draggable.js";
+import { html, svg, text, list, update } from "domek";
 
-import Component from "./panel/base/Component.js";
-import Caption from "./panel/Caption.js";
-import Pod from "./panel/Pod.js";
+import Container from "./ux/Container.js";
+import Caption from "./ux/Caption.js";
+import Pod from "./ux/Pod.js";
+import Line from "./ux/Line.js";
 
-export default class Panel extends Component {
-  constructor(setup) {
-    super(setup);
-    this.el = svg.g({ 'transform': `translate(${this.node.x}, ${this.node.y})`, });
-    setup.main = this;
+export default class Panel {
+  el;
+  #cleanup = [];
 
-    const caption = new Caption({...setup, name:'caption bar', size:64});
-    this.append(caption);
+  start({data, view}){
 
+      const container = new Container(`container`);
+      container.setBounds({border:1});
+      container.setView(view);
+      container.setData(data);
 
-    const outputPod = new Pod({...setup,  name:'output pod', data: setup.node.Output});
-    this.append(outputPod);
+      const caption = new Caption(`caption`);
+      caption.setBounds({border:1, height: 32});
+      container.add(caption)
 
-    const inputPod = new Pod({...setup,  name:'input pod', data: setup.node.Input});
-    this.append(inputPod);
+      const outputPod = new Pod(`outputPod`);
+      outputPod.setBounds({gap: 2, padding: 1, border:1});
+      container.add(outputPod)
 
-    // this.shadowRectangle = svg.rect({ x: 10, y:10, filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.size, fill:  'black', });
-    // this.el.appendChild( this.shadowRectangle )
+      data.Output.forEach((data, index) => {
+        const port = new Line(`port${index}`);
+        port.setBounds({height: 24});
+        port.setData(data);
+        outputPod.add( port )
+      });
 
-    this.backgroundRectangle = svg.rect({ class: 'interactive', filter: `url(#shadow-primary)` , ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: 'black', });
-    this.el.appendChild( this.backgroundRectangle )
+      const inputPod = new Pod(`inputPod`);
+      inputPod.setBounds({gap: 2, padding: 1, border:1});
+      container.add(inputPod);
 
+      data.Input.forEach((data, index) => {
+        const port = new Line(`port${index}`);
+        port.setBounds({height: 24});
+        port.setData(data);
+        inputPod.add( port )
+      });
 
-    const draggable = new Draggable({
-      container: window, // <g> element representing an SVG scene
-      draggable: this.el, // <g> element that contains the window
-      handle: caption.el, // <rect> that is the caption of a window meant to be dragged
-      node: this.node,
-      // events
-      scale: o => setup.view.transform.scale,
-    });
+      container.setup();
+      container.render();
 
-    this.wipe( draggable.stop );
+      console.log(container.height, 12);
 
+      // container.node = node;
+      // container.view = view;
+      // container.root = root;
+      //
+      // container.append(new Caption({size:64}));
+      //
+      // const outputPod = new Pod();
+      // const inputPod = new Pod();
+      // container.append(outputPod);
+      // container.append(inputPod);
+      //
+      // this.#node.Output.forEach( (data,index) => outputPod.append( new Line({size:32}) ));
+      // this.#node.Input.forEach( (data,index) => outputPod.append( new Line({size:32}) ));
 
-    // PLEASE NOTE THAT THIS WRITES TO THE NODE, after measuring the rectangle size
-    this.wipe(      this.node.Input.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Input.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Output.observe('created', (v)=>this.node.nodeHeight = this.size   )  );
-    this.wipe(      this.node.Output.observe('removed', (v)=>this.node.nodeHeight = this.size   )  );
-
-    // PLEASE NOTE the .observe will trigger instantly upon subscription to reliably deliver the value.
-    this.wipe(      this.node.observe('x', (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
-    this.wipe(      this.node.observe('y', (v)=>update(this.el, { 'transform': `translate(${this.node.x}, ${this.node.y})`, }))     );
-    // this.wipe(      this.node.observe('backgroundColor',         (v)=>update( this.backgroundRectangle, {fill:v})   )  );
-    this.wipe(      this.node.observe('nodeHeight',              (v)=>update( this.backgroundRectangle, {size: v}) ));
-    this.wipe(      this.node.observe('nodeWidth',               (v)=>update( this.backgroundRectangle, {width: v}) ));
-    this.wipe(      this.node.observe('depthLevel',              (v)=>update( this.el, {zIndex: v}) )); // mimic bring-to-top
-
-    // ANNOy
-    // console.info('TODO: Hey, maybe Pods should be measured here, and store in in input/output???')
-    // console.info('TODO: make me draggable, mimic bring to top')
-
+      this.cleanup(container);
   }
 
-  draw() {
-  }
 
+  stop(){
+    this.#cleanup.map(x=>x());
+  }
+  cleanup(...arg){
+    this.#cleanup.push(...arg);
+  }
 }

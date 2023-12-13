@@ -11,7 +11,7 @@ export default class Component   {
   #view = null;
   #node = null;
   #root = null;
-  #wipe = [];
+  #cleanup = [];
 
   constructor(conf) {
 
@@ -94,7 +94,7 @@ export default class Component   {
 
   start() {
     this.draw();
-     this.#list.map( o => o.start() )
+    this.#list.map( o => o.start() )
   }
 
   draw() {
@@ -102,11 +102,11 @@ export default class Component   {
 
   stop() {
     this.el.remove()
-    this.#wipe.map(x=>x());
+    this.#unsubscribe.map(x=>x());
   }
 
-  wipe(...arg){
-    this.#wipe.push(...arg);
+  cleanup(...arg){
+    this.#cleanup.push(...arg);
   }
 
 };

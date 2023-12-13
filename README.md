@@ -3,6 +3,16 @@ A tiny visual programming language.
 
 ## TODO
 
+add .x to the layout engine
+consider bounds margin to become a [0, 3, [0], [3]] with top right, bottom left like in CSS
+Fix Cable
+move dode from alpha-code to the new layout engine,
+copy the Drag Window and Connect  Ports libraries (alpha-code)
+import Container from "./ux/Container.js";
+import Caption from "./ux/Caption.js";
+import Pod from "./ux/Pod.js";
+import Line from "./ux/Line.js";
+
 - Node Property Editor (YAML First)
 
 - Cable Delete & Remove

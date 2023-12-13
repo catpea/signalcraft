@@ -2,6 +2,13 @@ import flattenDeep from 'lodash/flattenDeep';
 
 export default function(application){
 
+  const testTwoThree = application.Types.create({type:'test/two-three'});
+  testTwoThree.output.push( {name:"output1", generator:({value, string}) => { return string }} );
+  testTwoThree.output.push( {name:"output2", generator:({value, string}) => { return string }} );
+  testTwoThree.input.push( {name:"string1", type: "string", description: "a string of letters", value: "default value"} );
+  testTwoThree.input.push( {name:"string2", type: "string", description: "a string of letters", value: "default value"} );
+  testTwoThree.input.push( {name:"string3", type: "string", description: "a string of letters", value: "default value"} );
+
   const textType = application.Types.create({type:'text/string'});
   textType.output.push( {name:"output", generator:({value, string}) => { return string }} );
   textType.input.push( {name:"string", type: "string", description: "a string of letters", value: "default value"} );

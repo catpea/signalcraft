@@ -60,6 +60,10 @@ export default class ReactiveArray {
     return this.#content.find(callback);
   }
 
+  id(id) {
+    return this.#content.find(item=>item.id == id);
+  }
+
   filter(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
     return this.#content.filter(callback);

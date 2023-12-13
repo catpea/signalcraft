@@ -8,8 +8,8 @@ const application = new Application();
 setup(application);
 
 // views display all the Nodes and Links as an SVG
-application.Views.create({name:'view-1', element:document.querySelector('.signalcraft-view-1')});
-application.Views.create({name:'view-2', element:document.querySelector('.signalcraft-view-2')});
+application.Views.create({ name:'view-1', element: document.querySelector('.signalcraft-view-1')} );
+application.Views.create({ name:'view-2', element: document.querySelector('.signalcraft-view-2')} );
 
 // start application
 application.start();

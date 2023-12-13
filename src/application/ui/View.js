@@ -1,6 +1,6 @@
 import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
-// import React from "jsx-dom";
+import { html, svg, text, list, update } from "domek";
 
 import Panel from './view/Panel.js';
 import Cable from './view/Cable.js';
@@ -9,9 +9,10 @@ import Cable from './view/Cable.js';
 // import NodeRenderer from './NodeRenderer.js';
 
 export default class View {
-  application;
+  #application;
 
   #name;
+  #theme = "signalcraft-magenta-theme";
 
   #element;
   #svg;
@@ -26,7 +27,7 @@ export default class View {
   constructor({name, element, application}) {
     this.#name = name;
     this.#element = element;
-    this.application = application;
+    this.#application = application;
   }
 
   start() {
@@ -35,10 +36,8 @@ export default class View {
     this.#svg = this.#installCanvas();
     this.#scene = this.#installScene();
     this.#panzoom = panzoom(this.#scene, {
-
       smoothScroll: false, // this is the sluggish post  scrolling effect
       transformOrigin: {x: 0.5, y: 0.5},
-
       maxZoom: 10,
       minZoom: 0.1,
       initialX: 500,
@@ -53,8 +52,6 @@ export default class View {
       }
 
     });
-
-
     this.#panzoom.on('transform',  (e) =>{
       const {x, y, scale} = this.#panzoom.getTransform();
       this.#transform = {x, y, scale};
@@ -62,7 +59,11 @@ export default class View {
       foo.textContent = scale ;
     });
 
-    // this.#unsubscribe.push(this.#panzoom.dispose());
+    this.#unsubscribe.push(this.#panzoom.dispose);
+
+
+    this.#installMenu()
+
 
 
     // setup all th einstances of nodes
@@ -218,6 +219,15 @@ export default class View {
     return svg;
   }
 
+  #installMenu(){
+
+    const container = html.p({style:'border: 1px solid gold;', class:'p-1'}, 'Hello World')
+    this.#element.appendChild(container);
+    console.log(container);
+
+  }
+
+
   #installScene() {
     const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
     scene.setAttributeNS(null, "id", "scene");
@@ -257,10 +267,10 @@ export default class View {
     this.#renderers.get( item.id ).stop();
   }
   #createPanel({ item }) {
-    const panel = new Panel({node: item, view:this, root:this.#scene, name:'main panel', padd: 3});
+    const panel = new Panel();
     this.#renderers.set( item.id, panel );
-    this.#scene.appendChild(panel.el);
-    panel.start();
+    panel.start({data:item, view:this});
+    // this.#scene.appendChild(panel.el);
   }
 
 
@@ -269,13 +279,16 @@ export default class View {
     this.#renderers.get( item.id ).stop();
   }
   #createCable({ item }) {
-    const cable = new Cable({link: item, view:this, root:this.#scene, name:'cable', size: 3});
+    const cable = new Cable();
     this.#renderers.set( item.id, cable );
-    this.#scene.appendChild(cable.el);
-    cable.start();
+    cable.start({link: item, view:this, scene:this.#scene, name:'cable', size: 3});
+    // this.#scene.appendChild(cable.el);
   }
 
 
+  get application(){return this.#application;}
   get transform(){return this.#transform;}
+  get scene(){return this.#scene;}
+  get theme(){return this.#theme;}
 
 }

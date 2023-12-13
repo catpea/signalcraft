@@ -1,4 +1,4 @@
-import { html, svg, text, list, update } from "./tools/domek.js";
+import { html, svg, text, list, update } from "domek";
 
 export default class Cable {
   #application;
@@ -13,8 +13,11 @@ export default class Cable {
   #home;
   #padd;
 
-  constructor(setup) {
+  constructor() {}
 
+  start({node, scene, view }){
+  }
+  start_OLD(setup) {
     this.#application = setup.link.application;
 
     this.#link = setup.link;
@@ -26,10 +29,10 @@ export default class Cable {
     this.#home = setup.home;
     this.#padd = setup.padd;
 
-    const sourceNode = this.#application.Nodes.find(node=>node.id == this.#link.sourceNode);
-    const sourcePort = sourceNode.Output.find(port=>port.id==this.#link.sourcePort);
-    const targetNode = this.#application.Nodes.find(node=>node.id == this.#link.targetNode);
-    const targetPort = targetNode.Input.find(port=>port.id==this.#link.targetPort);
+    const sourceNode = this.#application.Nodes .id(this.#link.sourceNode);
+    const targetNode = this.#application.Nodes .id(this.#link.targetNode);
+    const sourcePort = sourceNode.Output       .id(this.#link.sourcePort);
+    const targetPort = targetNode.Input        .id(this.#link.targetPort);
 
     let x1 = sourceNode.x + sourcePort.x;
     let y1 = sourceNode.y + sourcePort.y;
@@ -57,9 +60,9 @@ export default class Cable {
     this.#cleanup.push(      targetPort.observe('y',      (v)=>update(this.el, { y2:targetNode.y+v }))     );
 
     // console.log('%cTODO: now monitor sourceNode sourcePort targetNode targetPort for changes but only to x and y and when chnages occur update(el)', "color: gold; background: red;");
-  }
 
-  start() {
+
+
   }
 
   stop() {

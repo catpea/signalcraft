@@ -1,13 +1,13 @@
 const svg = new Proxy({}, {
     get: function(target, property) {
-      return function(properties){
+      return function(properties, text){
         const el = document.createElementNS('http://www.w3.org/2000/svg', property);
         for (const key in properties) {
           if (properties.hasOwnProperty(key)) {
             el.setAttributeNS(null, key, properties[key]);
-            // el.setAttribute(key, properties[key]);
           }
         }
+        if(text) el.appendChild(document.createTextNode(text));
         return el;
       }
     }
@@ -15,8 +15,19 @@ const svg = new Proxy({}, {
 
 const html = new Proxy({}, {
     get: function(target, property) {
+      return function(properties, text){
+
         const el = document.createElement(property);
+        for (const key in properties) {
+          if (properties.hasOwnProperty(key)) {
+            el.setAttribute(key, properties[key]);
+          }
+        }
+
+        if(text) el.appendChild(document.createTextNode(text));
+
         return el;
+      }
     }
 });
 
@@ -43,9 +54,12 @@ const text = function(){}
 
 const update = function(el, properties){
   for (const key in properties) {
-    el.setAttributeNS(null, key, properties[key]);
+    if(el.namespaceURI == 'http://www.w3.org/2000/svg'){
+      el.setAttributeNS(null, key, properties[key]);
+    }else{
+      el.setAttribute(key, properties[key]);
+    }
   }
-
 }
 
-export {svg, html, text, list, update}
+export {svg, html, text, list, update};

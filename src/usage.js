@@ -12,6 +12,7 @@ export default async function(api){
   //                           |        .run()
   //                           v
 
+  if(0){
   // define your components
   const stringA = api.addNode("text/string", { string: "Hello" } );
   const stringB = api.addNode("text/string", { string: "World" } );
@@ -30,5 +31,12 @@ export default async function(api){
   const actual = JSON.stringify(result);
   const expect = JSON.stringify(['Hello', 'World']);
   console.assert(actual==expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+  }
 
+
+  if(1){
+
+    const stringA = api.addNode("test/two-three", { string1: "Hello" } );
+
+  }
 }

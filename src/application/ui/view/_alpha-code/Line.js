@@ -1,8 +1,8 @@
 import oneOf from "oneof";
 
-import { html, svg, text, list, update } from '../tools/domek.js';
-import Component from './base/Component.js';
-import { DraggableConnector } from './base/DraggableConnector.js';
+import { html, svg, text, list, update } from 'domek';
+import Component from './Component.js';
+import { DraggableConnector } from './line/Draggable.js';
 
 export default class Line extends Component {
 	constructor(setup) {
@@ -30,7 +30,7 @@ export default class Line extends Component {
 
 		port.dataset.portAddress = [this.node.id, this.data.id].join(':');
 
-		const captionNode = svg.text({ x: this.left, y: this.top + (this.size - (this.size / 10)), style: 'font-size: 2rem;', fill: `url(#panel-text)` });
+		const captionNode = svg.text({ x: this.left, y: this.top + (this.size - (this.size / 10)), style: 'font-size: 2rem; pointer-events: none; user-select: none;', fill: `url(#panel-text)` });
 		const cationText = document.createTextNode(this.data.name);
 		captionNode.appendChild(cationText);
 		this.main.el.appendChild(captionNode)
@@ -53,8 +53,7 @@ export default class Line extends Component {
 			// events
 			scale: o => this.view.transform.scale,
 		});
-		// later draggable.stop(); // to remove all event listeners
-		this.wipe( draggable.stop );
+		this.cleanup( draggable.stop );
 
 	}
 

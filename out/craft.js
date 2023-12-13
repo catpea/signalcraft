@@ -1746,6 +1746,9 @@
         throw new TypeError("Find needs a function.");
       return this.#content.find(callback);
     }
+    id(id) {
+      return this.#content.find((item) => item.id == id);
+    }
     filter(callback) {
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
@@ -2137,415 +2140,225 @@
   var import_panzoom = __toESM(require_panzoom(), 1);
   var import_calculate_percent = __toESM(require_calculate_percent(), 1);
 
-  // src/application/ui/view/Panel.js
-  var import_oneof3 = __toESM(require_oneof(), 1);
-
-  // src/application/ui/view/tools/domek.js
+  // modules/domek/index.js
   var svg = new Proxy({}, {
     get: function(target, property) {
-      return function(properties) {
+      return function(properties, text2) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", property);
         for (const key in properties) {
           if (properties.hasOwnProperty(key)) {
             el.setAttributeNS(null, key, properties[key]);
           }
         }
+        if (text2)
+          el.appendChild(document.createTextNode(text2));
         return el;
       };
     }
   });
   var html = new Proxy({}, {
     get: function(target, property) {
-      const el = document.createElement(property);
-      return el;
+      return function(properties, text2) {
+        const el = document.createElement(property);
+        for (const key in properties) {
+          if (properties.hasOwnProperty(key)) {
+            el.setAttribute(key, properties[key]);
+          }
+        }
+        if (text2)
+          el.appendChild(document.createTextNode(text2));
+        return el;
+      };
     }
   });
-  var update = function(el, properties) {
+  var update2 = function(el, properties) {
     for (const key in properties) {
-      el.setAttributeNS(null, key, properties[key]);
-    }
-  };
-
-  // src/application/ui/view/tools/Draggable.js
-  var Draggable = class {
-    // Private Class Fields
-    #container;
-    #draggable;
-    #handle;
-    #mouseDownHandler;
-    #mouseMoveHandler;
-    #mouseUpHandler;
-    #dragging = false;
-    #initialPosition = { x: 0, y: 0 };
-    #scale;
-    #node;
-    constructor({ container, draggable, handle, scale, node }) {
-      this.#container = container;
-      this.#draggable = draggable;
-      this.#handle = handle;
-      this.#scale = scale;
-      this.#node = node;
-      this.#mouseDownHandler = (e) => {
-        this.#initialPosition.x = e.clientX;
-        this.#initialPosition.y = e.clientY;
-        this.#dragging = true;
-        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
-      };
-      this.#mouseMoveHandler = (e) => {
-        let dx = 0;
-        let dy = 0;
-        dx = e.clientX - this.#initialPosition.x;
-        dy = e.clientY - this.#initialPosition.y;
-        dx = dx + this.#node.x * this.#scale();
-        dy = dy + this.#node.y * this.#scale();
-        dx = dx / this.#scale();
-        dy = dy / this.#scale();
-        this.#node.x = dx;
-        this.#node.y = dy;
-        dx = 0;
-        dy = 0;
-        this.#initialPosition.x = e.clientX;
-        this.#initialPosition.y = e.clientY;
-      };
-      this.#mouseUpHandler = (e) => {
-        this.#dragging = false;
-        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
-      };
-      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
-      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
-    }
-    stop() {
-      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
-      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
-      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
-    }
-  };
-
-  // src/application/ui/view/panel/base/Component.js
-  var Component = class {
-    el;
-    #name = null;
-    // name, spaces allowed
-    #main = null;
-    // root parent object
-    #data = null;
-    #home = null;
-    #size = -1;
-    #padd = -1;
-    #list = [];
-    #view = null;
-    #node = null;
-    #root = null;
-    #wipe = [];
-    constructor(conf) {
-      const setup = Object.assign({}, { node: null, view: null, root: null, padd: 3, size: 0, data: null, main: null, name: null }, conf);
-      this.#name = setup.name;
-      this.#main = setup.main;
-      this.#home = setup.home;
-      this.#data = setup.data;
-      this.#size = setup.size;
-      this.#padd = setup.padd;
-      this.#view = setup.view;
-      this.#node = setup.node;
-      this.#root = setup.root;
-    }
-    append(component) {
-      component.home = this;
-      this.#list.push(component);
-    }
-    get isRoot() {
-      return this.#home == null;
-    }
-    get view() {
-      return this.#view;
-    }
-    get name() {
-      return this.#name;
-    }
-    get padd() {
-      return this.#padd;
-    }
-    set home(v) {
-      this.#home = v;
-    }
-    get home() {
-      return this.#home;
-    }
-    set main(v) {
-      this.#main = v;
-    }
-    get main() {
-      return this.#main;
-    }
-    set list(v) {
-      this.#list = v;
-    }
-    get list() {
-      return this.#list;
-    }
-    get node() {
-      return this.#node;
-    }
-    get data() {
-      return this.#data;
-    }
-    get containers() {
-      if (this.isRoot)
-        return [this];
-      return [...this.#home.containers, this.#home];
-    }
-    get aboveAll() {
-      if (this.isRoot)
-        return [this];
-      return [...this.#home.aboveAll, ...this.#home.list.slice(0, this.#home.list.indexOf(this))];
-    }
-    get above() {
-      if (this.isRoot)
-        return [];
-      return [...this.#home.list.slice(0, this.#home.list.indexOf(this))];
-    }
-    get top() {
-      if (this.isRoot)
-        return 0;
-      const topPadding = this.#padd;
-      const sizeOfAllAbove = this.above.reduce((total, item) => total + item.size, 0);
-      const paddOfAllAbove = this.above.length * this.#padd;
-      return this.#home.top + topPadding + sizeOfAllAbove + paddOfAllAbove;
-    }
-    get size() {
-      return this.#size + this.#list.reduce((total, child) => total + child.size, 0) + this.#padd * (this.#list.length + 1);
-    }
-    get width() {
-      return this.node.nodeWidth - this.containers.slice(1).reduce((total, item) => total + item.padd * 2, 0);
-    }
-    get left() {
-      return this.containers.slice(1).reduce((total, item) => total + item.padd, 0);
-    }
-    start() {
-      this.draw();
-      this.#list.map((o) => o.start());
-    }
-    draw() {
-    }
-    stop() {
-      this.el.remove();
-      this.#wipe.map((x) => x());
-    }
-    wipe(...arg) {
-      this.#wipe.push(...arg);
-    }
-  };
-
-  // src/application/ui/view/panel/Caption.js
-  var Caption = class extends Component {
-    el;
-    constructor(setup) {
-      super(setup, { size: 32 });
-      this.el = svg.rect({
-        class: `caption`,
-        x: this.left,
-        y: this.top,
-        ry: 3,
-        width: this.node.nodeWidth - this.padd * 2,
-        height: this.size,
-        fill: `url(#panel-caption)`
-      });
-    }
-    draw() {
-      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem; pointer-events: none;", fill: `url(#panel-text)` });
-      const cationText = document.createTextNode(this.node.type);
-      captionNode.appendChild(cationText);
-      this.main.el.appendChild(this.el);
-      this.main.el.appendChild(captionNode);
-    }
-  };
-
-  // src/application/ui/view/panel/Line.js
-  var import_oneof2 = __toESM(require_oneof(), 1);
-
-  // src/application/ui/view/panel/base/DraggableConnector.js
-  var DraggableConnector = class {
-    #application;
-    #container;
-    #draggable;
-    #handle;
-    #mouseDownHandler;
-    #mouseMoveHandler;
-    #mouseUpHandler;
-    #dragging = false;
-    #initialPosition = { x: 0, y: 0 };
-    #scale;
-    #node;
-    #line;
-    #data;
-    #main;
-    constructor({ application: application2, container, draggable, handle, scale, node, data, main }) {
-      this.#data = data;
-      this.#main = main;
-      this.#application = application2;
-      this.#container = container;
-      this.#draggable = draggable;
-      this.#handle = handle;
-      this.#scale = scale;
-      this.#node = node;
-      this.#mouseDownHandler = (e) => {
-        this.#initialPosition.x = e.clientX;
-        this.#initialPosition.y = e.clientY;
-        this.#dragging = true;
-        this.#line = svg.line({
-          class: "ant-trail",
-          stroke: "green",
-          fill: "transparent",
-          "stroke-width": 2,
-          "vector-effect": "non-scaling-stroke"
-        });
-        this.#main.el.appendChild(this.#line);
-        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
-      };
-      this.#mouseMoveHandler = (e) => {
-        let dx = 0;
-        let dy = 0;
-        dx = e.clientX - this.#initialPosition.x;
-        dy = e.clientY - this.#initialPosition.y;
-        dx = dx + this.#data.x * this.#scale();
-        dy = dy + this.#data.y * this.#scale();
-        dx = dx / this.#scale();
-        dy = dy / this.#scale();
-        const geometry = {
-          x1: this.#data.x,
-          y1: this.#data.y,
-          x2: dx,
-          y2: dy
-        };
-        update(this.#line, geometry);
-        dx = 0;
-        dy = 0;
-      };
-      this.#mouseUpHandler = (e) => {
-        if (this.#dragging && e.target && e.target.classList.contains("port")) {
-          const portAddress = e.target.dataset.portAddress;
-          const [targetNodeId, targetPortId] = portAddress.split(":");
-          this.#application.Links.create({
-            sourceNode: this.#node.id,
-            sourcePort: this.#data.id,
-            targetNode: targetNodeId,
-            targetPort: targetPortId
-          });
-        }
-        if (this.#line)
-          this.#line.remove();
-        this.#dragging = false;
-        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
-      };
-      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
-      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
-    }
-    stop() {
-      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
-      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
-      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
-    }
-  };
-
-  // src/application/ui/view/panel/Line.js
-  var Line = class extends Component {
-    constructor(setup) {
-      super(setup, { size: 32 });
-    }
-    draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.width, height: this.size, fill: "transparent", Xfill: `url(#panel-primary)` });
-      this.main.el.appendChild(this.el);
-      let port;
-      if (this.data.direction == "input") {
-        const x = this.left - 5;
-        const y = this.top + this.size / 2;
-        this.data.x = x;
-        this.data.y = y;
-        port = svg.circle({ class: "port", cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+      if (el.namespaceURI == "http://www.w3.org/2000/svg") {
+        el.setAttributeNS(null, key, properties[key]);
       } else {
-        const x = this.width + 10;
-        const y = this.top + this.size / 2;
-        this.data.x = x;
-        this.data.y = y;
-        port = svg.circle({ class: "port", cx: x, cy: y, r: 8, height: this.size, fill: (0, import_oneof2.default)([`url(#socket-primary)`, `url(#socket-error)`]), filter: `url(#socket-shadow)` });
+        el.setAttribute(key, properties[key]);
       }
-      port.dataset.portAddress = [this.node.id, this.data.id].join(":");
-      const captionNode = svg.text({ x: this.left, y: this.top + (this.size - this.size / 10), style: "font-size: 2rem;", fill: `url(#panel-text)` });
-      const cationText = document.createTextNode(this.data.name);
-      captionNode.appendChild(cationText);
-      this.main.el.appendChild(captionNode);
-      this.main.el.appendChild(port);
-      this.makeInteractive(port);
-    }
-    makeInteractive(port) {
-      const draggable = new DraggableConnector({
-        application: this.view.application,
-        // <g> element representing an SVG scene
-        container: window,
-        // <g> element representing an SVG scene
-        draggable: this.el,
-        // <g> element that contains the window
-        handle: port,
-        // <rect> that is the caption of a window meant to be dragged
-        main: this.main,
-        node: this.node,
-        data: this.data,
-        // events
-        scale: (o) => this.view.transform.scale
-      });
-      this.wipe(draggable.stop);
-    }
-  };
-
-  // src/application/ui/view/panel/Pod.js
-  var Pod = class extends Component {
-    constructor(setup) {
-      super(setup);
-      this.data.forEach((data, index) => this.append(new Line({ ...setup, name: `pod line ${index}`, data, size: 32 })));
-    }
-    draw() {
-      this.el = svg.rect({ x: this.left, y: this.top, ry: 3, width: this.node.nodeWidth - this.padd * 2, height: this.size, fill: "transparent", Xfill: `url(#panel-pod)`, stroke: "black" });
-      this.main.el.appendChild(this.el);
     }
   };
 
   // src/application/ui/view/Panel.js
-  var Panel = class extends Component {
-    constructor(setup) {
-      super(setup);
-      this.el = svg.g({ "transform": `translate(${this.node.x}, ${this.node.y})` });
-      setup.main = this;
-      const caption = new Caption({ ...setup, name: "caption bar", size: 64 });
-      this.append(caption);
-      const outputPod = new Pod({ ...setup, name: "output pod", data: setup.node.Output });
-      this.append(outputPod);
-      const inputPod = new Pod({ ...setup, name: "input pod", data: setup.node.Input });
-      this.append(inputPod);
-      this.backgroundRectangle = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: this.node.nodeWidth, height: this.size, fill: this.node.backgroundColor, stroke: "black" });
-      this.el.appendChild(this.backgroundRectangle);
-      const draggable = new Draggable({
-        container: window,
-        // <g> element representing an SVG scene
-        draggable: this.el,
-        // <g> element that contains the window
-        handle: caption.el,
-        // <rect> that is the caption of a window meant to be dragged
-        node: this.node,
-        // events
-        scale: (o) => setup.view.transform.scale
-      });
-      this.wipe(draggable.stop);
-      this.wipe(this.node.Input.observe("created", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Input.observe("removed", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Output.observe("created", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.Output.observe("removed", (v) => this.node.nodeHeight = this.size));
-      this.wipe(this.node.observe("x", (v) => update(this.el, { "transform": `translate(${this.node.x}, ${this.node.y})` })));
-      this.wipe(this.node.observe("y", (v) => update(this.el, { "transform": `translate(${this.node.x}, ${this.node.y})` })));
-      this.wipe(this.node.observe("nodeHeight", (v) => update(this.backgroundRectangle, { size: v })));
-      this.wipe(this.node.observe("nodeWidth", (v) => update(this.backgroundRectangle, { width: v })));
-      this.wipe(this.node.observe("depthLevel", (v) => update(this.el, { zIndex: v })));
+  var import_oneof2 = __toESM(require_oneof(), 1);
+
+  // src/application/ui/view/ux/Component.js
+  var Component = class {
+    el = {};
+    // container of elements
+    name;
+    data;
+    view;
+    group = svg.g();
+    root = true;
+    // by being added it is no longer a root container
+    parent = null;
+    bounds = {
+      x: 0,
+      y: 0,
+      width: 300,
+      height: 0,
+      gap: 0,
+      margin: 0,
+      border: 0,
+      padding: 0
+    };
+    children = [];
+    constructor(name, { view } = {}) {
+      this.name = name;
+      this.view = view;
     }
-    draw() {
+    get #above() {
+      if (this.root)
+        return [this];
+      const selfIndex = this.parent.children.indexOf(this);
+      return [...this.parent.children.slice(0, selfIndex)];
+    }
+    get y() {
+      if (this.root)
+        return 0;
+      console.log(`#above ${this.name} =`, this.#above.map((o) => o.name).join(", "), this.#above.length, this.#above);
+      return 0 + this.parent.y + this.parent.bounds.margin + this.parent.bounds.border + this.parent.bounds.padding + this.#above.reduce((total, child) => total + child.height, 0) + this.parent.bounds.gap * this.#above.length;
+    }
+    get height() {
+      return 0 + this.bounds.margin + this.bounds.border + this.bounds.padding + this.bounds.height + this.children.reduce((total, child) => total + child.height, 0) + this.bounds.gap * (this.children.length > 0 ? this.children.length - 1 : 0) + this.bounds.padding + this.bounds.border + this.bounds.margin;
+    }
+    add(child) {
+      child.root = false;
+      child.parent = this;
+      child.view = this.view;
+      if (!child.data)
+        child.data = this.data;
+      child.group = this.group;
+      this.children.push(child);
+      return this;
+    }
+    setup() {
+      this.children.map((child) => child.setup());
+    }
+    setData(data) {
+      this.data = data;
+      return this;
+    }
+    setView(view) {
+      this.view = view;
+      return this;
+    }
+    setBounds(data) {
+      Object.assign(this.bounds, data);
+      return this;
+    }
+  };
+
+  // src/application/ui/view/ux/Container.js
+  var Container = class extends Component {
+    setup() {
+      this.el.Panel = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
+      this.children.map((child) => child.setup());
+    }
+    render() {
+      update2(this.group, { "transform": `translate(${this.data.x}, ${this.data.y})` });
+      this.view.scene.appendChild(this.group);
+      this.group.appendChild(this.el.Panel);
+      this.children.map((child) => child.render());
+    }
+    update() {
+      update2(this.el.Panel, {});
+    }
+  };
+
+  // src/application/ui/view/ux/Caption.js
+  var Caption = class extends Component {
+    setup() {
+      this.el.Caption = svg.rect({ class: `caption`, filter: `url(#shadow-primary)`, ry: 5, width: 100, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
+      this.el.CaptionText = svg.text({ class: `caption-text`, y: this.y + (this.height - this.height / 5) }, this.data.type);
+    }
+    render() {
+      this.group.appendChild(this.el.Caption);
+      this.group.appendChild(this.el.CaptionText);
+      this.children.map((child) => child.render());
+    }
+    update() {
+      update2(this.el.Caption, {});
+      update2(this.el.CaptionText, {});
+    }
+  };
+
+  // src/application/ui/view/ux/Pod.js
+  var Pod = class extends Component {
+    setup() {
+      this.el.Pod = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, x: 5, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
+      this.children.map((child) => child.setup());
+    }
+    render() {
+      this.group.appendChild(this.el.Pod);
+      this.children.map((child) => child.render());
+    }
+    update() {
+      update(this.el.Pod, {});
+    }
+  };
+
+  // src/application/ui/view/ux/Line.js
+  var Line = class extends Component {
+    setup() {
+      this.el.Line = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, x: 10, y: this.y, height: this.height, fill: this.parent.data.backgroundColor, stroke: "black" });
+      this.el.LineText = svg.text({ class: `line-text`, y: this.y + (this.height - this.height / 5) }, this.data.name);
+      console.log(this.data);
+      this.children.map((child) => child.setup());
+    }
+    render() {
+      this.group.appendChild(this.el.Line);
+      this.group.appendChild(this.el.LineText);
+      this.children.map((child) => child.render());
+    }
+    update() {
+      update(this.el.Line, {});
+    }
+  };
+
+  // src/application/ui/view/Panel.js
+  var Panel = class {
+    el;
+    #cleanup = [];
+    start({ data, view }) {
+      const container = new Container(`container`);
+      container.setBounds({ border: 1 });
+      container.setView(view);
+      container.setData(data);
+      const caption = new Caption(`caption`);
+      caption.setBounds({ border: 1, height: 32 });
+      container.add(caption);
+      const outputPod = new Pod(`outputPod`);
+      outputPod.setBounds({ gap: 2, padding: 1, border: 1 });
+      container.add(outputPod);
+      data.Output.forEach((data2, index) => {
+        const port = new Line(`port${index}`);
+        port.setBounds({ height: 24 });
+        port.setData(data2);
+        outputPod.add(port);
+      });
+      const inputPod = new Pod(`inputPod`);
+      inputPod.setBounds({ gap: 2, padding: 1, border: 1 });
+      container.add(inputPod);
+      data.Input.forEach((data2, index) => {
+        const port = new Line(`port${index}`);
+        port.setBounds({ height: 24 });
+        port.setData(data2);
+        inputPod.add(port);
+      });
+      container.setup();
+      container.render();
+      console.log(container.height, 12);
+      this.cleanup(container);
+    }
+    stop() {
+      this.#cleanup.map((x) => x());
+    }
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
     }
   };
 
@@ -2561,7 +2374,11 @@
     #main;
     #home;
     #padd;
-    constructor(setup) {
+    constructor() {
+    }
+    start({ node, scene, view }) {
+    }
+    start_OLD(setup) {
       this.#application = setup.link.application;
       this.#link = setup.link;
       this.#view = setup.view;
@@ -2571,10 +2388,10 @@
       this.#main = setup.main;
       this.#home = setup.home;
       this.#padd = setup.padd;
-      const sourceNode = this.#application.Nodes.find((node) => node.id == this.#link.sourceNode);
-      const sourcePort = sourceNode.Output.find((port) => port.id == this.#link.sourcePort);
-      const targetNode = this.#application.Nodes.find((node) => node.id == this.#link.targetNode);
-      const targetPort = targetNode.Input.find((port) => port.id == this.#link.targetPort);
+      const sourceNode = this.#application.Nodes.id(this.#link.sourceNode);
+      const targetNode = this.#application.Nodes.id(this.#link.targetNode);
+      const sourcePort = sourceNode.Output.id(this.#link.sourcePort);
+      const targetPort = targetNode.Input.id(this.#link.targetPort);
       let x1 = sourceNode.x + sourcePort.x;
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
@@ -2590,16 +2407,14 @@
         "stroke-width": 2,
         "vector-effect": "non-scaling-stroke"
       });
-      this.#cleanup.push(sourceNode.observe("x", (v) => update(this.el, { x1: v + sourcePort.x })));
-      this.#cleanup.push(sourceNode.observe("y", (v) => update(this.el, { y1: v + sourcePort.y })));
-      this.#cleanup.push(targetNode.observe("x", (v) => update(this.el, { x2: v + targetPort.x })));
-      this.#cleanup.push(targetNode.observe("y", (v) => update(this.el, { y2: v + targetPort.y })));
-      this.#cleanup.push(sourcePort.observe("x", (v) => update(this.el, { x1: sourceNode.x + v })));
-      this.#cleanup.push(sourcePort.observe("y", (v) => update(this.el, { y1: sourceNode.y + v })));
-      this.#cleanup.push(targetPort.observe("x", (v) => update(this.el, { x2: targetNode.x + v })));
-      this.#cleanup.push(targetPort.observe("y", (v) => update(this.el, { y2: targetNode.y + v })));
-    }
-    start() {
+      this.#cleanup.push(sourceNode.observe("x", (v) => update2(this.el, { x1: v + sourcePort.x })));
+      this.#cleanup.push(sourceNode.observe("y", (v) => update2(this.el, { y1: v + sourcePort.y })));
+      this.#cleanup.push(targetNode.observe("x", (v) => update2(this.el, { x2: v + targetPort.x })));
+      this.#cleanup.push(targetNode.observe("y", (v) => update2(this.el, { y2: v + targetPort.y })));
+      this.#cleanup.push(sourcePort.observe("x", (v) => update2(this.el, { x1: sourceNode.x + v })));
+      this.#cleanup.push(sourcePort.observe("y", (v) => update2(this.el, { y1: sourceNode.y + v })));
+      this.#cleanup.push(targetPort.observe("x", (v) => update2(this.el, { x2: targetNode.x + v })));
+      this.#cleanup.push(targetPort.observe("y", (v) => update2(this.el, { y2: targetNode.y + v })));
     }
     stop() {
       this.el.remove();
@@ -2609,8 +2424,9 @@
 
   // src/application/ui/View.js
   var View = class {
-    application;
+    #application;
     #name;
+    #theme = "signalcraft-magenta-theme";
     #element;
     #svg;
     #scene;
@@ -2621,7 +2437,7 @@
     constructor({ name, element, application: application2 }) {
       this.#name = name;
       this.#element = element;
-      this.application = application2;
+      this.#application = application2;
     }
     start() {
       this.#svg = this.#installCanvas();
@@ -2650,6 +2466,8 @@
         const foo = document.getElementById("value-scale");
         foo.textContent = scale;
       });
+      this.#unsubscribe.push(this.#panzoom.dispose);
+      this.#installMenu();
       this.application.Nodes.forEach((node) => this.#createPanel(node));
       this.application.Links.forEach((node) => this.#createCable(node));
       const grandCentral = {
@@ -2772,6 +2590,11 @@
       svg2.appendChild(defs);
       return svg2;
     }
+    #installMenu() {
+      const container = html.p({ style: "border: 1px solid gold;", class: "p-1" }, "Hello World");
+      this.#element.appendChild(container);
+      console.log(container);
+    }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
       scene.setAttributeNS(null, "id", "scene");
@@ -2804,22 +2627,29 @@
       this.#renderers.get(item.id).stop();
     }
     #createPanel({ item }) {
-      const panel = new Panel({ node: item, view: this, root: this.#scene, name: "main panel", padd: 3 });
+      const panel = new Panel();
       this.#renderers.set(item.id, panel);
-      this.#scene.appendChild(panel.el);
-      panel.start();
+      panel.start({ data: item, view: this });
     }
     #deleteCable({ item }) {
       this.#renderers.get(item.id).stop();
     }
     #createCable({ item }) {
-      const cable = new Cable({ link: item, view: this, root: this.#scene, name: "cable", size: 3 });
+      const cable = new Cable();
       this.#renderers.set(item.id, cable);
-      this.#scene.appendChild(cable.el);
-      cable.start();
+      cable.start({ link: item, view: this, scene: this.#scene, name: "cable", size: 3 });
+    }
+    get application() {
+      return this.#application;
     }
     get transform() {
       return this.#transform;
+    }
+    get scene() {
+      return this.#scene;
+    }
+    get theme() {
+      return this.#theme;
     }
   };
 
@@ -2883,6 +2713,16 @@
   // src/setup.js
   var import_flattenDeep = __toESM(require_flattenDeep(), 1);
   function setup_default(application2) {
+    const testTwoThree = application2.Types.create({ type: "test/two-three" });
+    testTwoThree.output.push({ name: "output1", generator: ({ value, string }) => {
+      return string;
+    } });
+    testTwoThree.output.push({ name: "output2", generator: ({ value, string }) => {
+      return string;
+    } });
+    testTwoThree.input.push({ name: "string1", type: "string", description: "a string of letters", value: "default value" });
+    testTwoThree.input.push({ name: "string2", type: "string", description: "a string of letters", value: "default value" });
+    testTwoThree.input.push({ name: "string3", type: "string", description: "a string of letters", value: "default value" });
     const textType = application2.Types.create({ type: "text/string" });
     textType.output.push({ name: "output", generator: ({ value, string }) => {
       return string;
@@ -2919,17 +2759,22 @@
 
   // src/usage.js
   async function usage_default(api2) {
-    const stringA = api2.addNode("text/string", { string: "Hello" });
-    const stringB = api2.addNode("text/string", { string: "World" });
-    const stringC = api2.addNode("text/string", { string: "Meow!" });
-    const arrayJn = api2.addNode("array/join");
-    api2.linkPorts(stringA, arrayJn);
-    api2.linkPorts(stringB, arrayJn);
-    const result = await api2.execute(arrayJn);
-    console.log("usage.js api.execute said: ", result);
-    const actual = JSON.stringify(result);
-    const expect = JSON.stringify(["Hello", "World"]);
-    console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+    if (0) {
+      const stringA = api2.addNode("text/string", { string: "Hello" });
+      const stringB = api2.addNode("text/string", { string: "World" });
+      const stringC = api2.addNode("text/string", { string: "Meow!" });
+      const arrayJn = api2.addNode("array/join");
+      api2.linkPorts(stringA, arrayJn);
+      api2.linkPorts(stringB, arrayJn);
+      const result = await api2.execute(arrayJn);
+      console.log("usage.js api.execute said: ", result);
+      const actual = JSON.stringify(result);
+      const expect = JSON.stringify(["Hello", "World"]);
+      console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+    }
+    if (1) {
+      const stringA = api2.addNode("test/two-three", { string1: "Hello" });
+    }
   }
 
   // src/craft.js
