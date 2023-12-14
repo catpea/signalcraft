@@ -43,3 +43,7 @@
   fill: hsl(200,80%,20%);
   stroke: hsl(28,96%,25%);
 }
+
+.cable-line {
+  stroke: hsl(200,80%,20%)
+}

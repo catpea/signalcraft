@@ -16,14 +16,15 @@ export default class Caption extends Component {
 		this.group.appendChild(this.el.CaptionText);
 
 		const draggable = new Draggable({
-      container: window, // <g> element representing an SVG scene
-      draggable: this.el, // <g> element that contains the window
-      handle: this.el.Caption, // <rect> that is the caption of a window meant to be dragged
-      node: this.node,
-      // events
-      scale: o => this.view.transform.scale,
+      container: window,  // <g> element representing an SVG scene
+         handle: this.el.Caption, // <rect> that is the caption of a window meant to be dragged
+				   read: (property) => this.data[property],
+          write: (property, value) => this.data[property] = value,
     });
-    this.cleanup(draggable.stop);
+		this.cleanup(this.view.observe('transform', v=>draggable.scale = v.scale));
+		this.cleanup(draggable.stop);
+
+
 
 		this.children.map(child => child.render())
 	}

@@ -1,28 +1,21 @@
 export class Draggable {
-  // Private Class Fields
   #container;
-  #draggable;
   #handle;
-
+  #read;
+  #write;
+  #scale; // NOTE: set by a setter in this class, it is externaly set as view scale may change
+  // local variables
+  #dragging = false;
+  #initialPosition = { x: 0, y: 0 };
+  // handlers for cleanup
   #mouseDownHandler;
   #mouseMoveHandler;
   #mouseUpHandler;
-
-  #dragging = false;
-  #initialPosition = { x: 0, y: 0 };
-
-  #scale;
-  #node;
-
-  constructor({ container, draggable, handle, scale, node }) {
-
+  constructor({ container, handle, read, write }) {
     this.#container = container;
-    this.#draggable = draggable;
     this.#handle = handle;
-
-    this.#scale = scale;
-    this.#node = node;
-
+    this.#read = read;
+    this.#write = write;
     this.#mouseDownHandler = (e) => {
       // Remember where mouse touched down
       this.#initialPosition.x = e.clientX;
@@ -31,37 +24,26 @@ export class Draggable {
       this.#dragging = true;
       this.#container.addEventListener('mousemove', this.#mouseMoveHandler);
     };
-
     this.#mouseMoveHandler = (e) => {
-
-      //                                               //
       // NOTE: this code has been tested and it works. //
-      //                                               //
-
       // Start from beginning, using "" to have dx available throughout
       let dx = 0;
       let dy = 0;
-
       // Substract initial position from current cursor position to get relative motion, motion relative to initial touchdown
       dx = e.clientX - this.#initialPosition.x;
       dy = e.clientY - this.#initialPosition.y;
-
       // Add a scaled version of the node
-      dx = dx + (this.#node.x * this.#scale());
-      dy = dy + (this.#node.y * this.#scale());
-
+      dx = dx + (this.#read('x') * this.#scale);
+      dy = dy + (this.#read('y') * this.#scale);
       // Apply Scale Transformation To Everything
-      dx = dx / this.#scale();
-      dy = dy / this.#scale();
-
+      dx = dx / this.#scale;
+      dy = dy / this.#scale;
       // Final Asignment
-      this.#node.x = dx;
-      this.#node.y = dy;
-
+      this.#write('x', dx);
+      this.#write('y', dy);
       // End
       dx = 0;
       dy = 0;
-
       // Reset, because the cursor has moved and is in a new position now.
       this.#initialPosition.x = e.clientX;
       this.#initialPosition.y = e.clientY;
@@ -75,7 +57,9 @@ export class Draggable {
     this.#handle.addEventListener('mousedown', this.#mouseDownHandler);
     this.#container.addEventListener('mouseup', this.#mouseUpHandler);
   }
-
+  set scale(value){
+    this.#scale = value;
+  }
   stop() {
     this.#handle.removeEventListener('mousedown', this.#mouseDownHandler);
     this.#container.removeEventListener('mousemove', this.#mouseMoveHandler);

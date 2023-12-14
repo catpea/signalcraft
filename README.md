@@ -5,10 +5,12 @@ A tiny visual programming language.
 
 ### Urgent!
 
-- Configure Drag Window (requires removal of unused properties and simplification)
 - Configure Connect Ports (requires removal of unused properties and simplification)
+- Investigate container as the key mechanism in Context control
 
 ### Main
+
+- Drag Cable at any point to take over XY of destination?
 
 - Node Property Editor (YAML First)
 

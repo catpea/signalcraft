@@ -2,13 +2,12 @@ import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
 import { html, svg, text, list, update } from "domek";
 
+import ReactiveObject from "../system/ReactiveObject.js";
+
 import Panel from './view/Panel.js';
 import Cable from './view/Cable.js';
 
-
-// import NodeRenderer from './NodeRenderer.js';
-
-export default class View {
+export default class View extends ReactiveObject {
   #application;
 
   #name;
@@ -26,9 +25,19 @@ export default class View {
   #unsubscribe = [];
 
   constructor({name, element, application}) {
+    super()
     this.#name = name;
     this.#element = element;
     this.#application = application;
+
+
+    const props = {
+      transform: {x:0, y:0, scale:1},
+    };
+
+    Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+
+
   }
 
   start() {
@@ -47,7 +56,7 @@ export default class View {
 
       beforeMouseDown: function(e) {
         // console.log( e.target );
-        if(e.target.classList.contains('caption')) return true;
+        if(e.target.classList.contains('panel-caption')) return true;
         if(e.target.classList.contains('ant-trail')) return true;
         if(e.target.classList.contains('port')) return true;
       }
@@ -55,15 +64,14 @@ export default class View {
     });
     this.#panzoom.on('transform',  (e) =>{
       const {x, y, scale} = this.#panzoom.getTransform();
-      this.#transform = {x, y, scale};
-      const foo = document.getElementById("value-scale");
-      foo.textContent = scale ;
+      this.transform = {x, y, scale};
     });
 
     this.#unsubscribe.push(this.#panzoom.dispose);
 
 
     this.#installMenu()
+    this.#unsubscribe.push(this.observe('transform', v=>document.getElementById("value-scale").textContent = v.scale));
 
 
 

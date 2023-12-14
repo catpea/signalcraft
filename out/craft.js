@@ -2312,23 +2312,24 @@
 
   // src/application/ui/view/ux/caption/Draggable.js
   var Draggable = class {
-    // Private Class Fields
     #container;
-    #draggable;
     #handle;
+    #read;
+    #write;
+    #scale;
+    // NOTE: set by a setter in this class, it is externaly set as view scale may change
+    // local variables
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    // handlers for cleanup
     #mouseDownHandler;
     #mouseMoveHandler;
     #mouseUpHandler;
-    #dragging = false;
-    #initialPosition = { x: 0, y: 0 };
-    #scale;
-    #node;
-    constructor({ container, draggable, handle, scale, node }) {
+    constructor({ container, handle, read, write }) {
       this.#container = container;
-      this.#draggable = draggable;
       this.#handle = handle;
-      this.#scale = scale;
-      this.#node = node;
+      this.#read = read;
+      this.#write = write;
       this.#mouseDownHandler = (e) => {
         this.#initialPosition.x = e.clientX;
         this.#initialPosition.y = e.clientY;
@@ -2340,12 +2341,12 @@
         let dy = 0;
         dx = e.clientX - this.#initialPosition.x;
         dy = e.clientY - this.#initialPosition.y;
-        dx = dx + this.#node.x * this.#scale();
-        dy = dy + this.#node.y * this.#scale();
-        dx = dx / this.#scale();
-        dy = dy / this.#scale();
-        this.#node.x = dx;
-        this.#node.y = dy;
+        dx = dx + this.#read("x") * this.#scale;
+        dy = dy + this.#read("y") * this.#scale;
+        dx = dx / this.#scale;
+        dy = dy / this.#scale;
+        this.#write("x", dx);
+        this.#write("y", dy);
         dx = 0;
         dy = 0;
         this.#initialPosition.x = e.clientX;
@@ -2357,6 +2358,9 @@
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
     }
     stop() {
       this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
@@ -2377,14 +2381,12 @@
       const draggable = new Draggable({
         container: window,
         // <g> element representing an SVG scene
-        draggable: this.el,
-        // <g> element that contains the window
         handle: this.el.Caption,
         // <rect> that is the caption of a window meant to be dragged
-        node: this.node,
-        // events
-        scale: (o) => this.view.transform.scale
+        read: (property) => this.data[property],
+        write: (property, value) => this.data[property] = value
       });
+      this.cleanup(this.view.observe("transform", (v) => draggable.scale = v.scale));
       this.cleanup(draggable.stop);
       this.children.map((child) => child.render());
     }
@@ -2551,6 +2553,8 @@
       container.setBounds({ border: 1, gap: 5, radius: 5, padding: 2 });
       container.setView(view);
       container.setData(data);
+      this.cleanup(data.observe("x", (v) => update2(container.group, { "transform": `translate(${v},${data.y})` })));
+      this.cleanup(data.observe("y", (v) => update2(container.group, { "transform": `translate(${data.x},${v})` })));
       const caption = new Caption(`caption`);
       caption.setBounds({ border: 1, height: 32, width: "100%", radius: 3, margin: 4 });
       container.add(caption);
@@ -2631,7 +2635,7 @@
   };
 
   // src/application/ui/View.js
-  var View = class {
+  var View = class extends ReactiveObject {
     #application;
     #name;
     #classPrefix = "scui-";
@@ -2644,9 +2648,14 @@
     #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
     constructor({ name, element, application: application2 }) {
+      super();
       this.#name = name;
       this.#element = element;
       this.#application = application2;
+      const props = {
+        transform: { x: 0, y: 0, scale: 1 }
+      };
+      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
       this.#svg = this.#installCanvas();
@@ -2661,7 +2670,7 @@
         initialY: 500,
         initialZoom: 0.5,
         beforeMouseDown: function(e) {
-          if (e.target.classList.contains("caption"))
+          if (e.target.classList.contains("panel-caption"))
             return true;
           if (e.target.classList.contains("ant-trail"))
             return true;
@@ -2671,12 +2680,11 @@
       });
       this.#panzoom.on("transform", (e) => {
         const { x, y, scale } = this.#panzoom.getTransform();
-        this.#transform = { x, y, scale };
-        const foo = document.getElementById("value-scale");
-        foo.textContent = scale;
+        this.transform = { x, y, scale };
       });
       this.#unsubscribe.push(this.#panzoom.dispose);
       this.#installMenu();
+      this.#unsubscribe.push(this.observe("transform", (v) => document.getElementById("value-scale").textContent = v.scale));
       this.application.Nodes.forEach((node) => this.#createPanel(node));
       this.application.Links.forEach((node) => this.#createCable(node));
       const grandCentral = {

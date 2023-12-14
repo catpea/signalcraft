@@ -17,6 +17,11 @@ export default class Panel {
       container.setView(view);
       container.setData(data);
 
+      // NOTE: this is where Panel moves to match x/y of the node.
+      this.cleanup(data.observe('x',v=>update(container.group,{'transform':`translate(${v},${data.y})`} )));
+      this.cleanup(data.observe('y',v=>update(container.group,{'transform':`translate(${data.x},${v})`} )));
+
+
       const caption = new Caption(`caption`);
       caption.setBounds({border:1, height: 32, width:'100%', radius:3, margin: 4});
       container.add(caption)
