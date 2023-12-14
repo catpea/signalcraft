@@ -3,9 +3,12 @@ A tiny visual programming language.
 
 ## TODO
 
+### Urgent!
+
 - Configure Drag Window
 - Configure Connect Ports
-- Fix Cable
+
+### Main
 
 - Node Property Editor (YAML First)
 
