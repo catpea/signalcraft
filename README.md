@@ -5,8 +5,8 @@ A tiny visual programming language.
 
 ### Urgent!
 
-- Configure Drag Window
-- Configure Connect Ports
+- Configure Drag Window (requires removal of unused properties and simplification)
+- Configure Connect Ports (requires removal of unused properties and simplification)
 
 ### Main
 
