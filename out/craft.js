@@ -2586,40 +2586,29 @@
 
   // src/application/ui/view/Cable.js
   var Cable = class {
-    #application;
+    el = {};
     #cleanup = [];
-    #link;
-    #view;
-    #root;
-    #name;
-    #size;
-    #main;
-    #home;
-    #padd;
+    // #link;
+    // #view;
+    // #root;
+    // #name;
+    // #size;
+    // #main;
+    // #home;
+    // #padd;
     constructor() {
     }
-    start({ node, scene, view }) {
-    }
-    start_OLD(setup) {
-      this.#application = setup.link.application;
-      this.#link = setup.link;
-      this.#view = setup.view;
-      this.#root = setup.root;
-      this.#name = setup.name;
-      this.#size = setup.size;
-      this.#main = setup.main;
-      this.#home = setup.home;
-      this.#padd = setup.padd;
-      const sourceNode = this.#application.Nodes.id(this.#link.sourceNode);
-      const targetNode = this.#application.Nodes.id(this.#link.targetNode);
-      const sourcePort = sourceNode.Output.id(this.#link.sourcePort);
-      const targetPort = targetNode.Input.id(this.#link.targetPort);
+    start({ link, view }) {
+      const sourceNode = view.application.Nodes.id(link.sourceNode);
+      const targetNode = view.application.Nodes.id(link.targetNode);
+      const sourcePort = sourceNode.Output.id(link.sourcePort);
+      const targetPort = targetNode.Input.id(link.targetPort);
       let x1 = sourceNode.x + sourcePort.x;
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
-      this.el = svg.line({
-        class: "ant-trail",
+      this.el.Cable = svg.line({
+        class: "ant-trail cable-line",
         x1,
         y1,
         x2,
@@ -2629,17 +2618,14 @@
         "stroke-width": 2,
         "vector-effect": "non-scaling-stroke"
       });
-      this.#cleanup.push(sourceNode.observe("x", (v) => update2(this.el, { x1: v + sourcePort.x })));
-      this.#cleanup.push(sourceNode.observe("y", (v) => update2(this.el, { y1: v + sourcePort.y })));
-      this.#cleanup.push(targetNode.observe("x", (v) => update2(this.el, { x2: v + targetPort.x })));
-      this.#cleanup.push(targetNode.observe("y", (v) => update2(this.el, { y2: v + targetPort.y })));
-      this.#cleanup.push(sourcePort.observe("x", (v) => update2(this.el, { x1: sourceNode.x + v })));
-      this.#cleanup.push(sourcePort.observe("y", (v) => update2(this.el, { y1: sourceNode.y + v })));
-      this.#cleanup.push(targetPort.observe("x", (v) => update2(this.el, { x2: targetNode.x + v })));
-      this.#cleanup.push(targetPort.observe("y", (v) => update2(this.el, { y2: targetNode.y + v })));
+      this.#cleanup.push(sourceNode.observe("x", (v) => update2(this.el.Cable, { x1: v + sourcePort.x })));
+      this.#cleanup.push(sourceNode.observe("y", (v) => update2(this.el.Cable, { y1: v + sourcePort.y })));
+      this.#cleanup.push(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
+      this.#cleanup.push(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
+      view.scene.appendChild(this.el.Cable);
     }
     stop() {
-      this.el.remove();
+      this.el.Cable.remove();
       this.#cleanup.map((x) => x());
     }
   };
