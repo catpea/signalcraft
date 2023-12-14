@@ -2503,9 +2503,17 @@
       let moveDown = this.height / 2;
       let moveHorizontally = 10;
       if (this.data.direction == "input") {
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: this.x - moveHorizontally, cy: this.y + moveDown, r: 8, height: this.height / 3 });
+        const x = this.x - moveHorizontally;
+        const y = this.y + moveDown;
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 8, height: this.height / 3 });
+        this.data.x = x;
+        this.data.y = y;
       } else {
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: this.x + this.width + moveHorizontally, cy: this.y + moveDown, r: 8, height: this.height / 3 });
+        const x = this.x + this.width + moveHorizontally;
+        const y = this.y + moveDown;
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 8, height: this.height / 3 });
+        this.data.x = x;
+        this.data.y = y;
       }
     }
     render() {
