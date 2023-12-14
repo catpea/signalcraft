@@ -12,7 +12,7 @@ export default async function(api){
   //                           |        .run()
   //                           v
 
-  if(0){
+  if(1){
   // define your components
   const stringA = api.addNode("text/string", { string: "Hello" } );
   const stringB = api.addNode("text/string", { string: "World" } );
@@ -34,7 +34,7 @@ export default async function(api){
   }
 
 
-  if(1){
+  if(0){
 
     const stringA = api.addNode("test/two-three", { string1: "Hello" } );
 

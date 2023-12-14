@@ -1,39 +1,45 @@
 .view-scene {
 }
 .view-scene-background {
-  fill: hsl(100, 40%, 35%);
+  fill: hsl(215,26%,13%);
 }
 
 .panel-container {
-  filter: drop-shadow(16px 16px 20px hsl(100, 40%, 15%));
-  fill: hsl(100, 40%, 35%);
-  stroke: hsl(100, 40%, 15%);
+  filter: drop-shadow(4px 4px 20px hsl(215,26%,5%));
+  fill: hsl(283,23%,15%);
+  stroke: hsl(283,23%,10%);
 }
 
 .panel-caption {
-  fill: hsl(120, 40%, 45%);
-  stroke: hsl(130, 40%, 15%);
+  fill: hsl(215,28%,12%);
+  stroke: hsl(283,23%,10%);
 }
 
 .panel-caption-text {
-  fill: white;
+  fill: hsl(7,45%,47%);
+  font-size: 1.5rem;
+  pointer-events: none;
+  user-select: none;
 }
-
 .panel-pod {
-  fill: hsl(120, 40%, 45%);
-  stroke: hsl(130, 40%, 15%);
+  fill: hsl(215,28%,12%);
+  stroke: hsl(283,23%,10%);
 }
 
 .panel-line {
-  fill: hsl(120, 40%, 45%);
-  stroke: hsl(130, 40%, 15%);
+  fill: none;
+  /* fill: hsl(283,23%,15%); */
+  /* stroke: hsl(283,23%,10%); */
 }
 
 .panel-line-text {
-  fill: white;
+  fill: hsl(170,13%,35%);
+  font-size: .75rem;
+  pointer-events: none;
+  user-select: none;
 }
 
 .panel-line-port {
-  fill: hsl(150, 40%, 10%);
-  stroke: hsl(130, 40%, 35%);
+  fill: hsl(200,80%,20%);
+  stroke: hsl(28,96%,25%);
 }

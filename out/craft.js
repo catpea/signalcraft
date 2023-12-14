@@ -2974,7 +2974,7 @@
 
   // src/usage.js
   async function usage_default(api2) {
-    if (0) {
+    if (1) {
       const stringA = api2.addNode("text/string", { string: "Hello" });
       const stringB = api2.addNode("text/string", { string: "World" });
       const stringC = api2.addNode("text/string", { string: "Meow!" });
@@ -2987,7 +2987,7 @@
       const expect = JSON.stringify(["Hello", "World"]);
       console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
     }
-    if (1) {
+    if (0) {
       const stringA = api2.addNode("test/two-three", { string1: "Hello" });
     }
   }

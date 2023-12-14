@@ -16,8 +16,12 @@ export default class Line extends Component {
     let moveHorizontally = 10;
     if(this.data.direction == 'input') {
       this.el.Port = svg.circle({ class:'panel-line-port', cx: this.x-moveHorizontally, cy: this.y+moveDown, r: 8, height: this.height/3 });
+      //TODO: this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
+      //TODO: this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
     }else{
       this.el.Port = svg.circle({ class:'panel-line-port', cx: this.x+this.width+moveHorizontally, cy: this.y+moveDown, r: 8, height: this.height/3 });
+      //TODO: this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
+      //TODO: this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
     }
   }
 
