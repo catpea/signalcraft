@@ -2192,41 +2192,57 @@
     data;
     view;
     group = svg.g();
-    root = true;
+    isRoot = true;
     // by being added it is no longer a root container
+    root = null;
+    // reference to root
     parent = null;
     bounds = {
       x: 0,
       y: 0,
-      width: 300,
+      width: 0,
       height: 0,
       gap: 0,
-      margin: 0,
       border: 0,
-      padding: 0
+      padding: 0,
+      radius: 0
     };
     children = [];
     constructor(name, { view } = {}) {
+      this.root = this;
       this.name = name;
       this.view = view;
     }
     get #above() {
-      if (this.root)
+      if (this.isRoot)
         return [this];
       const selfIndex = this.parent.children.indexOf(this);
       return [...this.parent.children.slice(0, selfIndex)];
     }
-    get y() {
-      if (this.root)
+    get x() {
+      if (this.isRoot)
         return 0;
-      console.log(`#above ${this.name} =`, this.#above.map((o) => o.name).join(", "), this.#above.length, this.#above);
-      return 0 + this.parent.y + this.parent.bounds.margin + this.parent.bounds.border + this.parent.bounds.padding + this.#above.reduce((total, child) => total + child.height, 0) + this.parent.bounds.gap * this.#above.length;
+      return 0 + this.parent.x + this.parent.bounds.border + this.parent.bounds.padding;
+    }
+    get y() {
+      if (this.isRoot)
+        return 0;
+      return 0 + this.parent.y + this.parent.bounds.border + this.parent.bounds.padding + this.#above.reduce((total, child) => total + child.height, 0) + this.parent.bounds.gap * this.#above.length;
+    }
+    get width() {
+      if (isPercentValue(this.bounds.width))
+        return this.siblings.reduce((max, sibling) => sibling.width > max ? sibling.width : max, 0) * (parseInt(this.bounds.width) / 100);
+      return 0 + this.bounds.border + this.bounds.padding + (this.bounds.width || this.children.reduce((max, child) => child.width > max ? child.width : max, 0)) + this.bounds.padding + this.bounds.border;
     }
     get height() {
-      return 0 + this.bounds.margin + this.bounds.border + this.bounds.padding + this.bounds.height + this.children.reduce((total, child) => total + child.height, 0) + this.bounds.gap * (this.children.length > 0 ? this.children.length - 1 : 0) + this.bounds.padding + this.bounds.border + this.bounds.margin;
+      return 0 + this.bounds.border + this.bounds.padding + this.bounds.height + this.children.reduce((total, child) => total + child.height, 0) + this.bounds.gap * (this.children.length > 0 ? this.children.length - 1 : 0) + this.bounds.padding + this.bounds.border;
+    }
+    get radius() {
+      return this.bounds.radius;
     }
     add(child) {
-      child.root = false;
+      child.isRoot = false;
+      child.root = this.root;
       child.parent = this;
       child.view = this.view;
       if (!child.data)
@@ -2234,6 +2250,12 @@
       child.group = this.group;
       this.children.push(child);
       return this;
+    }
+    get siblings() {
+      return this.parent ? this.parent.children.filter((child) => child !== this) : [];
+    }
+    get all() {
+      return [...this.children, ...flatten(this.children.map((child) => child.all))];
     }
     setup() {
       this.children.map((child) => child.setup());
@@ -2247,15 +2269,30 @@
       return this;
     }
     setBounds(data) {
+      if (Object.values(data).filter((item) => typeof item == "string").filter((item) => !item.endsWith("%")).length)
+        throw new Error("String without percent is not supported.");
       Object.assign(this.bounds, data);
       return this;
     }
   };
+  function isPercentValue(input) {
+    let output2 = false;
+    if (typeof input == "string" && input.endsWith("%"))
+      output2 = true;
+    return output2;
+  }
 
   // src/application/ui/view/ux/Container.js
   var Container = class extends Component {
     setup() {
-      this.el.Panel = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
+      this.el.Panel = svg.rect({
+        class: "panel-container",
+        ry: this.radius,
+        width: this.width,
+        x: this.x,
+        y: this.y,
+        height: this.height
+      });
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2272,8 +2309,8 @@
   // src/application/ui/view/ux/Caption.js
   var Caption = class extends Component {
     setup() {
-      this.el.Caption = svg.rect({ class: `caption`, filter: `url(#shadow-primary)`, ry: 5, width: 100, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
-      this.el.CaptionText = svg.text({ class: `caption-text`, y: this.y + (this.height - this.height / 5) }, this.data.type);
+      this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.CaptionText = svg.text({ class: `panel-caption-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
     }
     render() {
       this.group.appendChild(this.el.Caption);
@@ -2289,7 +2326,7 @@
   // src/application/ui/view/ux/Pod.js
   var Pod = class extends Component {
     setup() {
-      this.el.Pod = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, x: 5, y: this.y, height: this.height, fill: this.data.backgroundColor, stroke: "black" });
+      this.el.Pod = svg.rect({ class: "panel-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2304,8 +2341,8 @@
   // src/application/ui/view/ux/Line.js
   var Line = class extends Component {
     setup() {
-      this.el.Line = svg.rect({ class: "interactive", filter: `url(#shadow-primary)`, ry: 5, width: 100, x: 10, y: this.y, height: this.height, fill: this.parent.data.backgroundColor, stroke: "black" });
-      this.el.LineText = svg.text({ class: `line-text`, y: this.y + (this.height - this.height / 5) }, this.data.name);
+      this.el.Line = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height / 5) }, this.data.name);
       console.log(this.data);
       this.children.map((child) => child.setup());
     }
@@ -2325,33 +2362,32 @@
     #cleanup = [];
     start({ data, view }) {
       const container = new Container(`container`);
-      container.setBounds({ border: 1 });
+      container.setBounds({ border: 1, gap: 5, radius: 5, padding: 2 });
       container.setView(view);
       container.setData(data);
       const caption = new Caption(`caption`);
-      caption.setBounds({ border: 1, height: 32 });
+      caption.setBounds({ border: 1, height: 32, width: "100%", radius: 3, margin: 4 });
       container.add(caption);
       const outputPod = new Pod(`outputPod`);
-      outputPod.setBounds({ gap: 2, padding: 1, border: 1 });
+      outputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
       container.add(outputPod);
+      const inputPod = new Pod(`inputPod`);
+      inputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
+      container.add(inputPod);
       data.Output.forEach((data2, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({ height: 24 });
+        port.setBounds({ height: 32, width: 150, radius: 3, margin: 2 });
         port.setData(data2);
         outputPod.add(port);
       });
-      const inputPod = new Pod(`inputPod`);
-      inputPod.setBounds({ gap: 2, padding: 1, border: 1 });
-      container.add(inputPod);
       data.Input.forEach((data2, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({ height: 24 });
+        port.setBounds({ height: 32, width: 150, radius: 3 });
         port.setData(data2);
         inputPod.add(port);
       });
       container.setup();
       container.render();
-      console.log(container.height, 12);
       this.cleanup(container);
     }
     stop() {
@@ -2426,6 +2462,7 @@
   var View = class {
     #application;
     #name;
+    #classPrefix = "scui-";
     #theme = "signalcraft-magenta-theme";
     #element;
     #svg;
@@ -2597,15 +2634,15 @@
     }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      scene.setAttributeNS(null, "class", "view-scene");
       scene.setAttributeNS(null, "id", "scene");
       this.#svg.appendChild(scene);
       const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect2.setAttributeNS(null, "class", "background");
+      rect2.setAttributeNS(null, "class", "view-scene-background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
       rect2.setAttributeNS(null, "width", 11e3);
       rect2.setAttributeNS(null, "height", 8500);
-      rect2.setAttributeNS(null, "fill", "url(#background-primary)");
       scene.appendChild(rect2);
       const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
       vertical1.setAttributeNS(null, "x1", "100");

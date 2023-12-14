@@ -5,7 +5,7 @@ import Component from "./Component.js";
 export default class Pod extends Component {
 
   setup(){
-    this.el.Pod = svg.rect({ class: 'interactive', filter: `url(#shadow-primary)` , ry: 5, width: 100, x:5, y:this.y, height: this.height, fill: this.data.backgroundColor, stroke: 'black', });
+    this.el.Pod = svg.rect({ class: 'panel-pod', ry: this.radius, width: this.width, x:this.x, y:this.y, height: this.height});
     this.children.map(child=>child.setup())
   }
 

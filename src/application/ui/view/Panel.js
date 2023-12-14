@@ -13,54 +13,38 @@ export default class Panel {
   start({data, view}){
 
       const container = new Container(`container`);
-      container.setBounds({border:1});
+      container.setBounds({border:1, gap:5, radius:5, padding:2 });
       container.setView(view);
       container.setData(data);
 
       const caption = new Caption(`caption`);
-      caption.setBounds({border:1, height: 32});
+      caption.setBounds({border:1, height: 32, width:'100%', radius:3, margin: 4});
       container.add(caption)
 
       const outputPod = new Pod(`outputPod`);
-      outputPod.setBounds({gap: 2, padding: 1, border:1});
+      outputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
       container.add(outputPod)
+
+      const inputPod = new Pod(`inputPod`);
+      inputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
+      container.add(inputPod);
 
       data.Output.forEach((data, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({height: 24});
+        port.setBounds({height: 32, width:150, radius:3, margin: 2});
         port.setData(data);
         outputPod.add( port )
       });
 
-      const inputPod = new Pod(`inputPod`);
-      inputPod.setBounds({gap: 2, padding: 1, border:1});
-      container.add(inputPod);
-
       data.Input.forEach((data, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({height: 24});
+        port.setBounds({height: 32, width:150, radius:3});
         port.setData(data);
         inputPod.add( port )
       });
 
       container.setup();
       container.render();
-
-      console.log(container.height, 12);
-
-      // container.node = node;
-      // container.view = view;
-      // container.root = root;
-      //
-      // container.append(new Caption({size:64}));
-      //
-      // const outputPod = new Pod();
-      // const inputPod = new Pod();
-      // container.append(outputPod);
-      // container.append(inputPod);
-      //
-      // this.#node.Output.forEach( (data,index) => outputPod.append( new Line({size:32}) ));
-      // this.#node.Input.forEach( (data,index) => outputPod.append( new Line({size:32}) ));
 
       this.cleanup(container);
   }

@@ -1,0 +1,34 @@
+.view-scene {
+}
+.view-scene-background {
+  fill: hsl(100, 40%, 35%);
+}
+
+.panel-container {
+  filter: drop-shadow(16px 16px 20px hsl(100, 40%, 15%));
+  fill: hsl(100, 40%, 35%);
+  stroke: hsl(100, 40%, 15%);
+}
+
+.panel-caption {
+  fill: hsl(120, 40%, 45%);
+  stroke: hsl(130, 40%, 15%);
+}
+
+.panel-caption-text {
+  fill: white;
+}
+
+.panel-pod {
+  fill: hsl(120, 40%, 45%);
+  stroke: hsl(130, 40%, 15%);
+}
+
+.panel-line {
+  fill: hsl(120, 40%, 45%);
+  stroke: hsl(130, 40%, 15%);
+}
+
+.panel-line-text {
+  fill: white;
+}

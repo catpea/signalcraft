@@ -3,15 +3,11 @@ A tiny visual programming language.
 
 ## TODO
 
-add .x to the layout engine
-consider bounds margin to become a [0, 3, [0], [3]] with top right, bottom left like in CSS
-Fix Cable
-move dode from alpha-code to the new layout engine,
-copy the Drag Window and Connect  Ports libraries (alpha-code)
-import Container from "./ux/Container.js";
-import Caption from "./ux/Caption.js";
-import Pod from "./ux/Pod.js";
-import Line from "./ux/Line.js";
+- fix Line Dot
+- copy the Drag Window
+- copy Connect Ports
+- move code from alpha-code to the new layout engine,
+- Fix Cable
 
 - Node Property Editor (YAML First)
 
@@ -20,6 +16,8 @@ import Line from "./ux/Line.js";
 - Remove Node w/t Cable Clean-up
 - Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
 - Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
+
+- consider bounds padding to become a [0, 3, [0], [3]] with top right, bottom left like in CSS
 
 - Update Theme + Multiple Themes
 - Input/Output Line where both I/O ports visually align for neat programs (Line.js)

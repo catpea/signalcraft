@@ -5,7 +5,14 @@ import Component from "./Component.js";
 export default class Container extends Component {
 
   setup(){
-    this.el.Panel = svg.rect({ class: 'interactive', filter: `url(#shadow-primary)` , ry: 5, width: 100, y:this.y, height: this.height, fill: this.data.backgroundColor, stroke: 'black', });
+    this.el.Panel = svg.rect({
+      class: 'panel-container',
+      ry: this.radius,
+      width:this.width,
+      x:this.x,
+      y:this.y,
+      height:this.height,
+    });
 
     this.children.map(child=>child.setup())
   }

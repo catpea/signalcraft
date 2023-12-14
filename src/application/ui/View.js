@@ -12,6 +12,7 @@ export default class View {
   #application;
 
   #name;
+  #classPrefix = "scui-";
   #theme = "signalcraft-magenta-theme";
 
   #element;
@@ -230,16 +231,16 @@ export default class View {
 
   #installScene() {
     const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    scene.setAttributeNS(null, "class", "view-scene");
     scene.setAttributeNS(null, "id", "scene");
     this.#svg.appendChild(scene);
 
     const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect2.setAttributeNS(null, "class", "background");
+    rect2.setAttributeNS(null, "class", "view-scene-background");
     rect2.setAttributeNS(null, "x", "0");
     rect2.setAttributeNS(null, "y", "0");
     rect2.setAttributeNS(null, "width", 11_000);
     rect2.setAttributeNS(null, "height", 8_500);
-    rect2.setAttributeNS(null, "fill", "url(#background-primary)");
     scene.appendChild(rect2);
 
     const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
