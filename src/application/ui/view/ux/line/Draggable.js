@@ -1,6 +1,6 @@
 import { html, svg, text, list, update } from "domek";
 
-export class DraggableConnector {
+export class Draggable {
 	#application;
 	#container;
 	#draggable;

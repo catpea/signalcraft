@@ -32,3 +32,8 @@
 .panel-line-text {
   fill: white;
 }
+
+.panel-line-port {
+  fill: hsl(150, 40%, 10%);
+  stroke: hsl(130, 40%, 35%);
+}

@@ -3,10 +3,8 @@ A tiny visual programming language.
 
 ## TODO
 
-- fix Line Dot
-- copy the Drag Window
-- copy Connect Ports
-- move code from alpha-code to the new layout engine,
+- Configure Drag Window
+- Configure Connect Ports
 - Fix Cable
 
 - Node Property Editor (YAML First)

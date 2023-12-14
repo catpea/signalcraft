@@ -1,5 +1,7 @@
 import { svg, text, update } from "domek";
 
+import { Draggable } from   "./caption/Draggable.js";
+
 import Component from "./Component.js";
 
 export default class Caption extends Component {
@@ -12,6 +14,16 @@ export default class Caption extends Component {
 	render() {
 		this.group.appendChild(this.el.Caption);
 		this.group.appendChild(this.el.CaptionText);
+
+		const draggable = new Draggable({
+      container: window, // <g> element representing an SVG scene
+      draggable: this.el, // <g> element that contains the window
+      handle: this.el.Caption, // <rect> that is the caption of a window meant to be dragged
+      node: this.node,
+      // events
+      scale: o => this.view.transform.scale,
+    });
+    this.cleanup(draggable.stop);
 
 		this.children.map(child => child.render())
 	}

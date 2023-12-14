@@ -2208,6 +2208,7 @@
       radius: 0
     };
     children = [];
+    #cleanup = [];
     constructor(name, { view } = {}) {
       this.root = this;
       this.name = name;
@@ -2274,6 +2275,9 @@
       Object.assign(this.bounds, data);
       return this;
     }
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
+    }
   };
   function isPercentValue(input) {
     let output2 = false;
@@ -2306,6 +2310,61 @@
     }
   };
 
+  // src/application/ui/view/ux/caption/Draggable.js
+  var Draggable = class {
+    // Private Class Fields
+    #container;
+    #draggable;
+    #handle;
+    #mouseDownHandler;
+    #mouseMoveHandler;
+    #mouseUpHandler;
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    #scale;
+    #node;
+    constructor({ container, draggable, handle, scale, node }) {
+      this.#container = container;
+      this.#draggable = draggable;
+      this.#handle = handle;
+      this.#scale = scale;
+      this.#node = node;
+      this.#mouseDownHandler = (e) => {
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+        this.#dragging = true;
+        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#mouseMoveHandler = (e) => {
+        let dx = 0;
+        let dy = 0;
+        dx = e.clientX - this.#initialPosition.x;
+        dy = e.clientY - this.#initialPosition.y;
+        dx = dx + this.#node.x * this.#scale();
+        dy = dy + this.#node.y * this.#scale();
+        dx = dx / this.#scale();
+        dy = dy / this.#scale();
+        this.#node.x = dx;
+        this.#node.y = dy;
+        dx = 0;
+        dy = 0;
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+      };
+      this.#mouseUpHandler = (e) => {
+        this.#dragging = false;
+        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
   // src/application/ui/view/ux/Caption.js
   var Caption = class extends Component {
     setup() {
@@ -2315,6 +2374,18 @@
     render() {
       this.group.appendChild(this.el.Caption);
       this.group.appendChild(this.el.CaptionText);
+      const draggable = new Draggable({
+        container: window,
+        // <g> element representing an SVG scene
+        draggable: this.el,
+        // <g> element that contains the window
+        handle: this.el.Caption,
+        // <rect> that is the caption of a window meant to be dragged
+        node: this.node,
+        // events
+        scale: (o) => this.view.transform.scale
+      });
+      this.cleanup(draggable.stop);
       this.children.map((child) => child.render());
     }
     update() {
@@ -2338,6 +2409,90 @@
     }
   };
 
+  // src/application/ui/view/ux/line/Draggable.js
+  var Draggable2 = class {
+    #application;
+    #container;
+    #draggable;
+    #handle;
+    #mouseDownHandler;
+    #mouseMoveHandler;
+    #mouseUpHandler;
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    #scale;
+    #node;
+    #line;
+    #data;
+    #main;
+    constructor({ application: application2, container, draggable, handle, scale, node, data, main }) {
+      this.#data = data;
+      this.#main = main;
+      this.#application = application2;
+      this.#container = container;
+      this.#draggable = draggable;
+      this.#handle = handle;
+      this.#scale = scale;
+      this.#node = node;
+      this.#mouseDownHandler = (e) => {
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+        this.#dragging = true;
+        this.#line = svg.line({
+          class: "ant-trail",
+          stroke: "green",
+          fill: "transparent",
+          "stroke-width": 2,
+          "vector-effect": "non-scaling-stroke"
+        });
+        this.#main.el.appendChild(this.#line);
+        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#mouseMoveHandler = (e) => {
+        let dx = 0;
+        let dy = 0;
+        dx = e.clientX - this.#initialPosition.x;
+        dy = e.clientY - this.#initialPosition.y;
+        dx = dx + this.#data.x * this.#scale();
+        dy = dy + this.#data.y * this.#scale();
+        dx = dx / this.#scale();
+        dy = dy / this.#scale();
+        const geometry = {
+          x1: this.#data.x,
+          y1: this.#data.y,
+          x2: dx,
+          y2: dy
+        };
+        update2(this.#line, geometry);
+        dx = 0;
+        dy = 0;
+      };
+      this.#mouseUpHandler = (e) => {
+        if (this.#dragging && e.target && e.target.classList.contains("port")) {
+          const portAddress = e.target.dataset.portAddress;
+          const [targetNodeId, targetPortId] = portAddress.split(":");
+          this.#application.Links.create({
+            sourceNode: this.#node.id,
+            sourcePort: this.#data.id,
+            targetNode: targetNodeId,
+            targetPort: targetPortId
+          });
+        }
+        if (this.#line)
+          this.#line.remove();
+        this.#dragging = false;
+        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
   // src/application/ui/view/ux/Line.js
   var Line = class extends Component {
     setup() {
@@ -2345,10 +2500,33 @@
       this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height / 5) }, this.data.name);
       console.log(this.data);
       this.children.map((child) => child.setup());
+      let moveDown = this.height / 2;
+      let moveHorizontally = 10;
+      if (this.data.direction == "input") {
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: this.x - moveHorizontally, cy: this.y + moveDown, r: 8, height: this.height / 3 });
+      } else {
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: this.x + this.width + moveHorizontally, cy: this.y + moveDown, r: 8, height: this.height / 3 });
+      }
     }
     render() {
       this.group.appendChild(this.el.Line);
       this.group.appendChild(this.el.LineText);
+      this.group.appendChild(this.el.Port);
+      const draggable = new Draggable2({
+        application: this.view.application,
+        // <g> element representing an SVG scene
+        container: window,
+        // <g> element representing an SVG scene
+        draggable: this.el,
+        // <g> element that contains the window
+        handle: this.el.Port,
+        main: this.main,
+        node: this.node,
+        data: this.data,
+        // events
+        scale: (o) => this.view.transform.scale
+      });
+      this.cleanup(draggable.stop);
       this.children.map((child) => child.render());
     }
     update() {

@@ -28,6 +28,9 @@ export default class Component {
 
 	children = [];
 
+  #cleanup = [];
+
+
   constructor(name, {view}={}){
     this.root = this;
     this.name = name;
@@ -121,7 +124,10 @@ export default class Component {
     Object.assign(this.bounds, data);
     return this;
 	}
-
+  
+  cleanup(...arg){
+    this.#cleanup.push(...arg);
+  }
 
 }
 
