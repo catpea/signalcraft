@@ -47,3 +47,22 @@
 .cable-line {
   stroke: hsl(200,80%,20%)
 }
+
+.cable-line-indicator {
+  stroke: hsl(200,80%,40%)
+}
+
+
+
+/* utility */
+
+.line-ant-trail {
+  stroke-dasharray: 10; /* length of dash + gap = 20 */
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20; /* offset = length to 'move' the dash by its own length */
+  }
+}

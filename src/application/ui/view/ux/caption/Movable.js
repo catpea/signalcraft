@@ -1,4 +1,4 @@
-export class Draggable {
+export class Movable {
   #container;
   #handle;
   #read;

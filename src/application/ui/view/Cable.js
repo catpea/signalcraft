@@ -27,7 +27,7 @@ export default class Cable {
     let y2 = targetNode.y + targetPort.y;
 
     this.el.Cable = svg.line({
-      class:'ant-trail cable-line',
+      class:'cable-line line-ant-trail',
       x1, y1, x2, y2,
       stroke: "white",
       fill: 'transparent',

@@ -57,8 +57,8 @@ export default class View extends ReactiveObject {
       beforeMouseDown: function(e) {
         // console.log( e.target );
         if(e.target.classList.contains('panel-caption')) return true;
+        if(e.target.classList.contains('panel-line-port')) return true;
         if(e.target.classList.contains('ant-trail')) return true;
-        if(e.target.classList.contains('port')) return true;
       }
 
     });
@@ -279,7 +279,6 @@ export default class View extends ReactiveObject {
     const panel = new Panel();
     this.#renderers.set( item.id, panel );
     panel.start({data:item, view:this});
-    // this.#scene.appendChild(panel.el);
   }
 
 
@@ -290,8 +289,7 @@ export default class View extends ReactiveObject {
   #createCable({ item }) {
     const cable = new Cable();
     this.#renderers.set( item.id, cable );
-    cable.start({link: item, view:this, scene:this.#scene, name:'cable', size: 3});
-    // this.#scene.appendChild(cable.el);
+    cable.start({link: item, view:this});
   }
 
 
