@@ -2831,9 +2831,16 @@
       return svg2;
     }
     #installMenu() {
-      const container = html.p({ style: "border: 1px solid gold;", class: "p-1" }, "Hello World");
+      const container = html.p({ class: "p-1 rounded border border-secondary bg-dark" });
       this.#element.appendChild(container);
       console.log(container);
+      this.application.Types.forEach((typeObject) => {
+        const typeButton = html.a({ class: "btn btn-sm btn-secondary me-1" }, typeObject.type);
+        container.appendChild(typeButton);
+        typeButton.addEventListener("click", () => {
+          this.application.Dream.addNode(typeObject.type);
+        });
+      });
     }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");

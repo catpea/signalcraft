@@ -5,16 +5,16 @@ A tiny visual programming language.
 
 ### Urgent!
 
-- RERUN api.execute return stale data.
+- Add Node Deletion and Link Cleanup
 - Install Menu
+- Add New Nodex Via Toolbox In Menu
+- LOD: on scale 2+ show string preview in Line via FOreignObject
 
 ### Main
 
 - Drag Cable at any point to take over XY of destination?
 
 - Node Property Editor (YAML First)
-
-- Cable Delete & Remove
 
 - Remove Node w/t Cable Clean-up
 - Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
@@ -65,3 +65,4 @@ A tiny visual programming language.
 ![art/fui-x.jpg](art/fui-x.jpg)
 ![art/fui-y.jpg](art/fui-y.jpg)
 ![art/fui-z.jpg](art/fui-z.jpg)
+![art/fui-a.jpg](art/fui-a.jpg)
