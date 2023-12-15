@@ -69,7 +69,6 @@ export class Connectable {
 					targetNode: targetNodeId,
 					targetPort: targetPortId
 				};
-				console.log(payload);
 				link(payload);
 			}
 			// when mouse up, the line is always removed

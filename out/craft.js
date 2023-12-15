@@ -1710,7 +1710,7 @@
       this.#Item = Item;
     }
     [Symbol.iterator]() {
-      return this.#content[Symbol.iterator]();
+      return this.#content.filter((item) => !item.deleted)[Symbol.iterator]();
     }
     dump() {
       return this.#content;
@@ -1736,6 +1736,8 @@
           item.stop();
         item.deleted = true;
         this.#notify("removed", { item });
+      } else {
+        console.log("ITEM NOT FOUND", id);
       }
     }
     removeDeleted() {
@@ -1744,7 +1746,7 @@
     find(callback) {
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
-      return this.#content.find(callback);
+      return this.#content.filter((item) => !item.deleted).find(callback);
     }
     id(id) {
       return this.#content.find((item) => item.id == id);
@@ -1752,7 +1754,7 @@
     filter(callback) {
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
-      return this.#content.filter(callback);
+      return this.#content.filter((item) => !item.deleted).filter(callback);
     }
     update(id, property, value) {
       const item = this.#content.find((item2) => item2.id === id);
@@ -1768,8 +1770,8 @@
         this.#observers[eventName].forEach((observer) => observer(eventData));
     }
     observe(eventName, observer) {
-      this.subscribe(eventName, observer);
       observer({ data: this.#content });
+      return this.subscribe(eventName, observer);
     }
     subscribe(eventName, observer) {
       if (typeof observer !== "function")
@@ -1831,8 +1833,8 @@
       };
     }
     observe(key, observer) {
-      this.subscribe(key, observer);
       observer(this[key]);
+      return this.subscribe(key, observer);
     }
     subscribe(key, observer) {
       if (typeof observer !== "function")
@@ -1903,6 +1905,9 @@
     application;
     constructor(application2) {
       this.application = application2;
+    }
+    getApplication() {
+      return this.application;
     }
     addNode(type, values) {
       return this.application.Nodes.create({ type, values });
@@ -2184,7 +2189,7 @@
   // src/application/ui/view/Panel.js
   var import_oneof2 = __toESM(require_oneof(), 1);
 
-  // src/application/ui/view/ux/Component.js
+  // src/application/ui/view/panel/Component.js
   var Component = class {
     el = {};
     // container of elements
@@ -2286,7 +2291,7 @@
     return output2;
   }
 
-  // src/application/ui/view/ux/Container.js
+  // src/application/ui/view/panel/Container.js
   var Container = class extends Component {
     setup() {
       this.el.Panel = svg.rect({
@@ -2310,7 +2315,7 @@
     }
   };
 
-  // src/application/ui/view/ux/caption/Movable.js
+  // src/application/ui/view/panel/caption/Movable.js
   var Movable = class {
     #container;
     #handle;
@@ -2369,7 +2374,7 @@
     }
   };
 
-  // src/application/ui/view/ux/Caption.js
+  // src/application/ui/view/panel/Caption.js
   var Caption = class extends Component {
     setup() {
       this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -2387,7 +2392,7 @@
         write: (property, value) => this.data[property] = value
       });
       this.cleanup(this.view.observe("transform", (v) => movable.scale = v.scale));
-      this.cleanup(movable.stop);
+      this.cleanup(() => movable.stop());
       this.children.map((child) => child.render());
     }
     update() {
@@ -2396,7 +2401,7 @@
     }
   };
 
-  // src/application/ui/view/ux/Pod.js
+  // src/application/ui/view/panel/Pod.js
   var Pod = class extends Component {
     setup() {
       this.el.Pod = svg.rect({ class: "panel-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -2411,7 +2416,7 @@
     }
   };
 
-  // src/application/ui/view/ux/line/Connectable.js
+  // src/application/ui/view/panel/line/Connectable.js
   var Connectable = class {
     #el = {};
     #scale;
@@ -2472,7 +2477,6 @@
             targetNode: targetNodeId,
             targetPort: targetPortId
           };
-          console.log(payload);
           link(payload);
         }
         if (this.#el.indicatorLine)
@@ -2493,7 +2497,7 @@
     }
   };
 
-  // src/application/ui/view/ux/Line.js
+  // src/application/ui/view/panel/Line.js
   var Line = class extends Component {
     setup() {
       this.el.Line = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -2530,7 +2534,7 @@
         link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort })
       });
       this.cleanup(this.view.observe("transform", (v) => connectable.scale = v.scale));
-      this.cleanup(connectable.stop);
+      this.cleanup(() => connectable.stop());
       this.children.map((child) => child.render());
     }
     update() {
@@ -2582,18 +2586,38 @@
     }
   };
 
+  // src/application/ui/view/cable/Removable.js
+  var Removable = class {
+    #scale;
+    // set by setter
+    // handlers
+    #mouseDownHandler;
+    #mouseUpHandler;
+    // used in stop/cleanup
+    #handle;
+    constructor({ handle, remove }) {
+      this.#handle = handle;
+      this.#mouseDownHandler = (e) => {
+      };
+      this.#mouseUpHandler = (e) => {
+        remove();
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
   // src/application/ui/view/Cable.js
   var Cable = class {
     el = {};
     #cleanup = [];
-    // #link;
-    // #view;
-    // #root;
-    // #name;
-    // #size;
-    // #main;
-    // #home;
-    // #padd;
     constructor() {
     }
     start({ link, view }) {
@@ -2621,10 +2645,15 @@
       this.#cleanup.push(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
       this.#cleanup.push(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
       view.scene.appendChild(this.el.Cable);
+      const removable = new Removable({
+        handle: this.el.Cable,
+        remove: () => view.application.Links.remove(link.id)
+      });
+      this.#cleanup.push(() => removable.stop());
     }
     stop() {
-      this.el.Cable.remove();
       this.#cleanup.map((x) => x());
+      this.el.Cable.remove();
     }
   };
 
@@ -2685,11 +2714,11 @@
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
         "Nodes created ...": this.#createPanel,
         //   NOTE:
-        "Nodes deleted ...": this.#deletePanel,
+        "Nodes removed ...": this.#deletePanel,
         //   the node updates it self, here we only ensure it exists, or is removed as needed
         "Links created ...": this.#createCable,
         //   NOTE:
-        "Links deleted ...": this.#deleteCable
+        "Links removed ...": this.#deleteCable
         //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
       const unintegrate = this.application.integrate(this, grandCentral);
@@ -2982,6 +3011,13 @@
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
       console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+      const rerun = async function() {
+        const result2 = await api2.execute(arrayJn);
+        console.log("usage.js RERUN api.execute said: ", result2);
+      };
+      const app = api2.getApplication();
+      app.Links.observe("created", rerun);
+      app.Links.observe("removed", rerun);
     }
     if (0) {
       const stringA = api2.addNode("test/two-three", { string1: "Hello" });

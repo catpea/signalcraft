@@ -8,6 +8,10 @@ export default class DreamInterface {
     this.application = application;
   }
 
+  getApplication(){
+    return this.application;
+  }
+
   addNode(type, values){
     // Procedure Step 1: create a node of the desired type in the reactive collection
     return this.application.Nodes.create({type, values});

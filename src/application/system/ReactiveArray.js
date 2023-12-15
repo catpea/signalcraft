@@ -15,7 +15,7 @@ export default class ReactiveArray {
   }
 
   [Symbol.iterator]() {
-     return this.#content[Symbol.iterator]();
+     return this.#content.filter((item) => !item.deleted)[Symbol.iterator]();
   }
 
   dump() {
@@ -48,6 +48,8 @@ export default class ReactiveArray {
       if (item.stop) item.stop();
       item.deleted = true;
       this.#notify("removed", { item });
+    }else{
+      console.log('ITEM NOT FOUND', id);
     }
   }
 
@@ -57,7 +59,7 @@ export default class ReactiveArray {
 
   find(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
-    return this.#content.find(callback);
+    return this.#content.filter((item) => !item.deleted).find(callback);
   }
 
   id(id) {
@@ -66,7 +68,7 @@ export default class ReactiveArray {
 
   filter(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
-    return this.#content.filter(callback);
+    return this.#content.filter((item) => !item.deleted).filter(callback);
   }
 
   update(id, property, value) {
@@ -99,8 +101,8 @@ export default class ReactiveArray {
 
 
   observe(eventName, observer) { // triggers asap
-    this.subscribe(eventName, observer);
     observer({data: this.#content});
+    return this.subscribe(eventName, observer);
   }
 
   subscribe(eventName, observer) {

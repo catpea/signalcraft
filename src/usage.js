@@ -31,7 +31,20 @@ export default async function(api){
   const actual = JSON.stringify(result);
   const expect = JSON.stringify(['Hello', 'World']);
   console.assert(actual==expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+
+
+  const rerun = async function(){
+    const result = await api.execute(arrayJn);
+    console.log('usage.js RERUN api.execute said: ', result);
   }
+  const app = api.getApplication();
+  app.Links.observe('created', rerun)
+  app.Links.observe('removed', rerun)
+
+  }
+
+
+
 
 
   if(0){

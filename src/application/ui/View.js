@@ -84,9 +84,9 @@ export default class View extends ReactiveObject {
       "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
 
       'Nodes created ...': this.#createPanel, //   NOTE:
-      'Nodes deleted ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
+      'Nodes removed ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
       'Links created ...': this.#createCable, //   NOTE:
-      'Links deleted ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
+      'Links removed ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
 
 
     };
@@ -143,7 +143,6 @@ export default class View extends ReactiveObject {
       },
 
     };
-
 
     for (const gradientType in gradientSpecification) {
       for (const categoryName in gradientSpecification[gradientType]) {
@@ -281,8 +280,6 @@ export default class View extends ReactiveObject {
     panel.start({data:item, view:this});
   }
 
-
-
   #deleteCable({ item }) {
     this.#renderers.get( item.id ).stop();
   }
@@ -291,8 +288,6 @@ export default class View extends ReactiveObject {
     this.#renderers.set( item.id, cable );
     cable.start({link: item, view:this});
   }
-
-
   get application(){return this.#application;}
   get transform(){return this.#transform;}
   get scene(){return this.#scene;}

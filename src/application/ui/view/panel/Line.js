@@ -38,7 +38,7 @@ export default class Line extends Component {
 			link: ({sourceNode, sourcePort, targetNode, targetPort})=> this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort }),
 		});
 		this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
-		this.cleanup(connectable.stop);
+		this.cleanup(()=>connectable.stop());
 		this.children.map(child => child.render())
 	}
 	update() {

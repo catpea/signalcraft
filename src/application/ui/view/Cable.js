@@ -1,17 +1,9 @@
 import { html, svg, text, list, update } from "domek";
+import { Removable } from './cable/Removable.js';
 
 export default class Cable {
   el={};
   #cleanup = [];
-  // #link;
-  // #view;
-  // #root;
-  // #name;
-  // #size;
-  // #main;
-  // #home;
-  // #padd;
-
   constructor() {}
 
   start({link, view }){
@@ -42,11 +34,17 @@ export default class Cable {
 
     view.scene.appendChild( this.el.Cable );
 
+    const removable = new Removable({
+      handle: this.el.Cable,
+      remove: ()=> view.application.Links.remove(link.id),
+    });
+    this.#cleanup.push( ()=>removable.stop() );
+
   }
 
   stop() {
-    this.el.Cable.remove()
     this.#cleanup.map(x=>x());
+    this.el.Cable.remove();
   }
 
 }

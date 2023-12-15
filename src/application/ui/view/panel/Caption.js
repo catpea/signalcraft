@@ -22,7 +22,7 @@ export default class Caption extends Component {
           write: (property, value) => this.data[property] = value,
     });
 		this.cleanup(this.view.observe('transform', v=>movable.scale = v.scale));
-		this.cleanup(movable.stop);
+		this.cleanup(()=>movable.stop());
 
 
 

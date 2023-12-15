@@ -5,8 +5,8 @@ A tiny visual programming language.
 
 ### Urgent!
 
-- Configure Connect Ports (requires removal of unused properties and simplification)
-- Investigate container as the key mechanism in Context control
+- RERUN api.execute return stale data.
+- Install Menu
 
 ### Main
 
