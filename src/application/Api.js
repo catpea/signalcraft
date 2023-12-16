@@ -12,6 +12,17 @@ export default class DreamInterface {
     return this.application;
   }
 
+  select(reference){
+    // NOTE: the selected object id is used as selection ID
+    return this.application.Selection.create({id:reference.id, kind:reference.kind, reference});
+  }
+  deselect(item){
+    return this.application.Selection.remove(item.id);
+  }
+  deselectAll(item){
+    return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id));
+  }
+
   addNode(type, values){
     // Procedure Step 1: create a node of the desired type in the reactive collection
     return this.application.Nodes.create({type, values});

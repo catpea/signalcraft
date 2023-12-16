@@ -15,6 +15,10 @@ svg.ui-view {
   stroke: hsl(283,23%,10%);
 }
 
+.panel-container.selected {
+  fill: hsl(283,23%,35%);
+}
+
 .panel-caption {
   fill: hsl(215,28%,12%);
   stroke: hsl(283,23%,10%);
@@ -45,12 +49,16 @@ svg.ui-view {
 }
 
 .panel-line-port {
-  fill: hsl(200,80%,20%);
+  fill: hsl(210,80%,20%);
   stroke: hsl(28,96%,25%);
 }
 
 .cable-line {
   stroke: hsl(200,80%,20%)
+}
+
+.cable-line.selected {
+  stroke: hsl(200,80%,40%)
 }
 
 .cable-line-indicator {

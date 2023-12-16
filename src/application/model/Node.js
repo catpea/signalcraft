@@ -8,6 +8,7 @@ import Input from "./node/Input.js";
 import Output from "./node/Output.js";
 
 export default class Node extends ReactiveObject {
+  #kind = 'Node';
 
   #application;
   #unsubscribe = [];
@@ -107,6 +108,10 @@ export default class Node extends ReactiveObject {
     if(!output) throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
     const response = await output.generator({...await this.#upstream(), value: output.value})
     return response;
+  }
+
+  get kind(){
+    return this.#kind;
   }
 
 }

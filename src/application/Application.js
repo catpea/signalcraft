@@ -11,6 +11,8 @@ import Output from './model/node/Output.js';
 import Link from './model/Link.js';
 import View from './ui/View.js';
 
+import Selected from './model/Selected.js';
+
 export default class Brain extends ReactiveObject {
 
   Setup; // Application Configuration
@@ -21,15 +23,20 @@ export default class Brain extends ReactiveObject {
   Views; // Node UI
   Dream; // User API
 
+  Selection; // Selection
+
   constructor() {
     super();
     this.Types = new ReactiveArray({application:this, Item:Type, auto:false }); // This is where node library resides
     this.Nodes = new ReactiveArray({application:this, Item:Node, auto:true }); // all nodes the user is working with
     this.Links = new ReactiveArray({application:this, Item:Link, auto:true }); // all links (edges) that connect nodes
     this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
+
     this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
     this.Theme = new UserTheme(this); // Theme Of Choice
     this.Dream = new Api(this); // Pretty Dream API *FOR USER ONLY* eveything must be informative!
+
+    this.Selection = new ReactiveArray({application:this, Item:Selected}); // this is the screen, multiple screens are supported
   }
 
   async start() {

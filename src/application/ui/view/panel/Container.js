@@ -14,6 +14,15 @@ export default class Container extends Component {
       height:this.height,
     });
 
+    this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
+      if(data.has(this.data.id)){
+        this.el.Panel.classList.add('selected');
+      }else{
+        this.el.Panel.classList.remove('selected');
+      }
+    }))
+
+
     this.children.map(child=>child.setup())
   }
 

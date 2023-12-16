@@ -19,18 +19,21 @@ export default class Cable {
     let y2 = targetNode.y + targetPort.y;
 
     this.el.Cable = svg.line({
-      class:'cable-line line-ant-trail',
+      class:'cable-line',
+      // class:'cable-line line-ant-trail',
       x1, y1, x2, y2,
       stroke: "white",
-      fill: 'transparent',
-      'stroke-width': 3,
-      'vector-effect': 'non-scaling-stroke',
+      fill: 'red',
+      'width': 5,
+      'stroke-width': 5,
+      strokeLinecap: 'round',
+      vectorEffect: 'non-scaling-stroke',
     });
 
-    this.#cleanup.push(      sourceNode.observe('x',      (v)=>update(this.el.Cable, { x1:v+sourcePort.x }))     );
-    this.#cleanup.push(      sourceNode.observe('y',      (v)=>update(this.el.Cable, { y1:v+sourcePort.y }))     );
-    this.#cleanup.push(      targetNode.observe('x',      (v)=>update(this.el.Cable, { x2:v+targetPort.x }))     );
-    this.#cleanup.push(      targetNode.observe('y',      (v)=>update(this.el.Cable, { y2:v+targetPort.y }))     );
+    this.cleanup(      sourceNode.observe('x',      (v)=>update(this.el.Cable, { x1:v+sourcePort.x }))     );
+    this.cleanup(      sourceNode.observe('y',      (v)=>update(this.el.Cable, { y1:v+sourcePort.y }))     );
+    this.cleanup(      targetNode.observe('x',      (v)=>update(this.el.Cable, { x2:v+targetPort.x }))     );
+    this.cleanup(      targetNode.observe('y',      (v)=>update(this.el.Cable, { y2:v+targetPort.y }))     );
 
     view.scene.appendChild( this.el.Cable );
 
@@ -38,8 +41,21 @@ export default class Cable {
       handle: this.el.Cable,
       remove: ()=> view.application.Links.remove(link.id),
     });
-    this.#cleanup.push( ()=>removable.stop() );
+    this.cleanup( ()=>removable.stop() );
 
+
+    this.cleanup( view.application.Selection.observe('changed', ({data}) => {
+      if(data.has(link.id)){
+        this.el.Cable.classList.add('selected');
+      }else{
+        this.el.Cable.classList.remove('selected');
+      }
+		}))
+
+  } // start
+
+  cleanup(...arg){
+    this.#cleanup.push(...arg);
   }
 
   stop() {

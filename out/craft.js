@@ -1699,7 +1699,7 @@
     #parent;
     #Item = [];
     #content = [];
-    constructor({ application: application2, parent, Item, auto }) {
+    constructor({ application: application2, parent, Item, auto } = {}) {
       if (!application2)
         throw new TypeError("application is required");
       if (!Item)
@@ -1727,6 +1727,7 @@
       if (this.#auto && item.start)
         item.start();
       this.#notify("created", { item });
+      this.#notify("changed", { item, data: this });
       return item;
     }
     remove(id2) {
@@ -1736,6 +1737,7 @@
           item.stop();
         item.deleted = true;
         this.#notify("removed", { item });
+        this.#notify("changed", { item, data: this });
       } else {
         console.log("ITEM NOT FOUND", id2);
       }
@@ -1751,6 +1753,9 @@
     id(id2) {
       return this.#content.find((item) => item.id == id2);
     }
+    has(id2) {
+      return this.#content.filter((item) => !item.deleted).find((item) => item.id == id2);
+    }
     filter(callback) {
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
@@ -1762,6 +1767,7 @@
         const old = item[property];
         item[property] = value;
         this.#notify("updated", { item, property, value, old });
+        this.#notify("changed", { item, data: this });
       }
     }
     #observers = {};
@@ -1770,7 +1776,7 @@
         this.#observers[eventName].forEach((observer) => observer(eventData));
     }
     observe(eventName, observer) {
-      observer({ data: this.#content });
+      observer({ data: this });
       return this.subscribe(eventName, observer);
     }
     subscribe(eventName, observer) {
@@ -1909,6 +1915,15 @@
     getApplication() {
       return this.application;
     }
+    select(reference) {
+      return this.application.Selection.create({ id: reference.id, kind: reference.kind, reference });
+    }
+    deselect(item) {
+      return this.application.Selection.remove(item.id);
+    }
+    deselectAll(item) {
+      return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2));
+    }
     addNode(type, values) {
       return this.application.Nodes.create({ type, values });
     }
@@ -2026,6 +2041,7 @@
 
   // src/application/model/Node.js
   var Node = class extends ReactiveObject {
+    #kind = "Node";
     #application;
     #unsubscribe = [];
     #values;
@@ -2108,10 +2124,14 @@
       const response = await output2.generator({ ...await this.#upstream(), value: output2.value });
       return response;
     }
+    get kind() {
+      return this.#kind;
+    }
   };
 
   // src/application/model/Link.js
-  var Edge = class extends ReactiveObject {
+  var Link = class extends ReactiveObject {
+    #kind = "Link";
     application;
     #unsubscribe = [];
     constructor({ application: application2, id: id2, type, sourceNode, targetNode, sourcePort, targetPort }) {
@@ -2138,6 +2158,9 @@
     }
     stop() {
       this.#unsubscribe.map((o) => o());
+    }
+    get kind() {
+      return this.#kind;
     }
   };
 
@@ -2309,6 +2332,13 @@
         y: this.y,
         height: this.height
       });
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(this.data.id)) {
+          this.el.Panel.classList.add("selected");
+        } else {
+          this.el.Panel.classList.remove("selected");
+        }
+      }));
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2637,26 +2667,40 @@
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
       this.el.Cable = svg.line({
-        class: "cable-line line-ant-trail",
+        class: "cable-line",
+        // class:'cable-line line-ant-trail',
         x1,
         y1,
         x2,
         y2,
         stroke: "white",
-        fill: "transparent",
-        "stroke-width": 3,
-        "vector-effect": "non-scaling-stroke"
+        fill: "red",
+        "width": 5,
+        "stroke-width": 5,
+        strokeLinecap: "round",
+        vectorEffect: "non-scaling-stroke"
       });
-      this.#cleanup.push(sourceNode.observe("x", (v) => update2(this.el.Cable, { x1: v + sourcePort.x })));
-      this.#cleanup.push(sourceNode.observe("y", (v) => update2(this.el.Cable, { y1: v + sourcePort.y })));
-      this.#cleanup.push(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
-      this.#cleanup.push(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
+      this.cleanup(sourceNode.observe("x", (v) => update2(this.el.Cable, { x1: v + sourcePort.x })));
+      this.cleanup(sourceNode.observe("y", (v) => update2(this.el.Cable, { y1: v + sourcePort.y })));
+      this.cleanup(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
+      this.cleanup(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
       view.scene.appendChild(this.el.Cable);
       const removable = new Removable({
         handle: this.el.Cable,
         remove: () => view.application.Links.remove(link.id)
       });
-      this.#cleanup.push(() => removable.stop());
+      this.cleanup(() => removable.stop());
+      this.cleanup(view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(link.id)) {
+          this.el.Cable.classList.add("selected");
+        } else {
+          this.el.Cable.classList.remove("selected");
+        }
+      }));
+    }
+    // start
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
     }
     stop() {
       this.#cleanup.map((x) => x());
@@ -2813,6 +2857,15 @@
           this.view.application.Dream.addNode(typeObject.type);
         });
       });
+      const selectedNodes = html.p({ class: "border border-info rounded p-2" });
+      offcanvasBody.appendChild(selectedNodes);
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        selectedNodes.replaceChildren();
+        data.forEach((item) => {
+          const text2 = text(item.kind + " ");
+          selectedNodes.appendChild(text2);
+        });
+      }));
     }
     render(container) {
       container.appendChild(this.el.NavItem);
@@ -3143,6 +3196,21 @@
     }
   };
 
+  // src/application/model/Selected.js
+  var Selected = class {
+    id;
+    kind;
+    reference;
+    // NOTE: live reference to an object as serializing selected items is a strange thing to do.
+    data = {};
+    deleted = false;
+    constructor({ id: id2, kind, reference }) {
+      this.id = id2 || v4_default();
+      this.kind = kind;
+      this.reference = reference;
+    }
+  };
+
   // src/application/Application.js
   var Brain = class extends ReactiveObject {
     Setup;
@@ -3159,15 +3227,18 @@
     // Node UI
     Dream;
     // User API
+    Selection;
+    // Selection
     constructor() {
       super();
       this.Types = new ReactiveArray({ application: this, Item: Type, auto: false });
       this.Nodes = new ReactiveArray({ application: this, Item: Node, auto: true });
-      this.Links = new ReactiveArray({ application: this, Item: Edge, auto: true });
+      this.Links = new ReactiveArray({ application: this, Item: Link, auto: true });
       this.Views = new ReactiveArray({ application: this, Item: View, auto: false });
       this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" });
       this.Theme = new MyTheme(this);
       this.Dream = new DreamInterface(this);
+      this.Selection = new ReactiveArray({ application: this, Item: Selected });
     }
     async start() {
       this.Views.start();
@@ -3254,8 +3325,14 @@
       const stringB = api2.addNode("text/string", { string: "World" });
       const stringC = api2.addNode("text/string", { string: "Meow!" });
       const arrayJn = api2.addNode("array/join");
-      api2.linkPorts(stringA, arrayJn);
-      api2.linkPorts(stringB, arrayJn);
+      const linkA = api2.linkPorts(stringA, arrayJn);
+      const linkB = api2.linkPorts(stringB, arrayJn);
+      api2.select(stringA);
+      api2.select(linkA);
+      setTimeout(() => {
+        api2.deselect(stringA);
+        api2.select(arrayJn);
+      }, 5e3);
       const result = await api2.execute(arrayJn);
       console.log("usage.js api.execute said: ", result);
       const actual = JSON.stringify(result);

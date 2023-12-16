@@ -5,7 +5,7 @@ export default class ReactiveArray {
   #Item = [];
   #content = [];
 
-  constructor({application, parent, Item, auto}) {
+  constructor({application, parent, Item, auto}={}) {
     if (!application) throw new TypeError("application is required");
     if (!Item) throw new TypeError("Item is required");
     this.#auto = !!auto;
@@ -38,6 +38,7 @@ export default class ReactiveArray {
     if (this.#auto && item.start) item.start();
 
     this.#notify("created", { item });
+    this.#notify("changed", { item, data:this });
     return item;
   }
 
@@ -48,6 +49,7 @@ export default class ReactiveArray {
       if (item.stop) item.stop();
       item.deleted = true;
       this.#notify("removed", { item });
+      this.#notify("changed", { item, data:this });
     }else{
       console.log('ITEM NOT FOUND', id);
     }
@@ -66,6 +68,10 @@ export default class ReactiveArray {
     return this.#content.find(item=>item.id == id);
   }
 
+  has(id) {
+    return this.#content.filter((item) => !item.deleted).find(item=>item.id == id);
+  }
+
   filter(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
     return this.#content.filter((item) => !item.deleted).filter(callback);
@@ -77,6 +83,7 @@ export default class ReactiveArray {
       const old = item[property];
       item[property] = value;
       this.#notify("updated", { item, property, value, old });
+      this.#notify("changed", { item, data:this });
     }
   }
 
@@ -101,7 +108,7 @@ export default class ReactiveArray {
 
 
   observe(eventName, observer) { // triggers asap
-    observer({data: this.#content});
+    observer({data: this});
     return this.subscribe(eventName, observer);
   }
 

@@ -66,7 +66,31 @@ export default class Offcanvas extends Component {
 			});
 
 
-		})
+		});
+
+		// this.view.application.Group.forEach(typeObject => {
+		// 	const p = html.p();
+		// 	offcanvasBody.appendChild(p);
+		// 	const text2 = text(typeObject.name);
+		// 	p.appendChild(text2);
+		// });
+
+
+		const selectedNodes = html.p({class:'border border-info rounded p-2'});
+		offcanvasBody.appendChild(selectedNodes);
+
+		this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
+			selectedNodes.replaceChildren();
+
+			data.forEach((item) => {
+				const text2 = text(item.kind + ' ');
+				selectedNodes.appendChild(text2);
+			});
+
+		}))
+
+
+
 	}
 	render(container) {
 		container.appendChild(this.el.NavItem);

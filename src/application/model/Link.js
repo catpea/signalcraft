@@ -1,7 +1,10 @@
 import { v4 as uuid } from "uuid";
 import ReactiveObject from "../system/ReactiveObject.js";
 
-export default class Edge extends ReactiveObject {
+export default class Link extends ReactiveObject {
+
+  #kind = 'Link';
+
   application;
   #unsubscribe = [];
 
@@ -49,6 +52,10 @@ export default class Edge extends ReactiveObject {
 
   stop() {
     this.#unsubscribe.map((o) => o());
+  }
+
+  get kind(){
+    return this.#kind;
   }
 
 }
