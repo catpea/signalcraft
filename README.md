@@ -3,6 +3,13 @@ A tiny visual programming language.
 
 ## TODO
 
+### Bug Fix
+
+- Lines are too thin to click on, replace delete feature with SELECT+DEL like in Blender
+- Drag Connecting lines between entire Line.js not just Port, it is easier to hit the targer
+- too hard to click on caption, at certain scale make the entire node draggable
+- default action for drag should be selection manager not panning, see NodeRED
+
 ### Urgent!
 
 - Finish Toolbox
@@ -33,6 +40,7 @@ A tiny visual programming language.
 
 - Node Alignment And Z-Order Tools (Bring To Front, Send To Back)
 - ForeignObjects in ZUI Mode
+- Add Node Search And Canvas Scroll
 
 - Give TODOM multiple code generation profiles
 
