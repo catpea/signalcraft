@@ -5,9 +5,8 @@ A tiny visual programming language.
 
 ### Urgent!
 
+- RPi Friendly Theme (zionui?)
 - Add Node Deletion and Link Cleanup
-- Install Menu
-- Add New Nodex Via Toolbox In Menu
 - LOD: on scale 2+ show string preview in Line via FOreignObject
 
 ### Main
