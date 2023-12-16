@@ -1,3 +1,8 @@
+function camelize(str) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+    return index === 0 ? word.toLowerCase() : word.toUpperCase();
+  }).replace(/\s+|-/g, '');
+}
 export default function transform(html, parentName = 'PARENT') {
 
     // Create a document from the HTML string.
@@ -34,7 +39,12 @@ export default function transform(html, parentName = 'PARENT') {
     if (node.nodeType === Node.ELEMENT_NODE) {
       // Get the tag name and generate unique variable name
       const tagName = node.tagName.toLowerCase();
-      const varName = `${tagName}${getNumber(tagName)}`;
+      let varName = `${tagName}${getNumber(tagName)}`;
+
+      if(node.className){
+        varName = camelize(node.className)
+        varName += getNumber(varName);
+      }
 
       // Check if current tag belongs to SVG
       // if it does use 'createElementNS', otherwise use 'createElement'

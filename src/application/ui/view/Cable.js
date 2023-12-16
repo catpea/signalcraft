@@ -23,7 +23,7 @@ export default class Cable {
       x1, y1, x2, y2,
       stroke: "white",
       fill: 'transparent',
-      'stroke-width': 2,
+      'stroke-width': 3,
       'vector-effect': 'non-scaling-stroke',
     });
 

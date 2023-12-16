@@ -2637,7 +2637,7 @@
         y2,
         stroke: "white",
         fill: "transparent",
-        "stroke-width": 2,
+        "stroke-width": 3,
         "vector-effect": "non-scaling-stroke"
       });
       this.#cleanup.push(sourceNode.observe("x", (v) => update2(this.el.Cable, { x1: v + sourcePort.x })));
@@ -2657,6 +2657,184 @@
     }
   };
 
+  // src/application/ui/view/Menus.js
+  var import_oneof3 = __toESM(require_oneof(), 1);
+
+  // src/application/ui/view/menu/Component.js
+  var Component2 = class {
+    el = {};
+    // container of elements
+    name;
+    data;
+    view;
+    isRoot = true;
+    // by being added it is no longer a root container
+    root = null;
+    // reference to root
+    parent = null;
+    children = [];
+    #cleanup = [];
+    constructor(name, { view } = {}) {
+      this.root = this;
+      this.name = name;
+      this.view = view;
+    }
+    get #above() {
+      if (this.isRoot)
+        return [this];
+      const selfIndex = this.parent.children.indexOf(this);
+      return [...this.parent.children.slice(0, selfIndex)];
+    }
+    add(child) {
+      child.isRoot = false;
+      child.root = this.root;
+      child.parent = this;
+      child.view = this.view;
+      if (!child.data)
+        child.data = this.data;
+      child.group = this.group;
+      this.children.push(child);
+      return this;
+    }
+    get siblings() {
+      return this.parent ? this.parent.children.filter((child) => child !== this) : [];
+    }
+    get all() {
+      return [...this.children, ...flatten(this.children.map((child) => child.all))];
+    }
+    setup() {
+      this.children.map((child) => child.setup());
+    }
+    setData(data) {
+      this.data = data;
+      return this;
+    }
+    setView(view) {
+      this.view = view;
+      return this;
+    }
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
+    }
+  };
+
+  // src/application/ui/view/menu/Dropdown.js
+  var Dropdown = class extends Component2 {
+    constructor(...args) {
+      super(...args);
+    }
+    setup() {
+      this.el.navItemDropdown = document.createElement("li");
+      this.el.navItemDropdown.setAttribute("class", "nav-item dropdown");
+      const navLinkDropdownToggle = document.createElement("a");
+      navLinkDropdownToggle.setAttribute("class", "nav-link dropdown-toggle");
+      navLinkDropdownToggle.setAttribute("href", "#");
+      navLinkDropdownToggle.setAttribute("role", "button");
+      navLinkDropdownToggle.setAttribute("data-bs-toggle", "dropdown");
+      navLinkDropdownToggle.setAttribute("aria-expanded", "false");
+      this.el.navItemDropdown.appendChild(navLinkDropdownToggle);
+      const text2 = document.createTextNode(this.name);
+      navLinkDropdownToggle.appendChild(text2);
+      const dropdownMenu = document.createElement("ul");
+      dropdownMenu.setAttribute("class", "dropdown-menu");
+      this.el.navItemDropdown.appendChild(dropdownMenu);
+      this.view.application.Types.forEach((typeObject) => {
+        const listItem = document.createElement("li");
+        dropdownMenu.appendChild(listItem);
+        const dropdownItem = document.createElement("div");
+        dropdownItem.setAttribute("class", "dropdown-item");
+        listItem.appendChild(dropdownItem);
+        const text22 = document.createTextNode(typeObject.type);
+        dropdownItem.appendChild(text22);
+        dropdownItem.addEventListener("click", () => {
+          this.view.application.Dream.addNode(typeObject.type);
+        });
+      });
+    }
+    render(container) {
+      container.appendChild(this.el.navItemDropdown);
+    }
+  };
+
+  // src/application/ui/view/menu/Navbar.js
+  var Navbar = class extends Component2 {
+    constructor(...args) {
+      super(...args);
+    }
+    setup() {
+      this.el.Nav = document.createElement("nav");
+      this.el.Nav.setAttribute("class", "navbar navbar-expand-lg bg-body-tertiary");
+      const div = document.createElement("div");
+      div.setAttribute("class", "container-fluid");
+      this.el.Nav.appendChild(div);
+      const a = document.createElement("a");
+      a.setAttribute("class", "navbar-brand");
+      a.setAttribute("href", "#");
+      div.appendChild(a);
+      const text2 = document.createTextNode(this.name);
+      a.appendChild(text2);
+      const button = document.createElement("button");
+      button.setAttribute("class", "navbar-toggler");
+      button.setAttribute("type", "button");
+      button.setAttribute("data-bs-toggle", "collapse");
+      button.setAttribute("data-bs-target", "#navbarSupportedContent");
+      button.setAttribute("aria-controls", "navbarSupportedContent");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", "Toggle navigation");
+      div.appendChild(button);
+      const span = document.createElement("span");
+      span.setAttribute("class", "navbar-toggler-icon");
+      button.appendChild(span);
+      const div2 = document.createElement("div");
+      div2.setAttribute("class", "collapse navbar-collapse");
+      div2.setAttribute("id", "navbarSupportedContent");
+      div.appendChild(div2);
+      this.el.navbarNavContainer = document.createElement("ul");
+      this.el.navbarNavContainer.setAttribute("class", "navbar-nav me-auto mb-2 mb-lg-0");
+      div2.appendChild(this.el.navbarNavContainer);
+      const form = document.createElement("form");
+      form.setAttribute("class", "d-flex");
+      form.setAttribute("role", "search");
+      div2.appendChild(form);
+      const input = document.createElement("input");
+      input.setAttribute("class", "form-control me-2");
+      input.setAttribute("type", "search");
+      input.setAttribute("placeholder", "Search");
+      input.setAttribute("aria-label", "Search");
+      form.appendChild(input);
+      this.children.map((child) => child.setup());
+    }
+    render(container) {
+      container.appendChild(this.el.Nav);
+      this.children.filter((instance) => instance instanceof Dropdown).map((child) => child.render(this.el.navbarNavContainer));
+    }
+  };
+
+  // src/application/ui/view/Menus.js
+  var Menu = class {
+    el;
+    #cleanup = [];
+    start(view) {
+      const navbar = new Navbar(view.name);
+      navbar.setView(view);
+      const dropdown = new Dropdown(`Add`);
+      dropdown.setData([
+        { name: "a", onClick: () => ({}) },
+        { name: "b", onClick: () => ({}) }
+      ]);
+      navbar.add(dropdown);
+      navbar.setup();
+      navbar.render(view.element);
+      this.cleanup(navbar);
+    }
+    stop() {
+      this.#cleanup.map((x) => x());
+    }
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
+    }
+  };
+
   // src/application/ui/View.js
   var View = class extends ReactiveObject {
     #application;
@@ -2666,6 +2844,7 @@
     #element;
     #svg;
     #scene;
+    #menus;
     #panzoom;
     #transform;
     #renderers = /* @__PURE__ */ new Map();
@@ -2681,6 +2860,7 @@
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
+      this.#menus = this.#installMenus();
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
       this.#panzoom = (0, import_panzoom.default)(this.#scene, {
@@ -2706,8 +2886,6 @@
         this.transform = { x, y, scale };
       });
       this.#unsubscribe.push(this.#panzoom.dispose);
-      this.#installMenu();
-      this.#unsubscribe.push(this.observe("transform", (v) => document.getElementById("value-scale").textContent = v.scale));
       this.application.Nodes.forEach((node) => this.#createPanel(node));
       this.application.Links.forEach((node) => this.#createCable(node));
       const grandCentral = {
@@ -2730,6 +2908,7 @@
     }
     #installCanvas() {
       const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg2.setAttributeNS(null, "class", "ui-view");
       svg2.setAttributeNS(null, "width", "100%");
       svg2.setAttributeNS(null, "height", "1000");
       this.#element.appendChild(svg2);
@@ -2830,17 +3009,10 @@
       svg2.appendChild(defs);
       return svg2;
     }
-    #installMenu() {
-      const container = html.p({ class: "p-1 rounded border border-secondary bg-dark" });
-      this.#element.appendChild(container);
-      console.log(container);
-      this.application.Types.forEach((typeObject) => {
-        const typeButton = html.a({ class: "btn btn-sm btn-secondary me-1" }, typeObject.type);
-        container.appendChild(typeButton);
-        typeButton.addEventListener("click", () => {
-          this.application.Dream.addNode(typeObject.type);
-        });
-      });
+    #installMenus() {
+      const menus = new Menu();
+      menus.start(this);
+      this.#unsubscribe.push(() => menus.stop());
     }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -2892,11 +3064,17 @@
     get transform() {
       return this.#transform;
     }
+    get element() {
+      return this.#element;
+    }
     get scene() {
       return this.#scene;
     }
     get theme() {
       return this.#theme;
+    }
+    get name() {
+      return this.#name;
     }
   };
 

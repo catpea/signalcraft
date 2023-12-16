@@ -1,5 +1,10 @@
+svg.ui-view {
+  outline: none;
+}
+
 .view-scene {
 }
+
 .view-scene-background {
   fill: hsl(215,26%,13%);
 }

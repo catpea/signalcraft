@@ -13,15 +13,6 @@
   </head>
   <body class="py-3 me-3">
 
-
-    <div class="container-fluid">
-      <div class="row mb-3">
-        <button type="button" class="btn btn-primary">
-        Scale <span id="value-scale" class="badge text-bg-secondary">4</span>
-        </button>
-        </div>
-      </div>
-    </div>
     <div class="container-fluid">
       <div class="row mb-3">
         <div class="signalcraft-view-1 col"></div>
@@ -39,10 +30,12 @@
         <tool-todom/>
       </div>
     </div>
+
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       new EventSource("/esbuild").addEventListener("change", () => location.reload() );
       console.log("EventSource LiveReload Activated");
     </script>
+
   </body>
 </html>

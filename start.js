@@ -27,7 +27,7 @@ let ctx = await esbuild.context({
 const xxx = await ctx.watch(function(){console.log('XXX');})
 console.log(xxx);
 let { host, port } = await ctx.serve({
-    host:'127.0.0.1',
+    host:'0.0.0.0',
     servedir: '.',
 })
 
