@@ -1,5 +1,6 @@
 import Component from "./Component.js";
 import Dropdown from "./Dropdown.js";
+import Offcanvas from "./Offcanvas.js";
 
 export default class Navbar extends Component {
 
@@ -93,7 +94,11 @@ export default class Navbar extends Component {
     container.appendChild( this.el.Nav );
 
 		// render dropdowns into navbarNavContainer
-    this.children.filter(instance => instance instanceof Dropdown).map(child=>child.render(this.el.navbarNavContainer))
+		const allowedClasses = [Dropdown, Offcanvas];
+
+    this.children
+			.filter(instance => allowedClasses.some(allowedClass => instance instanceof allowedClass))
+			.map(child=>child.render(this.el.navbarNavContainer))
   }
 
 }

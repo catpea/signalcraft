@@ -5,11 +5,18 @@ A tiny visual programming language.
 
 ### Urgent!
 
+- Finish Toolbox
+- Add Property Toolbox
+- Live Data Output Bottom Debugger
+
+- Add minimal previews to nodes (string, number color, etc...)
 - RPi Friendly Theme (zionui?)
 - Add Node Deletion and Link Cleanup
 - LOD: on scale 2+ show string preview in Line via FOreignObject
 
 ### Main
+
+- Use OOP as the DX Interface for node creation.
 
 - Drag Cable at any point to take over XY of destination?
 
@@ -26,6 +33,8 @@ A tiny visual programming language.
 
 - Node Alignment And Z-Order Tools (Bring To Front, Send To Back)
 - ForeignObjects in ZUI Mode
+
+- Give TODOM multiple code generation profiles
 
 ## How It Works
 

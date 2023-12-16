@@ -1,8 +1,12 @@
+import { v4 as uuid } from "uuid";
+
 import ReactiveArray from '../../../system/ReactiveArray.js';
 import ReactiveObject from '../../../system/ReactiveObject.js';
 import { html } from "domek";
 
 export default class Component {
+
+  id = uuid();
 
   el = {}; // container of elements
 
@@ -14,13 +18,15 @@ export default class Component {
   root = null; // reference to root
   parent = null;
 
+	defaults = {};
+	options = {};
 	children = [];
   #cleanup = [];
 
-  constructor(name, {view}={}){
+  constructor(name, options={}){
     this.root = this;
     this.name = name;
-    this.view = view;
+    this.options = Object.assign({}, options, this.defaults);
   }
 
   get #above(){

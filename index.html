@@ -11,13 +11,24 @@
     <script type="module" src="./out/craft.js"></script>
     <script type="module" src="./src/tools/todom.js"></script>
   </head>
-  <body class="py-3 me-3">
+  <body class="">
 
-    <div class="container-fluid">
-      <div class="row mb-3">
-        <div class="signalcraft-view-1 col"></div>
+    <div class="signalcraft-view-1 col"></div>
+
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Enable body scrolling</button>
+
+    <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Offcanvas with body scrolling</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <p>Try scrolling the rest of the page to see this option in action.</p>
       </div>
     </div>
+
+
 
     <div class="container-fluid">
       <div class="row mb-3">

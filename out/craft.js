@@ -240,8 +240,8 @@
           next: function(cb) {
             return setTimeout(cb, 1e3 / 60);
           },
-          cancel: function(id) {
-            return clearTimeout(id);
+          cancel: function(id2) {
+            return clearTimeout(id2);
           }
         };
       }
@@ -1729,15 +1729,15 @@
       this.#notify("created", { item });
       return item;
     }
-    remove(id) {
-      const item = this.#content.find((item2) => item2.id === id);
+    remove(id2) {
+      const item = this.#content.find((item2) => item2.id === id2);
       if (item) {
         if (item.stop)
           item.stop();
         item.deleted = true;
         this.#notify("removed", { item });
       } else {
-        console.log("ITEM NOT FOUND", id);
+        console.log("ITEM NOT FOUND", id2);
       }
     }
     removeDeleted() {
@@ -1748,16 +1748,16 @@
         throw new TypeError("Find needs a function.");
       return this.#content.filter((item) => !item.deleted).find(callback);
     }
-    id(id) {
-      return this.#content.find((item) => item.id == id);
+    id(id2) {
+      return this.#content.find((item) => item.id == id2);
     }
     filter(callback) {
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
       return this.#content.filter((item) => !item.deleted).filter(callback);
     }
-    update(id, property, value) {
-      const item = this.#content.find((item2) => item2.id === id);
+    update(id2, property, value) {
+      const item = this.#content.find((item2) => item2.id === id2);
       if (item && item[property] !== value) {
         const old = item[property];
         item[property] = value;
@@ -1826,10 +1826,10 @@
       Object.values(this.#monitors).forEach((callback) => callback(key, value, this));
     }
     monitor(observer) {
-      const id = Math.random().toString(36).substring(2);
-      this.#monitors[id] = observer;
+      const id2 = Math.random().toString(36).substring(2);
+      this.#monitors[id2] = observer;
       return () => {
-        delete this.#monitors[id];
+        delete this.#monitors[id2];
       };
     }
     observe(key, observer) {
@@ -1947,8 +1947,8 @@
     // used in setting up reactive arrays in node (this could be upgraded to a real reactive object but outside of project scope atm)
     input = [];
     output = [];
-    constructor({ id, type, application: application2 }) {
-      this.id = id || v4_default();
+    constructor({ id: id2, type, application: application2 }) {
+      this.id = id2 || v4_default();
       this.type = type;
     }
   };
@@ -2031,7 +2031,7 @@
     #values;
     Input;
     Output;
-    constructor({ id, type, values, application: application2 }) {
+    constructor({ id: id2, type, values, application: application2 }) {
       super();
       this.#application = application2;
       this.#values = values || {};
@@ -2049,7 +2049,7 @@
         this.Output.create(o);
       });
       const props = {
-        id: id || v4_default(),
+        id: id2 || v4_default(),
         type,
         backgroundColor: (0, import_oneof.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
         // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
@@ -2114,11 +2114,11 @@
   var Edge = class extends ReactiveObject {
     application;
     #unsubscribe = [];
-    constructor({ application: application2, id, type, sourceNode, targetNode, sourcePort, targetPort }) {
+    constructor({ application: application2, id: id2, type, sourceNode, targetNode, sourcePort, targetPort }) {
       super();
       this.application = application2;
       const props = {
-        id: id || v4_default(),
+        id: id2 || v4_default(),
         type,
         sourceNode,
         targetNode,
@@ -2146,13 +2146,14 @@
   var import_calculate_percent = __toESM(require_calculate_percent(), 1);
 
   // modules/domek/index.js
+  var kebabize = (str) => str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase());
   var svg = new Proxy({}, {
     get: function(target, property) {
       return function(properties, text2) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", property);
         for (const key in properties) {
           if (properties.hasOwnProperty(key)) {
-            el.setAttributeNS(null, key, properties[key]);
+            el.setAttributeNS(null, kebabize(key), properties[key]);
           }
         }
         if (text2)
@@ -2167,7 +2168,7 @@
         const el = document.createElement(property);
         for (const key in properties) {
           if (properties.hasOwnProperty(key)) {
-            el.setAttribute(key, properties[key]);
+            el.setAttribute(kebabize(key), properties[key]);
           }
         }
         if (text2)
@@ -2176,6 +2177,12 @@
       };
     }
   });
+  var id = function(str = "") {
+    return "id" + str.replaceAll(/ |-/g, "0");
+  };
+  var text = function(text2) {
+    return document.createTextNode(text2);
+  };
   var update2 = function(el, properties) {
     for (const key in properties) {
       if (el.namespaceURI == "http://www.w3.org/2000/svg") {
@@ -2662,6 +2669,7 @@
 
   // src/application/ui/view/menu/Component.js
   var Component2 = class {
+    id = v4_default();
     el = {};
     // container of elements
     name;
@@ -2672,12 +2680,14 @@
     root = null;
     // reference to root
     parent = null;
+    defaults = {};
+    options = {};
     children = [];
     #cleanup = [];
-    constructor(name, { view } = {}) {
+    constructor(name, options = {}) {
       this.root = this;
       this.name = name;
-      this.view = view;
+      this.options = Object.assign({}, options, this.defaults);
     }
     get #above() {
       if (this.isRoot)
@@ -2756,6 +2766,60 @@
     }
   };
 
+  // src/application/ui/view/menu/Offcanvas.js
+  var Offcanvas = class extends Component2 {
+    defaults = {
+      location: "start"
+    };
+    constructor(...args) {
+      super(...args);
+    }
+    setup() {
+      this.el.NavItem = html.li({ class: "nav-item" });
+      const navLink = html.a({
+        class: "nav-link",
+        href: "#",
+        dataBsToggle: "offcanvas",
+        dataBsTarget: "#" + id(this.id),
+        ariaControls: id(this.id)
+      });
+      this.el.NavItem.appendChild(navLink);
+      const text0 = text(this.name);
+      navLink.appendChild(text0);
+      this.el.Offcanvas = html.div({
+        id: id(this.id),
+        class: `offcanvas offcanvas-${this.options.location}`,
+        dataBsScroll: "true",
+        dataBsBackdrop: "false",
+        tabindex: "-1",
+        ariaLabelledby: "offcanvasScrollingLabel"
+      });
+      const offcanvasHeader = html.div({ class: "offcanvas-header" });
+      this.el.Offcanvas.appendChild(offcanvasHeader);
+      const offcanvasTitle = html.h5({ class: "offcanvas-title", id: "offcanvasScrollingLabel" });
+      offcanvasHeader.appendChild(offcanvasTitle);
+      const text1 = text(this.name);
+      offcanvasTitle.appendChild(text1);
+      const btnClose = html.button({ type: "button", class: "btn-close", dataBsDismiss: "offcanvas", ariaLabel: "Close" });
+      offcanvasHeader.appendChild(btnClose);
+      const offcanvasBody = html.div({ class: "offcanvas-body" });
+      this.el.Offcanvas.appendChild(offcanvasBody);
+      this.view.application.Types.forEach((typeObject) => {
+        const p = html.p();
+        offcanvasBody.appendChild(p);
+        const text2 = text(typeObject.type);
+        p.appendChild(text2);
+        p.addEventListener("click", () => {
+          this.view.application.Dream.addNode(typeObject.type);
+        });
+      });
+    }
+    render(container) {
+      container.appendChild(this.el.NavItem);
+      this.view.element.appendChild(this.el.Offcanvas);
+    }
+  };
+
   // src/application/ui/view/menu/Navbar.js
   var Navbar = class extends Component2 {
     constructor(...args) {
@@ -2806,7 +2870,8 @@
     }
     render(container) {
       container.appendChild(this.el.Nav);
-      this.children.filter((instance) => instance instanceof Dropdown).map((child) => child.render(this.el.navbarNavContainer));
+      const allowedClasses = [Dropdown, Offcanvas];
+      this.children.filter((instance) => allowedClasses.some((allowedClass) => instance instanceof allowedClass)).map((child) => child.render(this.el.navbarNavContainer));
     }
   };
 
@@ -2817,12 +2882,12 @@
     start(view) {
       const navbar = new Navbar(view.name);
       navbar.setView(view);
-      const dropdown = new Dropdown(`Add`);
-      dropdown.setData([
-        { name: "a", onClick: () => ({}) },
-        { name: "b", onClick: () => ({}) }
-      ]);
-      navbar.add(dropdown);
+      const toolbox = new Offcanvas(`Toolbox`, { location: "start" });
+      navbar.add(toolbox);
+      const propertiesPane = new Offcanvas(`Properties`, { location: "end" });
+      navbar.add(propertiesPane);
+      const debuggerOutput = new Offcanvas(`Debugger`, { location: "bottom" });
+      navbar.add(debuggerOutput);
       navbar.setup();
       navbar.render(view.element);
       this.cleanup(navbar);

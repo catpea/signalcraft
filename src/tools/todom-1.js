@@ -3,7 +3,6 @@ function camelize(str) {
     return index === 0 ? word.toLowerCase() : word.toUpperCase();
   }).replace(/\s+|-/g, '');
 }
-
 export default function transform(html, parentName = 'PARENT') {
 
     // Create a document from the HTML string.
@@ -49,34 +48,17 @@ export default function transform(html, parentName = 'PARENT') {
 
       // Check if current tag belongs to SVG
       // if it does use 'createElementNS', otherwise use 'createElement'
-
-      let elementAttributes = '';
-      const attributeArray = [];
-      for (let attr of node.attributes) {
-        const {name, value} = attr;
-        attributeArray.push({name, value})
-      }
-      if(attributeArray.length){
-        elementAttributes = `, {${attributeArray.map(({name, value})=>`${camelize(name)}: '${value}'`).join(', ')}}`
-      }
-
-
-
       if (tagName === 'svg' || parentExpression.startsWith('svg') || nameSpace) {
         nameSpace = nameSpaceURI;
-        js += `const ${varName} = svg('${tagName}'${elementAttributes});\n`;
+        js += `const ${varName} = document.createElementNS('${nameSpaceURI}', '${tagName}');\n`;
       } else {
-        js += `const ${varName} = html('${tagName}'${elementAttributes});\n`;
+        js += `const ${varName} = document.createElement('${tagName}');\n`;
       }
 
-
-
       // Set attributes and append to parent
-      // for (let attr of node.attributes) {
-      //   attributeObject[attr.name] = attr.value
-      //   js += `${varName}.setAttribute('${attr.name}', '${attr.value}');\n`;
-      //
-      // }
+      for (let attr of node.attributes) {
+        js += `${varName}.setAttribute('${attr.name}', '${attr.value}');\n`;
+      }
 
       js += `${parentExpression}.appendChild(${varName});\n\n`;
 
@@ -90,7 +72,7 @@ export default function transform(html, parentName = 'PARENT') {
       const text = node.nodeValue.trim();
       if (text !== '') {
         const textNodeVar = `text${getNumber('text')}`;
-        js += `const ${textNodeVar} = text('${text}');\n`;
+        js += `const ${textNodeVar} = document.createTextNode('${text}');\n`;
         js += `${parentExpression}.appendChild(${textNodeVar});\n\n`;
       }
     }
