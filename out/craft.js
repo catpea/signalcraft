@@ -1723,6 +1723,11 @@
     }
     create(argv) {
       const item = new this.#Item({ ...argv, application: this.#application, parent: this.#parent });
+      const itemExists = this.#content.find((o) => o.id === item.id);
+      if (itemExists)
+        console.log(item);
+      if (itemExists)
+        throw new Error("Item Exixts");
       this.#content.push(item);
       if (this.#auto && item.start)
         item.start();
@@ -1730,7 +1735,7 @@
       this.#notify("changed", { item, data: this });
       return item;
     }
-    remove(id2) {
+    remove(id2, hard) {
       const item = this.#content.find((item2) => item2.id === id2);
       if (item) {
         if (item.stop)
@@ -1741,6 +1746,8 @@
       } else {
         console.log("ITEM NOT FOUND", id2);
       }
+      if (hard)
+        this.#content = this.#content.filter((o) => o.id !== item.id);
     }
     removeDeleted() {
       this.#content = this.#content.filter((item) => !item.deleted);
@@ -1918,11 +1925,18 @@
     select(reference) {
       return this.application.Selection.create({ id: reference.id, kind: reference.kind, reference });
     }
+    toggleSelect(item) {
+      if (this.application.Selection.has(item.id)) {
+        return this.application.Selection.remove(item.id, true);
+      } else {
+        return this.application.Selection.create({ id: item.id, kind: item.kind, reference: item });
+      }
+    }
     deselect(item) {
-      return this.application.Selection.remove(item.id);
+      return this.application.Selection.remove(item.id, true);
     }
     deselectAll(item) {
-      return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2));
+      return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2, true));
     }
     addNode(type, values) {
       return this.application.Nodes.create({ type, values });
@@ -2411,6 +2425,34 @@
     }
   };
 
+  // src/application/ui/view/panel/caption/Selectable.js
+  var Selectable = class {
+    #scale;
+    // set by setter
+    // handlers
+    #mouseDownHandler;
+    #mouseUpHandler;
+    // used in stop/cleanup
+    #handle;
+    constructor({ handle, action }) {
+      this.#handle = handle;
+      this.#mouseDownHandler = (e) => {
+      };
+      this.#mouseUpHandler = (e) => {
+        action();
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
   // src/application/ui/view/panel/Caption.js
   var Caption = class extends Component {
     setup() {
@@ -2430,6 +2472,14 @@
       });
       this.cleanup(this.view.observe("transform", (v) => movable.scale = v.scale));
       this.cleanup(() => movable.stop());
+      const selectable = new Selectable({
+        container: window,
+        // <g> element representing an SVG scene
+        handle: this.el.Caption,
+        // <rect> that is the caption of a window meant to be dragged
+        action: () => this.view.application.Dream.toggleSelect(this.data)
+      });
+      this.cleanup(() => selectable.stop());
       this.children.map((child) => child.render());
     }
     update() {
@@ -2623,8 +2673,8 @@
     }
   };
 
-  // src/application/ui/view/cable/Removable.js
-  var Removable = class {
+  // src/application/ui/view/cable/Selectable.js
+  var Selectable2 = class {
     #scale;
     // set by setter
     // handlers
@@ -2632,12 +2682,12 @@
     #mouseUpHandler;
     // used in stop/cleanup
     #handle;
-    constructor({ handle, remove }) {
+    constructor({ handle, action }) {
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
       };
       this.#mouseUpHandler = (e) => {
-        remove();
+        action();
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
@@ -2685,11 +2735,11 @@
       this.cleanup(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
       this.cleanup(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
       view.scene.appendChild(this.el.Cable);
-      const removable = new Removable({
+      const selectable = new Selectable2({
         handle: this.el.Cable,
-        remove: () => view.application.Links.remove(link.id)
+        action: () => view.application.Dream.toggleSelect(link)
       });
-      this.cleanup(() => removable.stop());
+      this.cleanup(() => selectable.stop());
       this.cleanup(view.application.Selection.observe("changed", ({ data }) => {
         if (data.has(link.id)) {
           this.el.Cable.classList.add("selected");
@@ -2973,6 +3023,7 @@
       this.#element = element;
       this.#application = application2;
       const props = {
+        id: v4_default(),
         transform: { x: 0, y: 0, scale: 1 }
       };
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));

@@ -33,6 +33,10 @@ export default class ReactiveArray {
   create(argv) {
 
     const item = new this.#Item({...argv, application:this.#application, parent:this.#parent});
+    const itemExists = this.#content.find((o) => o.id === item.id);
+    if(itemExists) console.log(item);
+    if(itemExists) throw new Error('Item Exixts')
+
     this.#content.push(item);
 
     if (this.#auto && item.start) item.start();
@@ -43,8 +47,9 @@ export default class ReactiveArray {
   }
 
 
-  remove(id) {
+  remove(id, hard) {
     const item = this.#content.find((item) => item.id === id);
+
     if (item) {
       if (item.stop) item.stop();
       item.deleted = true;
@@ -53,6 +58,9 @@ export default class ReactiveArray {
     }else{
       console.log('ITEM NOT FOUND', id);
     }
+
+    if(hard) this.#content = this.#content.filter(o => o.id!==item.id);
+
   }
 
   removeDeleted() {
@@ -69,7 +77,10 @@ export default class ReactiveArray {
   }
 
   has(id) {
-    return this.#content.filter((item) => !item.deleted).find(item=>item.id == id);
+    return this.#content
+    .filter((item) => !item.deleted)
+    .find(item=>item.id == id);
+
   }
 
   filter(callback) {

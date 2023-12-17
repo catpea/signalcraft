@@ -1,6 +1,7 @@
 import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
 import { html, svg, text, list, update } from "domek";
+import { v4 as uuid } from "uuid";
 
 import ReactiveObject from "../system/ReactiveObject.js";
 
@@ -34,6 +35,7 @@ export default class View extends ReactiveObject {
 
 
 		const props = {
+			id: uuid(),
 			transform: { x: 0, y: 0, scale: 1 },
 		};
 

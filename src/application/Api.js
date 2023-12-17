@@ -16,11 +16,18 @@ export default class DreamInterface {
     // NOTE: the selected object id is used as selection ID
     return this.application.Selection.create({id:reference.id, kind:reference.kind, reference});
   }
+  toggleSelect(item){
+    if(this.application.Selection.has(item.id)){
+      return this.application.Selection.remove(item.id, true);
+    }else{
+      return this.application.Selection.create({id:item.id, kind:item.kind, reference:item});
+    }
+  }
   deselect(item){
-    return this.application.Selection.remove(item.id);
+    return this.application.Selection.remove(item.id, true);
   }
   deselectAll(item){
-    return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id));
+    return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id, true));
   }
 
   addNode(type, values){

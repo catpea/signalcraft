@@ -1,6 +1,7 @@
 import { svg, text, update } from "domek";
 
 import { Movable } from   "./caption/Movable.js";
+import { Selectable } from   "./caption/Selectable.js";
 
 import Component from "./Component.js";
 
@@ -23,6 +24,13 @@ export default class Caption extends Component {
     });
 		this.cleanup(this.view.observe('transform', v=>movable.scale = v.scale));
 		this.cleanup(()=>movable.stop());
+
+		const selectable = new Selectable({
+      container: window,  // <g> element representing an SVG scene
+         handle: this.el.Caption, // <rect> that is the caption of a window meant to be dragged
+		  	 action: ()=>this.view.application.Dream.toggleSelect(this.data),
+    });
+		this.cleanup(()=>selectable.stop());
 
 
 

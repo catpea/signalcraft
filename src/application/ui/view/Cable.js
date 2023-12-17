@@ -1,5 +1,6 @@
 import { html, svg, text, list, update } from "domek";
-import { Removable } from './cable/Removable.js';
+//import { Removable } from './cable/Removable.js';
+import { Selectable } from './cable/Selectable.js';
 
 export default class Cable {
   el={};
@@ -37,11 +38,18 @@ export default class Cable {
 
     view.scene.appendChild( this.el.Cable );
 
-    const removable = new Removable({
+    // this removes link
+    // const removable = new Removable({
+    //   handle: this.el.Cable,
+    //   remove: ()=> view.application.Links.remove(link.id),
+    // });
+    // this.cleanup( ()=>removable.stop() );
+
+    const selectable = new Selectable({
       handle: this.el.Cable,
-      remove: ()=> view.application.Links.remove(link.id),
+      action: ()=>view.application.Dream.toggleSelect(link),
     });
-    this.cleanup( ()=>removable.stop() );
+    this.cleanup(()=>selectable.stop());
 
 
     this.cleanup( view.application.Selection.observe('changed', ({data}) => {
