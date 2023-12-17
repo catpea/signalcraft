@@ -69,7 +69,8 @@ export class Connectable {
 					targetNode: targetNodeId,
 					targetPort: targetPortId
 				};
-				link(payload);
+
+				if(payload.sourcePort != payload.targetPort) link(payload);
 			}
 			// when mouse up, the line is always removed
       if(this.#el.indicatorLine) this.#el.indicatorLine.remove();

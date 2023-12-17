@@ -68,12 +68,13 @@ CTRL+Click on caption or cable will select it.
 - Reactivity Links everything together.
 
 ### Current State
-![art/fui-x.jpg](art/fui-x.jpg)
-![art/fui-y.jpg](art/fui-y.jpg)
-![art/fui-z.jpg](art/fui-z.jpg)
-![art/fui-a.jpg](art/fui-a.jpg)
-![art/fui-b.jpg](art/fui-b.jpg)
+![art/fui-c.jpg](art/fui-d.jpg)
 ![art/fui-c.jpg](art/fui-c.jpg)
+![art/fui-b.jpg](art/fui-b.jpg)
+![art/fui-a.jpg](art/fui-a.jpg)
+![art/fui-z.jpg](art/fui-z.jpg)
+![art/fui-y.jpg](art/fui-y.jpg)
+![art/fui-x.jpg](art/fui-x.jpg)
 
 ### Design Ideas
 

@@ -2620,7 +2620,8 @@
             targetNode: targetNodeId,
             targetPort: targetPortId
           };
-          link(payload);
+          if (payload.sourcePort != payload.targetPort)
+            link(payload);
         }
         if (this.#el.indicatorLine)
           this.#el.indicatorLine.remove();
