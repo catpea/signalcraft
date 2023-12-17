@@ -6,13 +6,13 @@ export class Selectable {
 	// used in stop/cleanup
 	#handle;
 
-	constructor({ handle, action }) {
+	constructor({ handle, active, action }) {
 		this.#handle = handle;
 		this.#mouseDownHandler = (e) => {
 			// noop
 		};
 		this.#mouseUpHandler = (e) => {
-			action();
+			if(active(e)) action(e);
 		};
 		this.#handle.addEventListener('mousedown', this.#mouseDownHandler);
 		this.#handle.addEventListener('mouseup', this.#mouseUpHandler);

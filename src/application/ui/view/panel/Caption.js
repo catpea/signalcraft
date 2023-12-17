@@ -13,6 +13,8 @@ export default class Caption extends Component {
 	}
 
 	render() {
+		const {Shortcuts, Dream} = this.view.application;
+
 		this.group.appendChild(this.el.Caption);
 		this.group.appendChild(this.el.CaptionText);
 
@@ -26,9 +28,9 @@ export default class Caption extends Component {
 		this.cleanup(()=>movable.stop());
 
 		const selectable = new Selectable({
-      container: window,  // <g> element representing an SVG scene
-         handle: this.el.Caption, // <rect> that is the caption of a window meant to be dragged
-		  	 action: ()=>this.view.application.Dream.toggleSelect(this.data),
+         handle: this.el.Caption,
+				 active: e=>Shortcuts.isSelecting(e),
+		  	 action: ()=>Dream.toggleSelect(this.data),
     });
 		this.cleanup(()=>selectable.stop());
 

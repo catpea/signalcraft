@@ -36,7 +36,13 @@ export default class Brain extends ReactiveObject {
     this.Theme = new UserTheme(this); // Theme Of Choice
     this.Dream = new Api(this); // Pretty Dream API *FOR USER ONLY* eveything must be informative!
 
+    // Extended Concepts
     this.Selection = new ReactiveArray({application:this, Item:Selected}); // this is the screen, multiple screens are supported
+    this.Shortcuts = {
+      isSelecting: e=>e.ctrlKey,
+      // selecting2: e=>e.ctrlKey&&shiftKey,
+
+    }
   }
 
   async start() {

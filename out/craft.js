@@ -2434,12 +2434,13 @@
     #mouseUpHandler;
     // used in stop/cleanup
     #handle;
-    constructor({ handle, action }) {
+    constructor({ handle, active, action }) {
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
       };
       this.#mouseUpHandler = (e) => {
-        action();
+        if (active(e))
+          action(e);
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
@@ -2460,6 +2461,7 @@
       this.el.CaptionText = svg.text({ class: `panel-caption-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
     }
     render() {
+      const { Shortcuts, Dream } = this.view.application;
       this.group.appendChild(this.el.Caption);
       this.group.appendChild(this.el.CaptionText);
       const movable = new Movable({
@@ -2473,11 +2475,9 @@
       this.cleanup(this.view.observe("transform", (v) => movable.scale = v.scale));
       this.cleanup(() => movable.stop());
       const selectable = new Selectable({
-        container: window,
-        // <g> element representing an SVG scene
         handle: this.el.Caption,
-        // <rect> that is the caption of a window meant to be dragged
-        action: () => this.view.application.Dream.toggleSelect(this.data)
+        active: (e) => Shortcuts.isSelecting(e),
+        action: () => Dream.toggleSelect(this.data)
       });
       this.cleanup(() => selectable.stop());
       this.children.map((child) => child.render());
@@ -2682,12 +2682,13 @@
     #mouseUpHandler;
     // used in stop/cleanup
     #handle;
-    constructor({ handle, action }) {
+    constructor({ handle, active, action }) {
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
       };
       this.#mouseUpHandler = (e) => {
-        action();
+        if (active(e))
+          action(e);
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
@@ -2708,8 +2709,9 @@
     constructor() {
     }
     start({ link, view }) {
-      const sourceNode = view.application.Nodes.id(link.sourceNode);
-      const targetNode = view.application.Nodes.id(link.targetNode);
+      const { Shortcuts, Dream, Nodes, Selection, Cable: Cable2 } = view.application;
+      const sourceNode = Nodes.id(link.sourceNode);
+      const targetNode = Nodes.id(link.targetNode);
       const sourcePort = sourceNode.Output.id(link.sourcePort);
       const targetPort = targetNode.Input.id(link.targetPort);
       let x1 = sourceNode.x + sourcePort.x;
@@ -2723,10 +2725,10 @@
         y1,
         x2,
         y2,
-        stroke: "white",
-        fill: "red",
-        "width": 5,
-        "stroke-width": 5,
+        // stroke: "white",
+        // fill: 'red',
+        // 'width': 5,
+        // 'stroke-width': 5,
         strokeLinecap: "round",
         vectorEffect: "non-scaling-stroke"
       });
@@ -2737,10 +2739,11 @@
       view.scene.appendChild(this.el.Cable);
       const selectable = new Selectable2({
         handle: this.el.Cable,
-        action: () => view.application.Dream.toggleSelect(link)
+        active: (e) => Shortcuts.isSelecting(e),
+        action: (e) => Dream.toggleSelect(link)
       });
       this.cleanup(() => selectable.stop());
-      this.cleanup(view.application.Selection.observe("changed", ({ data }) => {
+      this.cleanup(Selection.observe("changed", ({ data }) => {
         if (data.has(link.id)) {
           this.el.Cable.classList.add("selected");
         } else {
@@ -3290,6 +3293,10 @@
       this.Theme = new MyTheme(this);
       this.Dream = new DreamInterface(this);
       this.Selection = new ReactiveArray({ application: this, Item: Selected });
+      this.Shortcuts = {
+        isSelecting: (e) => e.ctrlKey
+        // selecting2: e=>e.ctrlKey&&shiftKey,
+      };
     }
     async start() {
       this.Views.start();
@@ -3378,12 +3385,6 @@
       const arrayJn = api2.addNode("array/join");
       const linkA = api2.linkPorts(stringA, arrayJn);
       const linkB = api2.linkPorts(stringB, arrayJn);
-      api2.select(stringA);
-      api2.select(linkA);
-      setTimeout(() => {
-        api2.deselect(stringA);
-        api2.select(arrayJn);
-      }, 5e3);
       const result = await api2.execute(arrayJn);
       console.log("usage.js api.execute said: ", result);
       const actual = JSON.stringify(result);

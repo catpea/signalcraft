@@ -1,10 +1,15 @@
 # signalcraft
 A tiny visual programming language.
 
+## Usage
+
+CTRL+Click on caption or cable will select it.
+
 ## TODO
 
 ### Bug Fix
 
+- Prevent ports from connecting to themselves on an onclick without drag
 - Lines are too thin to click on, replace delete feature with SELECT+DEL like in Blender
 - Drag Connecting lines between entire Line.js not just Port, it is easier to hit the targer
 - too hard to click on caption, at certain scale make the entire node draggable
@@ -62,23 +67,26 @@ A tiny visual programming language.
 - Edges are decorated as Cables
 - Reactivity Links everything together.
 
-### Design Ideas
-
-![art/fui-0.jpg](art/fui-0.jpg)
-![art/fui-1.jpg](art/fui-1.jpg)
-![art/fui-2.jpg](art/fui-2.jpg)
-![art/fui-3.jpg](art/fui-3.jpg)
-![art/fui-4.jpg](art/fui-4.jpg)
-![art/fui-5.jpg](art/fui-5.jpg)
-![art/fui-6.jpg](art/fui-6.jpg)
-![art/fui-7.jpg](art/fui-7.jpg)
-![art/fui-8.jpg](art/fui-8.jpg)
-![art/fui-9.jpg](art/fui-9.jpg)
-![art/fui-10.jpg](art/fui-10.jpg)
-![art/fui-11.jpg](art/fui-11.jpg)
-
 ### Current State
 ![art/fui-x.jpg](art/fui-x.jpg)
 ![art/fui-y.jpg](art/fui-y.jpg)
 ![art/fui-z.jpg](art/fui-z.jpg)
 ![art/fui-a.jpg](art/fui-a.jpg)
+![art/fui-b.jpg](art/fui-b.jpg)
+![art/fui-c.jpg](art/fui-c.jpg)
+
+### Design Ideas
+
+![art/fui-12.jpg](art/fui-12.jpg)
+![art/fui-11.jpg](art/fui-11.jpg)
+![art/fui-10.jpg](art/fui-10.jpg)
+![art/fui-9.jpg](art/fui-9.jpg)
+![art/fui-8.jpg](art/fui-8.jpg)
+![art/fui-7.jpg](art/fui-7.jpg)
+![art/fui-6.jpg](art/fui-6.jpg)
+![art/fui-5.jpg](art/fui-5.jpg)
+![art/fui-4.jpg](art/fui-4.jpg)
+![art/fui-3.jpg](art/fui-3.jpg)
+![art/fui-2.jpg](art/fui-2.jpg)
+![art/fui-1.jpg](art/fui-1.jpg)
+![art/fui-0.jpg](art/fui-0.jpg)

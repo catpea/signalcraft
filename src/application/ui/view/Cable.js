@@ -8,9 +8,10 @@ export default class Cable {
   constructor() {}
 
   start({link, view }){
+    const {Shortcuts, Dream, Nodes, Selection, Cable} = view.application;
 
-    const sourceNode = view.application.Nodes .id(link.sourceNode);
-    const targetNode = view.application.Nodes .id(link.targetNode);
+    const sourceNode = Nodes .id(link.sourceNode);
+    const targetNode = Nodes .id(link.targetNode);
     const sourcePort = sourceNode.Output       .id(link.sourcePort);
     const targetPort = targetNode.Input        .id(link.targetPort);
 
@@ -23,10 +24,10 @@ export default class Cable {
       class:'cable-line',
       // class:'cable-line line-ant-trail',
       x1, y1, x2, y2,
-      stroke: "white",
-      fill: 'red',
-      'width': 5,
-      'stroke-width': 5,
+      // stroke: "white",
+      // fill: 'red',
+      // 'width': 5,
+      // 'stroke-width': 5,
       strokeLinecap: 'round',
       vectorEffect: 'non-scaling-stroke',
     });
@@ -47,12 +48,13 @@ export default class Cable {
 
     const selectable = new Selectable({
       handle: this.el.Cable,
-      action: ()=>view.application.Dream.toggleSelect(link),
+      active: e=>Shortcuts.isSelecting(e),
+      action: e=>Dream.toggleSelect(link),
     });
     this.cleanup(()=>selectable.stop());
 
 
-    this.cleanup( view.application.Selection.observe('changed', ({data}) => {
+    this.cleanup( Selection.observe('changed', ({data}) => {
       if(data.has(link.id)){
         this.el.Cable.classList.add('selected');
       }else{

@@ -2,7 +2,9 @@
 
 import * as esbuild from 'esbuild'
 
-let examplePlugin = {
+import {sassPlugin} from 'esbuild-sass-plugin'
+
+let examplePlugin = ()=>({
   name: 'example',
   setup(build) {
     build.onEnd(result => {
@@ -10,7 +12,7 @@ let examplePlugin = {
       console.log('-'.repeat(80), '\n\n')
     })
   },
-}
+});
 
 let ctx = await esbuild.context({
   bundle: true,
@@ -21,10 +23,10 @@ let ctx = await esbuild.context({
      '.html': 'text',
      '.js': 'jsx',
    },
-  plugins: [examplePlugin],
+  plugins: [ examplePlugin(), sassPlugin()],
 })
 
-const xxx = await ctx.watch(function(){console.log('XXX');})
+const xxx = await ctx.watch()
 console.log(xxx);
 let { host, port } = await ctx.serve({
     host:'0.0.0.0',

@@ -1,0 +1,50 @@
+/* src/theme/zion.scss */
+svg.ui-view {
+  outline: none;
+}
+.view-scene-background {
+  fill: hsl(60, 3%, 79%);
+}
+.panel-container {
+  fill: hsl(30, 22%, 96%);
+  filter: drop-shadow(3px 6px 10px hsl(200, 10%, 30%));
+  stroke: hsl(180, 1%, 90%);
+}
+.panel-container.selected {
+  filter: drop-shadow(0px 0px 0px hsl(0, 0%, 70%));
+  fill: hsl(56, 67%, 82%);
+}
+.panel-caption {
+  fill: hsl(40, 6%, 90%);
+}
+.panel-caption-text {
+  fill: hsl(180, 1%, 10%);
+  pointer-events: none;
+  user-select: none;
+}
+.panel-pod {
+  fill: transparent;
+}
+.panel-line {
+  fill: transparent;
+}
+.panel-line-text {
+  fill: gray;
+  pointer-events: none;
+  user-select: none;
+}
+.panel-line-port {
+  fill: hsl(206, 5%, 65%);
+  stroke: hsl(40, 6%, 90%);
+}
+.cable-line {
+  stroke: hsl(210, 6%, 70%);
+  stroke-width: 5;
+}
+.cable-line.selected {
+  stroke: hsl(56, 67%, 82%);
+}
+.cable-line-indicator {
+  stroke: hsl(136, 100%, 34%);
+  stroke-width: 5;
+}

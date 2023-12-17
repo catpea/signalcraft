@@ -29,6 +29,7 @@ export default class Line extends Component {
 		this.group.appendChild(this.el.Line);
 		this.group.appendChild(this.el.LineText);
 		this.group.appendChild(this.el.Port);
+
 		const connectable = new Connectable({
 			container: window, // <g> element representing an SVG scene
 			handle: this.el.Port,
@@ -37,6 +38,7 @@ export default class Line extends Component {
 			port: this.data,
 			link: ({sourceNode, sourcePort, targetNode, targetPort})=> this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort }),
 		});
+
 		this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
 		this.cleanup(()=>connectable.stop());
 		this.children.map(child => child.render())

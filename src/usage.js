@@ -23,14 +23,14 @@ export default async function(api){
   const linkA = api.linkPorts(stringA, arrayJn);
   const linkB = api.linkPorts(stringB, arrayJn);
 
-  api.select(stringA);
-  api.select(linkA);
-
-  setTimeout(()=>{
-    api.deselect(stringA);
-    api.select(arrayJn);
-
-  },5000);
+  // api.select(stringA);
+  // api.select(linkA);
+  //
+  // setTimeout(()=>{
+  //   api.deselect(stringA);
+  //   api.select(arrayJn);
+  //
+  // },5000);
 
   // execute your program;
   const result = await api.execute(arrayJn);
