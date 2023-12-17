@@ -20,6 +20,14 @@ export default class Cable {
     let x2 = targetNode.x + targetPort.x;
     let y2 = targetNode.y + targetPort.y;
 
+    this.el.CableClick = svg.line({
+      x1, y1, x2, y2,
+      stroke: "rgba(0,0,0,0.002)",
+      'stroke-width': 10,
+      strokeLinecap: 'round',
+      vectorEffect: 'non-scaling-stroke',
+    });
+
     this.el.Cable = svg.line({
       class:'cable-line',
       // class:'cable-line line-ant-trail',
@@ -32,12 +40,14 @@ export default class Cable {
       vectorEffect: 'non-scaling-stroke',
     });
 
-    this.cleanup(      sourceNode.observe('x',      (v)=>update(this.el.Cable, { x1:v+sourcePort.x }))     );
-    this.cleanup(      sourceNode.observe('y',      (v)=>update(this.el.Cable, { y1:v+sourcePort.y }))     );
-    this.cleanup(      targetNode.observe('x',      (v)=>update(this.el.Cable, { x2:v+targetPort.x }))     );
-    this.cleanup(      targetNode.observe('y',      (v)=>update(this.el.Cable, { y2:v+targetPort.y }))     );
+    this.cleanup(      sourceNode.observe('x',      (v)=>update([this.el.Cable, this.el.CableClick], { x1:v+sourcePort.x }))     );
+    this.cleanup(      sourceNode.observe('y',      (v)=>update([this.el.Cable, this.el.CableClick], { y1:v+sourcePort.y }))     );
+    this.cleanup(      targetNode.observe('x',      (v)=>update([this.el.Cable, this.el.CableClick], { x2:v+targetPort.x }))     );
+    this.cleanup(      targetNode.observe('y',      (v)=>update([this.el.Cable, this.el.CableClick], { y2:v+targetPort.y }))     );
 
-    view.scene.appendChild( this.el.Cable );
+    view.scene.insertBefore(this.el.Cable, view.scene.firstChild);
+    view.scene.insertBefore(this.el.CableClick , view.scene.firstChild);
+ 
 
     // this removes link
     // const removable = new Removable({
@@ -46,10 +56,24 @@ export default class Cable {
     // });
     // this.cleanup( ()=>removable.stop() );
 
+    // const selectable = new Selectable({
+    //   handle: this.el.Cable,
+    //   active: e=>Shortcuts.isSelecting(e),
+    //   action: e=>Dream.toggleSelect(link),
+    // });
+    // this.cleanup(()=>selectable.stop());
+
     const selectable = new Selectable({
-      handle: this.el.Cable,
-      active: e=>Shortcuts.isSelecting(e),
-      action: e=>Dream.toggleSelect(link),
+      handle: this.el.CableClick,
+      action: e=>{
+        const selectingMultiple = Shortcuts.isSelecting(e);
+        if(selectingMultiple){
+          Dream.toggleSelect(link);
+        }else{ // user simply chose a new selection
+          Dream.deselectAll();
+          Dream.toggleSelect(link);
+        }
+      }
     });
     this.cleanup(()=>selectable.stop());
 

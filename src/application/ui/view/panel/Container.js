@@ -23,6 +23,9 @@ export default class Container extends Component {
     }))
 
 
+
+		this.cleanup(()=>focus.stop());
+
     this.children.map(child=>child.setup())
   }
 

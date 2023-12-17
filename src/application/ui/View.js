@@ -235,11 +235,9 @@ export default class View extends ReactiveObject {
 		this.#unsubscribe.push(() => menus.stop());
 	}
 
+
+
 	#installScene() {
-		const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-		scene.setAttributeNS(null, "class", "view-scene");
-		scene.setAttributeNS(null, "id", "scene");
-		this.#svg.appendChild(scene);
 
 		const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 		rect2.setAttributeNS(null, "class", "view-scene-background");
@@ -247,25 +245,14 @@ export default class View extends ReactiveObject {
 		rect2.setAttributeNS(null, "y", "0");
 		rect2.setAttributeNS(null, "width", 11_000);
 		rect2.setAttributeNS(null, "height", 8_500);
-		scene.appendChild(rect2);
+		this.#svg.appendChild(rect2);
+		
+		const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+		scene.setAttributeNS(null, "class", "view-scene");
+		scene.setAttributeNS(null, "id", "scene");
+		this.#svg.appendChild(scene);
 
-		const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-		vertical1.setAttributeNS(null, "x1", "100");
-		vertical1.setAttributeNS(null, "y1", "100");
-		vertical1.setAttributeNS(null, "x2", "100");
-		vertical1.setAttributeNS(null, "y2", "200");
-		vertical1.setAttributeNS(null, "stroke", "white");
 
-		scene.appendChild(vertical1);
-
-		const horizontal1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-		horizontal1.setAttributeNS(null, "x1", "50");
-		horizontal1.setAttributeNS(null, "y1", "150");
-		horizontal1.setAttributeNS(null, "x2", "150");
-		horizontal1.setAttributeNS(null, "y2", "150");
-		horizontal1.setAttributeNS(null, "stroke", "white");
-
-		scene.appendChild(horizontal1);
 
 		return scene;
 	}

@@ -3,19 +3,22 @@ svg.ui-view {
   outline: none;
 }
 .view-scene-background {
-  fill: hsl(60, 3%, 79%);
+  fill: hsl(60, 3%, 75%);
 }
 .panel-container {
-  fill: hsl(30, 22%, 96%);
-  filter: drop-shadow(3px 6px 10px hsl(200, 10%, 30%));
-  stroke: hsl(180, 1%, 90%);
+  fill: hsl(60, 3%, 75%);
+  stroke: hsl(180, 1%, 40%);
 }
 .panel-container.selected {
-  filter: drop-shadow(0px 0px 0px hsl(0, 0%, 70%));
-  fill: hsl(56, 67%, 82%);
+  fill: hsl(60, 3%, 72%);
 }
 .panel-caption {
-  fill: hsl(40, 6%, 90%);
+  fill: hsl(60, 3%, 75%);
+  stroke: hsl(206, 5%, 65%);
+}
+.panel-caption.selected {
+  fill: hsl(19, 79%, 55%);
+  stroke: hsl(18, 90%, 60%);
 }
 .panel-caption-text {
   fill: hsl(180, 1%, 10%);
@@ -38,13 +41,13 @@ svg.ui-view {
   stroke: hsl(40, 6%, 90%);
 }
 .cable-line {
-  stroke: hsl(210, 6%, 70%);
-  stroke-width: 5;
+  stroke: hsl(180, 1%, 40%);
+  stroke-width: 1;
 }
 .cable-line.selected {
-  stroke: hsl(56, 67%, 82%);
+  stroke: hsl(18, 90%, 60%);
 }
 .cable-line-indicator {
-  stroke: hsl(136, 100%, 34%);
-  stroke-width: 5;
+  stroke: hsl(180, 1%, 10%);
+  stroke-width: 1;
 }

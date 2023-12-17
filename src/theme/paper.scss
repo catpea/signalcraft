@@ -1,5 +1,5 @@
 $active:           hsl(136, 100%, 34%);
-$selected:         hsl(18, 90%, 60%);
+$selected:         hsl(56, 67%, 82%);
 $primary:          hsl(206, 5%, 65%);
 $secondary:        hsl(210, 6%, 70%);
 
@@ -12,11 +12,9 @@ $light:            hsl(180,1%,90%);
 $dark:             hsl(180,1%,10%);
 $gray:             hsl(180,1%,40%);
 
-$active-bg:      hsl(56, 67%, 82%);
-$selected-bg:      hsl(19, 79%, 55%);
-
-$primary-bg:       hsl(60,3%,75%);
-$secondary-bg:     hsl(19, 79%, 55%);
+$selected-bg:      hsl(56, 67%, 82%);
+$primary-bg:       hsl(60,3%,79%);
+$secondary-bg:     hsl(30,22%,96%);
 
 $tertiary-bg:      hsl(40,6%,90%);
 $success-bg:       magenta;
@@ -25,7 +23,7 @@ $warning-bg:       magenta;
 $danger-bg:        magenta;
 
 $light-bg:         magenta;
-$gray-bg:          hsl(60,3%,72%);
+$gray:             magenta;
 $dark-bg:          magenta;
 
 
@@ -46,25 +44,21 @@ svg.ui-view {
 
 
 .panel-container {
-  fill: $primary-bg;
-  stroke: $gray;
-  // filter: drop-shadow(3px 6px 10px hsl(200,10%,30%));
+  fill: $secondary-bg;
+
+  filter: drop-shadow(3px 6px 10px hsl(200,10%,30%));
+  stroke: $light;
 }
 
 .panel-container.selected {
-  // fill:  tint($dark, $dark, 30%);
-  fill:  $gray-bg;
-  // stroke: transparent;
+  filter: drop-shadow(0px 0px 0px hsl(0,0%,70%));
+  fill: $selected-bg;
 }
 
 .panel-caption {
-  fill: $primary-bg;
-  stroke: $primary;
-}
+  fill: $tertiary-bg;
 
-.panel-caption.selected {
-  fill: $selected-bg;
-  stroke: $selected;
+  // stroke: hsl(283,23%,10%);
 }
 
 .panel-caption-text {
@@ -97,8 +91,8 @@ svg.ui-view {
 }
 
 .cable-line {
-  stroke: $gray;
-  stroke-width: 1;
+  stroke: $secondary;
+  stroke-width: 5;
 }
 
 .cable-line.selected {
@@ -106,6 +100,6 @@ svg.ui-view {
 }
 
 .cable-line-indicator {
-  stroke: $dark;
-  stroke-width: 1;
+  stroke: $active;
+  stroke-width: 5;
 }

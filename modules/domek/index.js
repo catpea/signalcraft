@@ -60,14 +60,38 @@ const text = function(text){
   return document.createTextNode(text);
 }
 
-const update = function(el, properties){
-  for (const key in properties) {
-    if(el.namespaceURI == 'http://www.w3.org/2000/svg'){
-      el.setAttributeNS(null, key, properties[key]);
-    }else{
-      el.setAttribute(key, properties[key]);
+const update = function(elements, properties){
+  const els = Array.isArray(elements)?elements:[elements];
+  for (const el of els) {
+    for (const key in properties) {
+      if(el.namespaceURI == 'http://www.w3.org/2000/svg'){
+        el.setAttributeNS(null, key, properties[key]);
+      }else{
+        el.setAttribute(key, properties[key]);
+      }
     }
   }
 }
 
-export {svg, html, text, list, update, id};
+
+function back(element) {
+  const parentElement = element.parentNode;
+
+  // Remove element from its current position...
+  parentElement.removeChild(element);
+
+  // And insert it at the first position (at the back in SVG)
+  parentElement.insertBefore(element, parentElement.firstChild);
+}
+
+function front(element) {
+  const parentElement = element.parentNode;
+
+  // Remove element from its current position...
+  parentElement.removeChild(element);
+
+  // And add it back, so it will be the last one (and thus at the front in SVG)
+  parentElement.appendChild(element);
+}
+
+export {svg, html, text, list, update, id, back, front};

@@ -2220,15 +2220,23 @@
   var text = function(text2) {
     return document.createTextNode(text2);
   };
-  var update2 = function(el, properties) {
-    for (const key in properties) {
-      if (el.namespaceURI == "http://www.w3.org/2000/svg") {
-        el.setAttributeNS(null, key, properties[key]);
-      } else {
-        el.setAttribute(key, properties[key]);
+  var update2 = function(elements, properties) {
+    const els = Array.isArray(elements) ? elements : [elements];
+    for (const el of els) {
+      for (const key in properties) {
+        if (el.namespaceURI == "http://www.w3.org/2000/svg") {
+          el.setAttributeNS(null, key, properties[key]);
+        } else {
+          el.setAttribute(key, properties[key]);
+        }
       }
     }
   };
+  function front(element) {
+    const parentElement = element.parentNode;
+    parentElement.removeChild(element);
+    parentElement.appendChild(element);
+  }
 
   // src/application/ui/view/Panel.js
   var import_oneof2 = __toESM(require_oneof(), 1);
@@ -2353,6 +2361,7 @@
           this.el.Panel.classList.remove("selected");
         }
       }));
+      this.cleanup(() => focus.stop());
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2434,13 +2443,40 @@
     #mouseUpHandler;
     // used in stop/cleanup
     #handle;
-    constructor({ handle, active, action }) {
+    constructor({ handle, action }) {
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
+        action(e);
       };
       this.#mouseUpHandler = (e) => {
-        if (active(e))
-          action(e);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
+  // src/application/ui/view/panel/caption/Focus.js
+  var Focus = class {
+    #scale;
+    // set by setter
+    // handlers
+    #mouseDownHandler;
+    #mouseUpHandler;
+    // used in stop/cleanup
+    #handle;
+    constructor({ handle, action }) {
+      this.#handle = handle;
+      this.#mouseDownHandler = (e) => {
+        action(e);
+      };
+      this.#mouseUpHandler = (e) => {
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
@@ -2459,6 +2495,19 @@
     setup() {
       this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
       this.el.CaptionText = svg.text({ class: `panel-caption-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(this.data.id)) {
+          this.el.Caption.classList.add("selected");
+        } else {
+          this.el.Caption.classList.remove("selected");
+        }
+      }));
+      const focus2 = new Focus({
+        handle: this.el.Caption,
+        action: (e) => {
+          front(this.parent.group);
+        }
+      });
     }
     render() {
       const { Shortcuts, Dream } = this.view.application;
@@ -2476,8 +2525,15 @@
       this.cleanup(() => movable.stop());
       const selectable = new Selectable({
         handle: this.el.Caption,
-        active: (e) => Shortcuts.isSelecting(e),
-        action: () => Dream.toggleSelect(this.data)
+        action: (e) => {
+          const selectingMultiple = Shortcuts.isSelecting(e);
+          if (selectingMultiple) {
+            Dream.toggleSelect(this.data);
+          } else {
+            Dream.deselectAll();
+            Dream.toggleSelect(this.data);
+          }
+        }
       });
       this.cleanup(() => selectable.stop());
       this.children.map((child) => child.render());
@@ -2682,13 +2738,12 @@
     #mouseUpHandler;
     // used in stop/cleanup
     #handle;
-    constructor({ handle, active, action }) {
+    constructor({ handle, action }) {
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
       };
       this.#mouseUpHandler = (e) => {
-        if (active(e))
-          action(e);
+        action(e);
       };
       this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
       this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
@@ -2718,6 +2773,16 @@
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
+      this.el.CableClick = svg.line({
+        x1,
+        y1,
+        x2,
+        y2,
+        stroke: "rgba(0,0,0,0.002)",
+        "stroke-width": 10,
+        strokeLinecap: "round",
+        vectorEffect: "non-scaling-stroke"
+      });
       this.el.Cable = svg.line({
         class: "cable-line",
         // class:'cable-line line-ant-trail',
@@ -2732,15 +2797,23 @@
         strokeLinecap: "round",
         vectorEffect: "non-scaling-stroke"
       });
-      this.cleanup(sourceNode.observe("x", (v) => update2(this.el.Cable, { x1: v + sourcePort.x })));
-      this.cleanup(sourceNode.observe("y", (v) => update2(this.el.Cable, { y1: v + sourcePort.y })));
-      this.cleanup(targetNode.observe("x", (v) => update2(this.el.Cable, { x2: v + targetPort.x })));
-      this.cleanup(targetNode.observe("y", (v) => update2(this.el.Cable, { y2: v + targetPort.y })));
-      view.scene.appendChild(this.el.Cable);
+      this.cleanup(sourceNode.observe("x", (v) => update2([this.el.Cable, this.el.CableClick], { x1: v + sourcePort.x })));
+      this.cleanup(sourceNode.observe("y", (v) => update2([this.el.Cable, this.el.CableClick], { y1: v + sourcePort.y })));
+      this.cleanup(targetNode.observe("x", (v) => update2([this.el.Cable, this.el.CableClick], { x2: v + targetPort.x })));
+      this.cleanup(targetNode.observe("y", (v) => update2([this.el.Cable, this.el.CableClick], { y2: v + targetPort.y })));
+      view.scene.insertBefore(this.el.Cable, view.scene.firstChild);
+      view.scene.insertBefore(this.el.CableClick, view.scene.firstChild);
       const selectable = new Selectable2({
-        handle: this.el.Cable,
-        active: (e) => Shortcuts.isSelecting(e),
-        action: (e) => Dream.toggleSelect(link)
+        handle: this.el.CableClick,
+        action: (e) => {
+          const selectingMultiple = Shortcuts.isSelecting(e);
+          if (selectingMultiple) {
+            Dream.toggleSelect(link);
+          } else {
+            Dream.deselectAll();
+            Dream.toggleSelect(link);
+          }
+        }
       });
       this.cleanup(() => selectable.stop());
       this.cleanup(Selection.observe("changed", ({ data }) => {
@@ -3187,31 +3260,17 @@
       this.#unsubscribe.push(() => menus.stop());
     }
     #installScene() {
-      const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      scene.setAttributeNS(null, "class", "view-scene");
-      scene.setAttributeNS(null, "id", "scene");
-      this.#svg.appendChild(scene);
       const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       rect2.setAttributeNS(null, "class", "view-scene-background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
       rect2.setAttributeNS(null, "width", 11e3);
       rect2.setAttributeNS(null, "height", 8500);
-      scene.appendChild(rect2);
-      const vertical1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      vertical1.setAttributeNS(null, "x1", "100");
-      vertical1.setAttributeNS(null, "y1", "100");
-      vertical1.setAttributeNS(null, "x2", "100");
-      vertical1.setAttributeNS(null, "y2", "200");
-      vertical1.setAttributeNS(null, "stroke", "white");
-      scene.appendChild(vertical1);
-      const horizontal1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      horizontal1.setAttributeNS(null, "x1", "50");
-      horizontal1.setAttributeNS(null, "y1", "150");
-      horizontal1.setAttributeNS(null, "x2", "150");
-      horizontal1.setAttributeNS(null, "y2", "150");
-      horizontal1.setAttributeNS(null, "stroke", "white");
-      scene.appendChild(horizontal1);
+      this.#svg.appendChild(rect2);
+      const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      scene.setAttributeNS(null, "class", "view-scene");
+      scene.setAttributeNS(null, "id", "scene");
+      this.#svg.appendChild(scene);
       return scene;
     }
     #deletePanel({ item }) {

@@ -1,4 +1,4 @@
-export class Selectable {
+export class Focus {
 	#scale; // set by setter
 	// handlers
 	#mouseDownHandler;
@@ -9,10 +9,9 @@ export class Selectable {
 	constructor({ handle, action }) {
 		this.#handle = handle;
 		this.#mouseDownHandler = (e) => {
-			// noop
+			action(e);
 		};
 		this.#mouseUpHandler = (e) => {
-			action(e);
 		};
 		this.#handle.addEventListener('mousedown', this.#mouseDownHandler);
 		this.#handle.addEventListener('mouseup', this.#mouseUpHandler);
