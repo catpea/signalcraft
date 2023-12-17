@@ -6,6 +6,8 @@ export default class Pod extends Component {
 
   setup(){
     this.el.Pod = svg.rect({ class: 'panel-pod', ry: this.radius, width: this.width, x:this.x, y:this.y, height: this.height});
+    this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
+    
     this.children.map(child=>child.setup())
   }
 

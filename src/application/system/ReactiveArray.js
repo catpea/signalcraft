@@ -46,6 +46,12 @@ export default class ReactiveArray {
     return item;
   }
 
+  clear(hard){
+    return this
+    .#content
+    .filter((item) => !item.deleted)
+    .forEach(({id})=>this.remove(id, hard))
+  }
 
   remove(id, hard) {
     const item = this.#content.find((item) => item.id === id);
@@ -59,7 +65,7 @@ export default class ReactiveArray {
       console.log('ITEM NOT FOUND', id);
     }
 
-    if(hard) this.#content = this.#content.filter(o => o.id!==item.id);
+    if(hard) this.#content = this.#content.filter(o => o.id!==id);
 
   }
 
@@ -72,8 +78,11 @@ export default class ReactiveArray {
     return this.#content.filter((item) => !item.deleted).find(callback);
   }
 
-  id(id) {
+  get(id) {
     return this.#content.find(item=>item.id == id);
+  }
+  id(id) {
+    return this.get(id);
   }
 
   has(id) {
@@ -81,6 +90,11 @@ export default class ReactiveArray {
     .filter((item) => !item.deleted)
     .find(item=>item.id == id);
 
+  }
+
+  destroy(matcher, hard) {
+    if (typeof matcher !== "function") throw new TypeError("Find needs a function.");
+    return this.#content.filter(matcher).forEach(o=>this.remove(o.id, hard));
   }
 
   filter(callback) {

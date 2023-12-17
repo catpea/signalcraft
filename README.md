@@ -9,8 +9,6 @@ CTRL+Click on caption or cable will select it.
 
 ### Bug Fix
 
-- Prevent ports from connecting to themselves on an onclick without drag
-- Lines are too thin to click on, replace delete feature with SELECT+DEL like in Blender
 - Drag Connecting lines between entire Line.js not just Port, it is easier to hit the targer
 - too hard to click on caption, at certain scale make the entire node draggable
 - default action for drag should be selection manager not panning, see NodeRED

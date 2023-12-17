@@ -51,11 +51,12 @@ export default class Panel {
       container.setup();
       container.render();
 
-      this.cleanup(container);
+      this.cleanup(()=>container.stop());
   }
 
 
   stop(){
+    // console.log(this.#cleanup)
     this.#cleanup.map(x=>x());
   }
   cleanup(...arg){

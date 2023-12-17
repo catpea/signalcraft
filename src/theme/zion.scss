@@ -100,7 +100,11 @@ svg.ui-view {
   stroke: $gray;
   stroke-width: 1;
 }
-
+.cable-line-ghost {
+  // for clicking
+  stroke: rgba(185, 185, 185, 0.1);
+  stroke-width: 22;
+}
 .cable-line.selected {
   stroke: $selected;
 }

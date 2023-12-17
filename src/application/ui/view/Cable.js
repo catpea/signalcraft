@@ -21,11 +21,10 @@ export default class Cable {
     let y2 = targetNode.y + targetPort.y;
 
     this.el.CableClick = svg.line({
+      class:'cable-line-ghost',
       x1, y1, x2, y2,
-      stroke: "rgba(0,0,0,0.002)",
-      'stroke-width': 10,
       strokeLinecap: 'round',
-      vectorEffect: 'non-scaling-stroke',
+      // vectorEffect: 'non-scaling-stroke',
     });
 
     this.el.Cable = svg.line({
@@ -40,14 +39,15 @@ export default class Cable {
       vectorEffect: 'non-scaling-stroke',
     });
 
+    this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
+
     this.cleanup(      sourceNode.observe('x',      (v)=>update([this.el.Cable, this.el.CableClick], { x1:v+sourcePort.x }))     );
     this.cleanup(      sourceNode.observe('y',      (v)=>update([this.el.Cable, this.el.CableClick], { y1:v+sourcePort.y }))     );
     this.cleanup(      targetNode.observe('x',      (v)=>update([this.el.Cable, this.el.CableClick], { x2:v+targetPort.x }))     );
     this.cleanup(      targetNode.observe('y',      (v)=>update([this.el.Cable, this.el.CableClick], { y2:v+targetPort.y }))     );
 
-    view.scene.insertBefore(this.el.Cable, view.scene.firstChild);
-    view.scene.insertBefore(this.el.CableClick , view.scene.firstChild);
- 
+    view.scene.insertBefore(this.el.CableClick , view.scene.firstChild.nextSibling);
+    view.scene.insertBefore(this.el.Cable, view.scene.firstChild.nextSibling);
 
     // this removes link
     // const removable = new Removable({
@@ -93,6 +93,7 @@ export default class Cable {
   }
 
   stop() {
+    console.log('Cable Cleanup');
     this.#cleanup.map(x=>x());
     this.el.Cable.remove();
   }

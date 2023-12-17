@@ -12,6 +12,8 @@ export default class Caption extends Component {
 		this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
 		this.el.CaptionText = svg.text({ class: `panel-caption-text`, x:this.x+(this.width*.02), y: this.y + (this.height - (this.height * .12)) }, this.data.type);
 
+		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
+
 		this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
 			if(data.has(this.data.id)){
 				this.el.Caption.classList.add('selected');
@@ -21,12 +23,7 @@ export default class Caption extends Component {
 		}))
 
 
-		const focus = new Focus({
-			handle: this.el.Caption,
-			action: e=>{
-				front(this.parent.group)
-			}
-		});
+
 
 
 	}
@@ -64,10 +61,15 @@ export default class Caption extends Component {
 				}
 			}
 		});
-
 		this.cleanup(()=>selectable.stop());
 
-
+		const focus = new Focus({
+			handle: this.el.Caption,
+			action: e=>{
+				front(this.parent.group)
+			}
+		});
+		this.cleanup(()=>focus.stop());
 
 
 		this.children.map(child => child.render())

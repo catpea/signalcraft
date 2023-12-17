@@ -1735,6 +1735,9 @@
       this.#notify("changed", { item, data: this });
       return item;
     }
+    clear(hard) {
+      return this.#content.filter((item) => !item.deleted).forEach(({ id: id2 }) => this.remove(id2, hard));
+    }
     remove(id2, hard) {
       const item = this.#content.find((item2) => item2.id === id2);
       if (item) {
@@ -1747,7 +1750,7 @@
         console.log("ITEM NOT FOUND", id2);
       }
       if (hard)
-        this.#content = this.#content.filter((o) => o.id !== item.id);
+        this.#content = this.#content.filter((o) => o.id !== id2);
     }
     removeDeleted() {
       this.#content = this.#content.filter((item) => !item.deleted);
@@ -1757,11 +1760,19 @@
         throw new TypeError("Find needs a function.");
       return this.#content.filter((item) => !item.deleted).find(callback);
     }
-    id(id2) {
+    get(id2) {
       return this.#content.find((item) => item.id == id2);
+    }
+    id(id2) {
+      return this.get(id2);
     }
     has(id2) {
       return this.#content.filter((item) => !item.deleted).find((item) => item.id == id2);
+    }
+    destroy(matcher, hard) {
+      if (typeof matcher !== "function")
+        throw new TypeError("Find needs a function.");
+      return this.#content.filter(matcher).forEach((o) => this.remove(o.id, hard));
     }
     filter(callback) {
       if (typeof callback !== "function")
@@ -1937,6 +1948,14 @@
     }
     deselectAll(item) {
       return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2, true));
+    }
+    removeSelected() {
+      const { Selection, Nodes, Links } = this.application;
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Links.destroy((link) => link.sourceNode == id2), true);
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Links.destroy((link) => link.targetNode == id2), true);
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Nodes.remove(id2, true));
+      Selection.filter((item) => item.kind == "Link").forEach(({ id: id2 }) => Links.remove(id2, true));
+      Selection.clear(true);
     }
     addNode(type, values) {
       return this.application.Nodes.create({ type, values });
@@ -2237,6 +2256,15 @@
     parentElement.removeChild(element);
     parentElement.appendChild(element);
   }
+  function keyboard(verify, callback) {
+    const listener = (e) => {
+      if (verify(e)) {
+        callback(e);
+      }
+    };
+    document.addEventListener("keydown", listener);
+    return () => document.removeEventListener("keydown", listener);
+  }
 
   // src/application/ui/view/Panel.js
   var import_oneof2 = __toESM(require_oneof(), 1);
@@ -2335,6 +2363,10 @@
     cleanup(...arg) {
       this.#cleanup.push(...arg);
     }
+    stop() {
+      this.children.map((child) => child.stop());
+      this.#cleanup.map((x) => x());
+    }
   };
   function isPercentValue(input) {
     let output2 = false;
@@ -2354,6 +2386,7 @@
         y: this.y,
         height: this.height
       });
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
         if (data.has(this.data.id)) {
           this.el.Panel.classList.add("selected");
@@ -2361,7 +2394,6 @@
           this.el.Panel.classList.remove("selected");
         }
       }));
-      this.cleanup(() => focus.stop());
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2495,6 +2527,7 @@
     setup() {
       this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
       this.el.CaptionText = svg.text({ class: `panel-caption-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
         if (data.has(this.data.id)) {
           this.el.Caption.classList.add("selected");
@@ -2502,12 +2535,6 @@
           this.el.Caption.classList.remove("selected");
         }
       }));
-      const focus2 = new Focus({
-        handle: this.el.Caption,
-        action: (e) => {
-          front(this.parent.group);
-        }
-      });
     }
     render() {
       const { Shortcuts, Dream } = this.view.application;
@@ -2536,6 +2563,13 @@
         }
       });
       this.cleanup(() => selectable.stop());
+      const focus = new Focus({
+        handle: this.el.Caption,
+        action: (e) => {
+          front(this.parent.group);
+        }
+      });
+      this.cleanup(() => focus.stop());
       this.children.map((child) => child.render());
     }
     update() {
@@ -2548,6 +2582,7 @@
   var Pod = class extends Component {
     setup() {
       this.el.Pod = svg.rect({ class: "panel-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.children.map((child) => child.setup());
     }
     render() {
@@ -2663,22 +2698,26 @@
         this.data.y = y;
       }
       this.el.Port.dataset.portAddress = [this.parent.data.id, this.data.id].join(":");
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
     }
     render() {
       this.group.appendChild(this.el.Line);
       this.group.appendChild(this.el.LineText);
       this.group.appendChild(this.el.Port);
-      const connectable = new Connectable({
-        container: window,
-        // <g> element representing an SVG scene
-        handle: this.el.Port,
-        canvas: this.group,
-        node: this.parent.data,
-        port: this.data,
-        link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort })
-      });
-      this.cleanup(this.view.observe("transform", (v) => connectable.scale = v.scale));
-      this.cleanup(() => connectable.stop());
+      if (this.data.direction == "input") {
+      } else {
+        const connectable = new Connectable({
+          container: window,
+          // <g> element representing an SVG scene
+          handle: this.el.Port,
+          canvas: this.group,
+          node: this.parent.data,
+          port: this.data,
+          link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort })
+        });
+        this.cleanup(this.view.observe("transform", (v) => connectable.scale = v.scale));
+        this.cleanup(() => connectable.stop());
+      }
       this.children.map((child) => child.render());
     }
     update() {
@@ -2720,7 +2759,7 @@
       });
       container.setup();
       container.render();
-      this.cleanup(container);
+      this.cleanup(() => container.stop());
     }
     stop() {
       this.#cleanup.map((x) => x());
@@ -2775,14 +2814,13 @@
       let x2 = targetNode.x + targetPort.x;
       let y2 = targetNode.y + targetPort.y;
       this.el.CableClick = svg.line({
+        class: "cable-line-ghost",
         x1,
         y1,
         x2,
         y2,
-        stroke: "rgba(0,0,0,0.002)",
-        "stroke-width": 10,
-        strokeLinecap: "round",
-        vectorEffect: "non-scaling-stroke"
+        strokeLinecap: "round"
+        // vectorEffect: 'non-scaling-stroke',
       });
       this.el.Cable = svg.line({
         class: "cable-line",
@@ -2798,12 +2836,13 @@
         strokeLinecap: "round",
         vectorEffect: "non-scaling-stroke"
       });
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.cleanup(sourceNode.observe("x", (v) => update2([this.el.Cable, this.el.CableClick], { x1: v + sourcePort.x })));
       this.cleanup(sourceNode.observe("y", (v) => update2([this.el.Cable, this.el.CableClick], { y1: v + sourcePort.y })));
       this.cleanup(targetNode.observe("x", (v) => update2([this.el.Cable, this.el.CableClick], { x2: v + targetPort.x })));
       this.cleanup(targetNode.observe("y", (v) => update2([this.el.Cable, this.el.CableClick], { y2: v + targetPort.y })));
-      view.scene.insertBefore(this.el.Cable, view.scene.firstChild);
-      view.scene.insertBefore(this.el.CableClick, view.scene.firstChild);
+      view.scene.insertBefore(this.el.CableClick, view.scene.firstChild.nextSibling);
+      view.scene.insertBefore(this.el.Cable, view.scene.firstChild.nextSibling);
       const selectable = new Selectable2({
         handle: this.el.CableClick,
         action: (e) => {
@@ -2830,6 +2869,7 @@
       this.#cleanup.push(...arg);
     }
     stop() {
+      console.log("Cable Cleanup");
       this.#cleanup.map((x) => x());
       this.el.Cable.remove();
     }
@@ -3106,6 +3146,7 @@
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
+      keyboard((e) => this.#application.Shortcuts.isDeleting(e), () => this.#application.Dream.removeSelected());
       this.#menus = this.#installMenus();
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
@@ -3261,17 +3302,17 @@
       this.#unsubscribe.push(() => menus.stop());
     }
     #installScene() {
+      const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      scene.setAttributeNS(null, "class", "view-scene");
+      scene.setAttributeNS(null, "id", "scene");
+      this.#svg.appendChild(scene);
       const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       rect2.setAttributeNS(null, "class", "view-scene-background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
       rect2.setAttributeNS(null, "width", 11e3);
       rect2.setAttributeNS(null, "height", 8500);
-      this.#svg.appendChild(rect2);
-      const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      scene.setAttributeNS(null, "class", "view-scene");
-      scene.setAttributeNS(null, "id", "scene");
-      this.#svg.appendChild(scene);
+      scene.appendChild(rect2);
       return scene;
     }
     #deletePanel({ item }) {
@@ -3283,6 +3324,7 @@
       panel.start({ data: item, view: this });
     }
     #deleteCable({ item }) {
+      console.log("Delete Cable Issued on ", item);
       this.#renderers.get(item.id).stop();
     }
     #createCable({ item }) {
@@ -3354,6 +3396,7 @@
       this.Dream = new DreamInterface(this);
       this.Selection = new ReactiveArray({ application: this, Item: Selected });
       this.Shortcuts = {
+        isDeleting: (e) => e.code == "Delete",
         isSelecting: (e) => e.ctrlKey
         // selecting2: e=>e.ctrlKey&&shiftKey,
       };
@@ -3467,7 +3510,6 @@
   var application = new Brain();
   setup_default(application);
   application.Views.create({ name: "view-1", element: document.querySelector(".signalcraft-view-1") });
-  application.Views.create({ name: "view-2", element: document.querySelector(".signalcraft-view-2") });
   application.start();
   var api = application.Dream;
   usage_default(api);

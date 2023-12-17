@@ -94,4 +94,17 @@ function front(element) {
   parentElement.appendChild(element);
 }
 
-export {svg, html, text, list, update, id, back, front};
+function keyboard(verify, callback) {
+  // Create a function to handle the keydown event
+  const listener = e => {
+    if (verify(e)) {
+      callback(e);
+    }
+  };
+  // Add the listener
+  document.addEventListener('keydown', listener);
+  // Return a function to remove the listener
+  return () => document.removeEventListener('keydown', listener);
+}
+
+export {svg, html, text, list, update, id, back, front, keyboard};

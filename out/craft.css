@@ -44,6 +44,10 @@ svg.ui-view {
   stroke: hsl(180, 1%, 40%);
   stroke-width: 1;
 }
+.cable-line-ghost {
+  stroke: rgba(185, 185, 185, 0.1);
+  stroke-width: 22;
+}
 .cable-line.selected {
   stroke: hsl(18, 90%, 60%);
 }

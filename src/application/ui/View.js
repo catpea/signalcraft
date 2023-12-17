@@ -1,6 +1,6 @@
 import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
-import { html, svg, text, list, update } from "domek";
+import { html, svg, text, list, update, keyboard } from "domek";
 import { v4 as uuid } from "uuid";
 
 import ReactiveObject from "../system/ReactiveObject.js";
@@ -45,6 +45,10 @@ export default class View extends ReactiveObject {
 	}
 
 	start() {
+
+		keyboard( e=>this.#application.Shortcuts.isDeleting(e), ()=>this.#application.Dream.removeSelected() )
+
+		// this.#unsubscribe.push( );
 
 		// setup the pre-requisites
 		this.#menus = this.#installMenus();
@@ -96,6 +100,8 @@ export default class View extends ReactiveObject {
 		};
 		const unintegrate = this.application.integrate(this, grandCentral);
 		this.#unsubscribe.push(unintegrate);
+
+
 	}
 
 	stop() {
@@ -239,20 +245,20 @@ export default class View extends ReactiveObject {
 
 	#installScene() {
 
+
+
+		const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
+		scene.setAttributeNS(null, "class", "view-scene");
+		scene.setAttributeNS(null, "id", "scene");
+		this.#svg.appendChild(scene);
+
 		const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 		rect2.setAttributeNS(null, "class", "view-scene-background");
 		rect2.setAttributeNS(null, "x", "0");
 		rect2.setAttributeNS(null, "y", "0");
 		rect2.setAttributeNS(null, "width", 11_000);
 		rect2.setAttributeNS(null, "height", 8_500);
-		this.#svg.appendChild(rect2);
-		
-		const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-		scene.setAttributeNS(null, "class", "view-scene");
-		scene.setAttributeNS(null, "id", "scene");
-		this.#svg.appendChild(scene);
-
-
+		scene.appendChild(rect2);
 
 		return scene;
 	}
@@ -267,6 +273,7 @@ export default class View extends ReactiveObject {
 	}
 
 	#deleteCable({ item }) {
+		console.log('Delete Cable Issued on ', item);
 		this.#renderers.get(item.id).stop();
 	}
 	#createCable({ item }) {

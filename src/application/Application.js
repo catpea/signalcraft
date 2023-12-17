@@ -39,6 +39,7 @@ export default class Brain extends ReactiveObject {
     // Extended Concepts
     this.Selection = new ReactiveArray({application:this, Item:Selected}); // this is the screen, multiple screens are supported
     this.Shortcuts = {
+      isDeleting: e=>e.code=='Delete',
       isSelecting: e=>e.ctrlKey,
       // selecting2: e=>e.ctrlKey&&shiftKey,
 

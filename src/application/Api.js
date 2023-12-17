@@ -12,6 +12,12 @@ export default class DreamInterface {
     return this.application;
   }
 
+
+
+
+
+
+
   select(reference){
     // NOTE: the selected object id is used as selection ID
     return this.application.Selection.create({id:reference.id, kind:reference.kind, reference});
@@ -28,6 +34,14 @@ export default class DreamInterface {
   }
   deselectAll(item){
     return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id, true));
+  }
+  removeSelected(){
+    const { Selection, Nodes, Links } = this.application;
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Links.destroy(link=>link.sourceNode==id), true);
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Links.destroy(link=>link.targetNode==id), true);
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Nodes.remove(id, true));
+    Selection.filter(item=>item.kind=='Link').forEach(({id})=>Links.remove(id, true));
+    Selection.clear(true);
   }
 
   addNode(type, values){

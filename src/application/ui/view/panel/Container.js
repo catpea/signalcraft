@@ -13,6 +13,7 @@ export default class Container extends Component {
       y:this.y,
       height:this.height,
     });
+    this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 
     this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
       if(data.has(this.data.id)){
@@ -22,9 +23,6 @@ export default class Container extends Component {
       }
     }))
 
-
-
-		this.cleanup(()=>focus.stop());
 
     this.children.map(child=>child.setup())
   }

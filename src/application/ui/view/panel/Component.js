@@ -124,9 +124,13 @@ export default class Component {
     Object.assign(this.bounds, data);
     return this;
 	}
-  
+
   cleanup(...arg){
     this.#cleanup.push(...arg);
+  }
+  stop(){
+    this.children.map(child=>child.stop())
+    this.#cleanup.map(x=>x());
   }
 
 }

@@ -24,23 +24,29 @@ export default class Line extends Component {
 		}
 		//NOTE: all ports must have an address consisting of node.id:port:id, used in Cable connecting
 		this.el.Port.dataset.portAddress = [this.parent.data.id, this.data.id].join(':');
+
+		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 	}
 	render() {
 		this.group.appendChild(this.el.Line);
 		this.group.appendChild(this.el.LineText);
 		this.group.appendChild(this.el.Port);
 
-		const connectable = new Connectable({
-			container: window, // <g> element representing an SVG scene
-			handle: this.el.Port,
-			canvas: this.group,
-			node: this.parent.data,
-			port: this.data,
-			link: ({sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort }),
-		});
+		if(this.data.direction == 'input') {
+			// this is an input port, it cannot be connectable
+		}else{
+			const connectable = new Connectable({
+				container: window, // <g> element representing an SVG scene
+				handle: this.el.Port,
+				canvas: this.group,
+				node: this.parent.data,
+				port: this.data,
+				link: ({sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort }),
+			});
+			this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
+			this.cleanup(()=>connectable.stop());
+		}
 
-		this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
-		this.cleanup(()=>connectable.stop());
 		this.children.map(child => child.render())
 	}
 	update() {
