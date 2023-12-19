@@ -25,14 +25,14 @@ export default class Panel {
       const caption = new Caption(`caption`);
       caption.setBounds({border:1, height: 32, width:'100%', radius:3, margin: 4});
       container.add(caption)
+      
+      const inputPod = new Pod(`inputPod`);
+      inputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
+      container.add(inputPod);
 
       const outputPod = new Pod(`outputPod`);
       outputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
       container.add(outputPod)
-
-      const inputPod = new Pod(`inputPod`);
-      inputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
-      container.add(inputPod);
 
       data.Output.forEach((data, index) => {
         const port = new Line(`port${index}`);

@@ -4954,12 +4954,12 @@
       const caption = new Caption(`caption`);
       caption.setBounds({ border: 1, height: 32, width: "100%", radius: 3, margin: 4 });
       container.add(caption);
-      const outputPod = new Pod(`outputPod`);
-      outputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
-      container.add(outputPod);
       const inputPod = new Pod(`inputPod`);
       inputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
       container.add(inputPod);
+      const outputPod = new Pod(`outputPod`);
+      outputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
+      container.add(outputPod);
       data.Output.forEach((data2, index) => {
         const port = new Line(`port${index}`);
         port.setBounds({ height: 32, width: 200, radius: 3, margin: 2 });
@@ -5706,6 +5706,15 @@
           return (0, import_flattenDeep.default)(input);
         }
       });
+      type.output.push({ name: "JSON", generator: ({ value, string }) => {
+        return string;
+      } });
+      type.output.push({ name: "debug", generator: ({ value, string }) => {
+        return string;
+      } });
+      type.output.push({ name: "log", generator: ({ value, string }) => {
+        return string;
+      } });
       type.input.push({ name: "input", type: "*", description: "data to join" });
       type.input.push({ name: "template", type: "*", description: "base template" });
       type.input.push({ name: "secondary", type: "*", description: "secondary characteristics" });
@@ -5727,7 +5736,7 @@
       const primaryPromptText2 = api2.addNode("text/string", { string: "World" }, { x: 100, y: 300 });
       const secondaryPromptText = api2.addNode("text/string", { string: "World" }, { x: 100, y: 600 });
       const stringC = api2.addNode("text/string", { string: "Meow!" }, { x: 100, y: 800 });
-      const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 500 });
+      const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 300 });
       const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
       const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
       const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });

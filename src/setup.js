@@ -55,6 +55,9 @@ export default function(application){
       return flattenDeep(input); //separator.length?input.join( separator.join()):input;
     }
   });
+  type.output.push( {name:"JSON", generator:({value, string}) => { return string }} );
+  type.output.push( {name:"debug", generator:({value, string}) => { return string }} );
+  type.output.push( {name:"log", generator:({value, string}) => { return string }} );
 
   type.input.push( {name:"input", type: "*", description: "data to join"} );
   type.input.push( {name:"template", type: "*", description: "base template"} );

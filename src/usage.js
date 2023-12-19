@@ -21,7 +21,7 @@ export default async function(api){
 
   const stringC = api.addNode("text/string", { string: "Meow!" }, {x:100, y:800});
 
-  const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:500});
+  const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:300});
 
   // create a flow between compoents
   const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
