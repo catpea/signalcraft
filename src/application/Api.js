@@ -36,11 +36,11 @@ export default class DreamInterface {
     return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id, true));
   }
   removeSelected(){
-    const { Selection, Nodes, Links } = this.application;
-    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Links.destroy(link=>link.sourceNode==id), true);
-    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Links.destroy(link=>link.targetNode==id), true);
+    const { Selection, Nodes, Connectors } = this.application;
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id), true);
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id), true);
     Selection.filter(item=>item.kind=='Node').forEach(({id})=>Nodes.remove(id, true));
-    Selection.filter(item=>item.kind=='Link').forEach(({id})=>Links.remove(id, true));
+    Selection.filter(item=>item.kind=='Connector').forEach(({id})=>Connectors.remove(id, true));
     Selection.clear(true);
   }
 
@@ -51,12 +51,12 @@ export default class DreamInterface {
 
   linkPorts(sourceNode, targetNode, options = {output:'output', input:'input'}){
     const { output:outputPort, input:inputPort } = options;
-    return this.application.Links.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.getPort(outputPort).id, targetPort: targetNode.getPort(inputPort).id, });
+    return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id, });
   }
 
   async execute(node, port='output'){
     if(!node) throw new Error('you must specify which node to execute');
-    const output = await node.execute(port);
+    const output = await node.Execute.run(port);
     console.log(`Output on port ${port} of node ${node.id}`, output)
     return output;
   }

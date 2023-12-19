@@ -47,8 +47,8 @@ export default async function(api){
     console.log('usage.js RERUN api.execute said: ', result);
   }
   const app = api.getApplication();
-  app.Links.observe('created', rerun)
-  app.Links.observe('removed', rerun)
+  app.Connectors.observe('created', rerun)
+  app.Connectors.observe('removed', rerun)
 
   }
 

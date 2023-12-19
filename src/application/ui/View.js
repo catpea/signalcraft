@@ -85,7 +85,7 @@ export default class View extends ReactiveObject {
 
 		// setup all th einstances of nodes
 		this.application.Nodes.forEach(node => this.#createPanel(node));
-		this.application.Links.forEach(node => this.#createCable(node)); // reminder: Links contain strings with IDs of sourceNode, targetNode, sourcePort, targetPort,
+		this.application.Connectors.forEach(node => this.#createCable(node)); // reminder: Connectors contain strings with IDs of sourceNode, targetNode, sourcePort, targetPort,
 
 		// ...and keep an eye on changes
 		const grandCentral = {
@@ -93,8 +93,8 @@ export default class View extends ReactiveObject {
 
 			'Nodes created ...': this.#createPanel, //   NOTE:
 			'Nodes removed ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
-			'Links created ...': this.#createCable, //   NOTE:
-			'Links removed ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
+			'Connectors created ...': this.#createCable, //   NOTE:
+			'Connectors removed ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
 
 
 		};

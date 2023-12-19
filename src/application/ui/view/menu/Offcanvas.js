@@ -53,7 +53,7 @@ export default class Offcanvas extends Component {
 		this.el.Offcanvas.appendChild(offcanvasBody);
 
 
-		this.view.application.Types.forEach(typeObject => {
+		this.view.application.Archetypes.forEach(typeObject => {
 
 			const p = html.p();
 			offcanvasBody.appendChild(p);

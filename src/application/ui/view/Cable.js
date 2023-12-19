@@ -49,20 +49,6 @@ export default class Cable {
     view.scene.insertBefore(this.el.CableClick , view.scene.firstChild.nextSibling);
     view.scene.insertBefore(this.el.Cable, view.scene.firstChild.nextSibling);
 
-    // this removes link
-    // const removable = new Removable({
-    //   handle: this.el.Cable,
-    //   remove: ()=> view.application.Links.remove(link.id),
-    // });
-    // this.cleanup( ()=>removable.stop() );
-
-    // const selectable = new Selectable({
-    //   handle: this.el.Cable,
-    //   active: e=>Shortcuts.isSelecting(e),
-    //   action: e=>Dream.toggleSelect(link),
-    // });
-    // this.cleanup(()=>selectable.stop());
-
     const selectable = new Selectable({
       handle: this.el.CableClick,
       action: e=>{

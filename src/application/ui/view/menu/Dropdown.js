@@ -29,7 +29,7 @@ export default class Dropdown extends Component {
 
 
 
-		this.view.application.Types.forEach(typeObject=>{
+		this.view.application.Archetypes.forEach(typeObject=>{
 
 
       const listItem = document.createElement('li');

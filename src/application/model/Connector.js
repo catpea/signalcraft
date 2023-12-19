@@ -1,9 +1,9 @@
 import { v4 as uuid } from "uuid";
 import ReactiveObject from "../system/ReactiveObject.js";
 
-export default class Link extends ReactiveObject {
+export default class Connector extends ReactiveObject {
 
-  #kind = 'Link';
+  #kind = 'Connector';
 
   application;
   #unsubscribe = [];
@@ -44,8 +44,6 @@ export default class Link extends ReactiveObject {
 
 
   }
-
-
 
   start(){
   }

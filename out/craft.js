@@ -25,22 +25,6 @@
     mod
   ));
 
-  // node_modules/oneof/index.js
-  var require_oneof = __commonJS({
-    "node_modules/oneof/index.js"(exports, module) {
-      module.exports = function(list2) {
-        if (list2 == void 0)
-          return null;
-        if (list2.length === 0)
-          return null;
-        var min = 0;
-        var max = list2.length - 1;
-        var idx = Math.floor(Math.random() * (max - min + 1)) + min;
-        return list2[idx];
-      };
-    }
-  });
-
   // node_modules/wheel/index.js
   var require_wheel = __commonJS({
     "node_modules/wheel/index.js"(exports, module) {
@@ -1488,6 +1472,22 @@
     }
   });
 
+  // node_modules/oneof/index.js
+  var require_oneof = __commonJS({
+    "node_modules/oneof/index.js"(exports, module) {
+      module.exports = function(list2) {
+        if (list2 == void 0)
+          return null;
+        if (list2.length === 0)
+          return null;
+        var min = 0;
+        var max = list2.length - 1;
+        var idx = Math.floor(Math.random() * (max - min + 1)) + min;
+        return list2[idx];
+      };
+    }
+  });
+
   // node_modules/lodash/_arrayPush.js
   var require_arrayPush = __commonJS({
     "node_modules/lodash/_arrayPush.js"(exports, module) {
@@ -1950,11 +1950,11 @@
       return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2, true));
     }
     removeSelected() {
-      const { Selection, Nodes, Links } = this.application;
-      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Links.destroy((link) => link.sourceNode == id2), true);
-      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Links.destroy((link) => link.targetNode == id2), true);
+      const { Selection, Nodes, Connectors } = this.application;
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2), true);
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2), true);
       Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Nodes.remove(id2, true));
-      Selection.filter((item) => item.kind == "Link").forEach(({ id: id2 }) => Links.remove(id2, true));
+      Selection.filter((item) => item.kind == "Connector").forEach(({ id: id2 }) => Connectors.remove(id2, true));
       Selection.clear(true);
     }
     addNode(type, values) {
@@ -1962,12 +1962,12 @@
     }
     linkPorts(sourceNode, targetNode, options = { output: "output", input: "input" }) {
       const { output: outputPort, input: inputPort } = options;
-      return this.application.Links.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.getPort(outputPort).id, targetPort: targetNode.getPort(inputPort).id });
+      return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id });
     }
     async execute(node, port = "output") {
       if (!node)
         throw new Error("you must specify which node to execute");
-      const output2 = await node.execute(port);
+      const output2 = await node.Execute.run(port);
       console.log(`Output on port ${port} of node ${node.id}`, output2);
       return output2;
     }
@@ -1988,8 +1988,8 @@
     panelBackground = "blue";
   };
 
-  // src/application/model/Type.js
-  var Type = class {
+  // src/application/model/Archetype.js
+  var Archetype = class {
     id;
     type;
     // used in setting up reactive arrays in node (this could be upgraded to a real reactive object but outside of project scope atm)
@@ -2001,8 +2001,44 @@
     }
   };
 
-  // src/application/model/Node.js
-  var import_oneof = __toESM(require_oneof(), 1);
+  // src/application/execute/Standard.js
+  var Standard = class {
+    node;
+    application;
+    constructor(node) {
+      this.node = node;
+      this.application = node.application;
+    }
+    async #upstream() {
+      const response = {};
+      for (const localPort of this.node.Input) {
+        response[localPort.name] = [];
+        const incomingConnectors = this.application.Connectors.filter((remoteConnector) => remoteConnector.targetPort == localPort.id);
+        const nothingConnected = incomingConnectors.length == 0;
+        if (nothingConnected) {
+          let currentValue = localPort.value;
+          if (this.node.values[localPort.name])
+            currentValue = this.node.values[localPort.name];
+          response[localPort.name].push(currentValue);
+        } else {
+          for (const incomingConnector of incomingConnectors) {
+            const parentNode = this.application.Nodes.find((node) => node.id == incomingConnector.sourceNode);
+            const connectedPort = parentNode.Output.find((item) => item.id == incomingConnector.sourcePort);
+            const result = await parentNode.Execute.run(connectedPort.name);
+            response[localPort.name].push(result);
+          }
+        }
+      }
+      return response;
+    }
+    async run(port) {
+      const outputPort = this.node.Output.find((item) => item.name == port);
+      if (!outputPort)
+        throw new Error(`Port named ${port} was not found on node of type ${this.node.type}`);
+      const response = await outputPort.generator({ ...await this.#upstream(), value: outputPort.value });
+      return response;
+    }
+  };
 
   // src/application/model/node/Input.js
   var Input = class extends ReactiveObject {
@@ -2077,18 +2113,20 @@
     #kind = "Node";
     #application;
     #unsubscribe = [];
-    #values;
+    values;
     Input;
     Output;
+    Execute;
     constructor({ id: id2, type, values, application: application2 }) {
       super();
       this.#application = application2;
-      this.#values = values || {};
+      this.values = values || {};
       if (!type)
         throw new Error("You must initialize a node with a known type, type was not specified");
+      this.Execute = new Standard(this);
       this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
       this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
-      const archetype = application2.Types.find((o) => o.type == type);
+      const archetype = application2.Archetypes.find((o) => o.type == type);
       if (!archetype)
         throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
       archetype.input.forEach((o) => {
@@ -2100,8 +2138,7 @@
       const props = {
         id: id2 || v4_default(),
         type,
-        backgroundColor: (0, import_oneof.default)([`url(#panel-primary)`, `url(#panel-secondary)`]),
-        // `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
+        backgroundColor: "magenta",
         x: 999 * Math.random(),
         y: 999 * Math.random(),
         nodeWidth: 300,
@@ -2115,7 +2152,7 @@
     stop() {
       this.#unsubscribe.map((o) => o());
     }
-    getPort(name) {
+    port(name) {
       const inputCandidate = this.Input.find((port) => port.name == name);
       if (inputCandidate)
         return inputCandidate;
@@ -2125,46 +2162,17 @@
       if (!output)
         throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
     }
-    async #upstream() {
-      const response = {};
-      for (const localPort of this.Input) {
-        response[localPort.name] = [];
-        const incomingLinks = this.#application.Links.filter((remoteLink) => remoteLink.targetPort == localPort.id);
-        const nothingConnected = incomingLinks.length == 0;
-        if (nothingConnected) {
-          let currentValue = localPort.value;
-          if (this.#values[localPort.name])
-            currentValue = this.#values[localPort.name];
-          response[localPort.name].push(currentValue);
-        } else {
-          for (const incomingLink of incomingLinks) {
-            const parentNode = this.#application.Nodes.find((node) => node.id == incomingLink.sourceNode);
-            const connectedPort = parentNode.Output.find((item) => item.id == incomingLink.sourcePort);
-            const result = await parentNode.execute(connectedPort.name);
-            response[localPort.name].push(result);
-          }
-        }
-      }
-      return response;
-    }
-    async execute(port) {
-      const output2 = this.Output.find((item) => item.name == port);
-      if (!output2)
-        console.log(this);
-      ;
-      if (!output2)
-        throw new Error(`Port named ${port} was not found on node of type ${this.type}`);
-      const response = await output2.generator({ ...await this.#upstream(), value: output2.value });
-      return response;
-    }
     get kind() {
       return this.#kind;
     }
+    get application() {
+      return this.#application;
+    }
   };
 
-  // src/application/model/Link.js
-  var Link = class extends ReactiveObject {
-    #kind = "Link";
+  // src/application/model/Connector.js
+  var Connector = class extends ReactiveObject {
+    #kind = "Connector";
     application;
     #unsubscribe = [];
     constructor({ application: application2, id: id2, type, sourceNode, targetNode, sourcePort, targetPort }) {
@@ -2194,6 +2202,54 @@
     }
     get kind() {
       return this.#kind;
+    }
+  };
+
+  // src/application/model/Junction.js
+  var Junction = class extends ReactiveObject {
+    #kind = "Junction";
+    #application;
+    #unsubscribe = [];
+    values;
+    Input;
+    Output;
+    Execute;
+    constructor({ id: id2, values, application: application2 }) {
+      super();
+      this.#application = application2;
+      this.values = values || {};
+      this.Execute = new Standard(this);
+      this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
+      this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
+      this.Input.create({ name: "input" });
+      this.Output.create({ name: "output", generator: ({ input }) => input });
+      const props = {
+        id: id2 || v4_default(),
+        x: 999 * Math.random(),
+        y: 999 * Math.random()
+      };
+      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    }
+    start() {
+    }
+    stop() {
+      this.#unsubscribe.map((o) => o());
+    }
+    port(name) {
+      const inputCandidate = this.Input.find((port) => port.name == name);
+      if (inputCandidate)
+        return inputCandidate;
+      const outputCandidate = this.Output.find((port) => port.name == name);
+      if (outputCandidate)
+        return outputCandidate;
+      if (!output)
+        throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
+    }
+    get kind() {
+      return this.#kind;
+    }
+    get application() {
+      return this.#application;
     }
   };
 
@@ -2267,7 +2323,7 @@
   }
 
   // src/application/ui/view/Panel.js
-  var import_oneof2 = __toESM(require_oneof(), 1);
+  var import_oneof = __toESM(require_oneof(), 1);
 
   // src/application/ui/view/panel/Component.js
   var Component = class {
@@ -2713,7 +2769,7 @@
           canvas: this.group,
           node: this.parent.data,
           port: this.data,
-          link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort })
+          link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Connectors.create({ sourceNode, sourcePort, targetNode, targetPort })
         });
         this.cleanup(this.view.observe("transform", (v) => connectable.scale = v.scale));
         this.cleanup(() => connectable.stop());
@@ -2876,7 +2932,7 @@
   };
 
   // src/application/ui/view/Menus.js
-  var import_oneof3 = __toESM(require_oneof(), 1);
+  var import_oneof2 = __toESM(require_oneof(), 1);
 
   // src/application/ui/view/menu/Component.js
   var Component2 = class {
@@ -2959,7 +3015,7 @@
       const dropdownMenu = document.createElement("ul");
       dropdownMenu.setAttribute("class", "dropdown-menu");
       this.el.navItemDropdown.appendChild(dropdownMenu);
-      this.view.application.Types.forEach((typeObject) => {
+      this.view.application.Archetypes.forEach((typeObject) => {
         const listItem = document.createElement("li");
         dropdownMenu.appendChild(listItem);
         const dropdownItem = document.createElement("div");
@@ -3015,7 +3071,7 @@
       offcanvasHeader.appendChild(btnClose);
       const offcanvasBody = html.div({ class: "offcanvas-body" });
       this.el.Offcanvas.appendChild(offcanvasBody);
-      this.view.application.Types.forEach((typeObject) => {
+      this.view.application.Archetypes.forEach((typeObject) => {
         const p = html.p();
         offcanvasBody.appendChild(p);
         const text2 = text(typeObject.type);
@@ -3174,16 +3230,16 @@
       });
       this.#unsubscribe.push(this.#panzoom.dispose);
       this.application.Nodes.forEach((node) => this.#createPanel(node));
-      this.application.Links.forEach((node) => this.#createCable(node));
+      this.application.Connectors.forEach((node) => this.#createCable(node));
       const grandCentral = {
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
         "Nodes created ...": this.#createPanel,
         //   NOTE:
         "Nodes removed ...": this.#deletePanel,
         //   the node updates it self, here we only ensure it exists, or is removed as needed
-        "Links created ...": this.#createCable,
+        "Connectors created ...": this.#createCable,
         //   NOTE:
-        "Links removed ...": this.#deleteCable
+        "Connectors removed ...": this.#deleteCable
         //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
       const unintegrate = this.application.integrate(this, grandCentral);
@@ -3373,11 +3429,11 @@
     // Application Configuration
     Theme;
     // Color/UI Theme
-    Types;
+    Archetypes;
     // Node Library
     Nodes;
     // Node Instances
-    Links;
+    Connectors;
     // Port Connections, remember it is not that are connected but the ports of a node
     Views;
     // Node UI
@@ -3387,9 +3443,10 @@
     // Selection
     constructor() {
       super();
-      this.Types = new ReactiveArray({ application: this, Item: Type, auto: false });
+      this.Archetypes = new ReactiveArray({ application: this, Item: Archetype, auto: false });
       this.Nodes = new ReactiveArray({ application: this, Item: Node, auto: true });
-      this.Links = new ReactiveArray({ application: this, Item: Link, auto: true });
+      this.Connectors = new ReactiveArray({ application: this, Item: Connector, auto: true });
+      this.Junctions = new ReactiveArray({ application: this, Item: Junction, auto: true });
       this.Views = new ReactiveArray({ application: this, Item: View, auto: false });
       this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" });
       this.Theme = new MyTheme(this);
@@ -3407,7 +3464,7 @@
     async stop() {
       this.Views.stop();
       this.Nodes.stop();
-      this.Links.stop();
+      this.Connectors.stop();
     }
     // this is a binder patterened after Backbone, not great but not terrible
     integrate(that, map) {
@@ -3422,8 +3479,8 @@
             case "Nodes":
               this.Nodes.subscribe(eventName, handlerFunction.bind(that));
               break;
-            case "Links":
-              this.Links.subscribe(eventName, handlerFunction.bind(that));
+            case "Connectors":
+              this.Connectors.subscribe(eventName, handlerFunction.bind(that));
               break;
             default:
           }
@@ -3435,7 +3492,7 @@
   // src/setup.js
   var import_flattenDeep = __toESM(require_flattenDeep(), 1);
   function setup_default(application2) {
-    const testTwoThree = application2.Types.create({ type: "test/two-three" });
+    const testTwoThree = application2.Archetypes.create({ type: "test/two-three" });
     testTwoThree.output.push({ name: "output1", generator: ({ value, string }) => {
       return string;
     } });
@@ -3445,19 +3502,19 @@
     testTwoThree.input.push({ name: "string1", type: "string", description: "a string of letters", value: "default value" });
     testTwoThree.input.push({ name: "string2", type: "string", description: "a string of letters", value: "default value" });
     testTwoThree.input.push({ name: "string3", type: "string", description: "a string of letters", value: "default value" });
-    const textType = application2.Types.create({ type: "text/string" });
+    const textType = application2.Archetypes.create({ type: "text/string" });
     textType.output.push({ name: "output", generator: ({ value, string }) => {
       return string;
     } });
     textType.input.push({ name: "string", type: "string", description: "a string of letters", value: "default value" });
-    const colorType = application2.Types.create({ type: "text/color" });
+    const colorType = application2.Archetypes.create({ type: "text/color" });
     colorType.output.push({ name: "output", generator: () => {
       return "TODO";
     } });
     colorType.input.push({ name: "color", type: "string", description: "color" });
     colorType.input.push({ name: "model", type: "string", description: "preferred model" });
     colorType.input.push({ name: "description", type: "string", description: "description" });
-    const uppercaseType = application2.Types.create({ type: "text/case" });
+    const uppercaseType = application2.Archetypes.create({ type: "text/case" });
     uppercaseType.output.push({ name: "upper", generator: () => {
       return "TODO";
     } });
@@ -3467,7 +3524,7 @@
     uppercaseType.input.push({ name: "input" });
     uppercaseType.input.push({ name: "template", type: "string", description: "string template use $input to interpolate" });
     uppercaseType.input.push({ name: "description", type: "string", description: "description" });
-    const arrayJoinType = application2.Types.create({ type: "array/join" });
+    const arrayJoinType = application2.Archetypes.create({ type: "array/join" });
     arrayJoinType.output.push({
       name: "output",
       generator: ({ input, separator }) => {
@@ -3498,8 +3555,8 @@
         console.log("usage.js RERUN api.execute said: ", result2);
       };
       const app = api2.getApplication();
-      app.Links.observe("created", rerun);
-      app.Links.observe("removed", rerun);
+      app.Connectors.observe("created", rerun);
+      app.Connectors.observe("removed", rerun);
     }
     if (0) {
       const stringA = api2.addNode("test/two-three", { string1: "Hello" });

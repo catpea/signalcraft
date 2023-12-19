@@ -41,7 +41,7 @@ export default class Line extends Component {
 				canvas: this.group,
 				node: this.parent.data,
 				port: this.data,
-				link: ({sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Links.create({ sourceNode, sourcePort, targetNode, targetPort }),
+				link: ({sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Connectors.create({ sourceNode, sourcePort, targetNode, targetPort }),
 			});
 			this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
 			this.cleanup(()=>connectable.stop());
