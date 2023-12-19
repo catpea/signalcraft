@@ -4,11 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bootstrap demo</title>
-    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="shortcut icon" type="image/png" href="out"/>
     <link href="./out/craft.css" rel="stylesheet" />
     <script type="module" src="./out/craft.js"></script>
-    <script type="module" src="./src/tools/todom.js"></script>
+    <!-- <script type="module" src="./src/tools/todom.js"></script> -->
   </head>
   <body class="">
 
@@ -21,15 +20,34 @@
       <div class="row mb-3">
         <div class="signalcraft-view-2 col"></div>
       </div>
-    </div>
-
-    <div class="container-fluid">
       <div class="row mb-3">
-        <tool-todom/>
+
+        <div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Signalcraft Preview</h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">interactivity tests</h6>
+    <p class="card-text">
+      User interface preview
+    </p>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item"><kbd>CTRL+Click</kbd> on caption or cable to select multiple.</li>
+      <li class="list-group-item"><kbd>DEL</kbd> to delete selected</li>
+    </ul>
+    <a href="https://github.com/catpea/signalcraft" class="card-link">repository</a>
+  </div>
+</div>
+
+
+
       </div>
     </div>
 
-    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <div class="container-fluid">
+      <div class="row mb-3">
+        <tool-todom/>
+      </div>
+    </div> -->
+
     <script>
       new EventSource("/esbuild").addEventListener("change", () => location.reload() );
       console.log("EventSource LiveReload Activated");
