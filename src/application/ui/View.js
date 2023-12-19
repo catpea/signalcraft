@@ -57,12 +57,12 @@ export default class View extends ReactiveObject {
 
 		this.#panzoom = panzoom(this.#scene, {
 			smoothScroll: false, // this is the sluggish post  scrolling effect
-			transformOrigin: { x: 0.5, y: 0.5 },
-			maxZoom: 10,
-			minZoom: 0.1,
-			initialX: 500,
-			initialY: 500,
-			initialZoom: .5,
+			// transformOrigin: { x: 0.5, y: 0.5 },
+			maxZoom: 100,
+			minZoom: 0.01,
+			initialX: 0,
+			initialY: 0,
+			// initialZoom: .5,
 			beforeMouseDown: function(e) {
 				// console.log( e.target );
 				if(e.target.classList.contains('panel-caption')) return true;
@@ -285,6 +285,7 @@ export default class View extends ReactiveObject {
 	get application() { return this.#application; }
 	get transform() { return this.#transform; }
 	get element() { return this.#element; }
+	get svg() { return this.#svg; }
 	get scene() { return this.#scene; }
 	get theme() { return this.#theme; }
 	get name() { return this.#name; }

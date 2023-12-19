@@ -2,16 +2,18 @@ import flattenDeep from 'lodash/flattenDeep';
 
 export default function(application){
 
-  const testTwoThree = application.Archetypes.create({type:'test/two-three'});
-  testTwoThree.output.push( {name:"output1", generator:({value, string}) => { return string }} );
-  testTwoThree.output.push( {name:"output2", generator:({value, string}) => { return string }} );
-  testTwoThree.input.push( {name:"string1", type: "string", description: "a string of letters", value: "default value"} );
-  testTwoThree.input.push( {name:"string2", type: "string", description: "a string of letters", value: "default value"} );
-  testTwoThree.input.push( {name:"string3", type: "string", description: "a string of letters", value: "default value"} );
+  {
+  const type = application.Archetypes.create({type:'test/layout'});
+  type.output.push( {name:"output1", generator:({value, string}) => { return string }} );
+  type.output.push( {name:"output2", generator:({value, string}) => { return string }} );
+  type.input.push( {name:"string1", type: "string", description: "a string of letters", value: "default value"} );
+  type.input.push( {name:"string2", type: "string", description: "a string of letters", value: "default value"} );
+  type.input.push( {name:"string3", type: "string", description: "a string of letters", value: "default value"} );
+  }
 
   const textType = application.Archetypes.create({type:'text/string'});
   textType.output.push( {name:"output", generator:({value, string}) => { return string }} );
-  textType.input.push( {name:"string", type: "string", description: "a string of letters", value: "default value"} );
+  textType.input.push( {name:"string", type: "string", description: "a string of letters", value: "default value long thing"} );
 
   const colorType = application.Archetypes.create({type:'text/color'});
   colorType.output.push( {name:"output", generator:() => { return 'TODO' }} );
@@ -37,6 +39,41 @@ export default function(application){
   arrayJoinType.input.push( {name:"input", type: "*", description: "data to join"} );
   arrayJoinType.input.push( {name:"separator", type: "string", description: "separator to use"} );
   arrayJoinType.input.push( {name:"duck", type: "string", description: "separator to use"} );
+
+
+
+
+
+
+
+  {
+  const type = application.Archetypes.create({type:'midjourney/prompt'});
+
+  type.output.push({
+    name:"output",
+    generator: ({input, separator}) => {
+      return flattenDeep(input); //separator.length?input.join( separator.join()):input;
+    }
+  });
+
+  type.input.push( {name:"input", type: "*", description: "data to join"} );
+  type.input.push( {name:"template", type: "*", description: "base template"} );
+  type.input.push( {name:"secondary", type: "*", description: "secondary characteristics"} );
+  type.input.push( {name:"styles", type: "string", description: "styles"} );
+  type.input.push( {name:"authors", type: "string", description: "authors"} );
+  type.input.push( {name:"chaos", type: "string", description: "chaos"} );
+  type.input.push( {name:"aspect-ratio", type: "string", description: "aspect-ratio"} );
+  type.input.push( {name:"style", type: "string", description: "style"} );
+  type.input.push( {name:"weird", type: "string", description: "weird"} );
+  type.input.push( {name:"version", type: "string", description: "version"} );
+  }
+
+
+
+
+
+
+
 
 
 }

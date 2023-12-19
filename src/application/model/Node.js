@@ -20,7 +20,7 @@ export default class Node extends ReactiveObject {
   Output;
   Execute;
 
-  constructor({id, type, values, application}){
+  constructor({id, type, values, properties, application}={}){
     super();
     this.#application = application;
     this.values = values || {};
@@ -37,7 +37,7 @@ export default class Node extends ReactiveObject {
     if(!archetype) throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
     archetype.input.forEach(o=>{ this.Input.create(o) })
     archetype.output.forEach(o=>{ this.Output.create(o) })
-    const props = {
+    const options = {
 
       id: id||uuid(),
       type,
@@ -49,7 +49,7 @@ export default class Node extends ReactiveObject {
       depthLevel: 0,
     };
 
-    Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    Object.entries({...options, ...properties}).forEach(([key, val]) => this.defineReactiveProperty(key, val));
 
   }
 
@@ -65,7 +65,7 @@ export default class Node extends ReactiveObject {
     if(inputCandidate) return inputCandidate;
     const outputCandidate = this.Output.find(port=>port.name==name);
     if(outputCandidate) return outputCandidate;
-    if(!output) throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
+    if(!outputCandidate) throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
   }
 
   get kind(){

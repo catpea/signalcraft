@@ -36,14 +36,14 @@ export default class Panel {
 
       data.Output.forEach((data, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({height: 32, width:150, radius:3, margin: 2});
+        port.setBounds({height: 32, width:200, radius:3, margin: 2});
         port.setData(data);
         outputPod.add( port )
       });
 
       data.Input.forEach((data, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({height: 32, width:150, radius:3});
+        port.setBounds({height: 32, width:200, radius:3});
         port.setData(data);
         inputPod.add( port )
       });

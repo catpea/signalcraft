@@ -62,7 +62,7 @@ export default class Offcanvas extends Component {
 			p.appendChild(text2);
 
 			p.addEventListener('click', () => {
-				this.view.application.Dream.addNode(typeObject.type);
+				this.view.application.Dream.addNode(typeObject.type, {}, {x:-this.view.transform.x+(this.view.svg.getBoundingClientRect().width/2), y:-this.view.transform.y+(this.view.svg.getBoundingClientRect().width/2)});
 			});
 
 

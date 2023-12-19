@@ -1957,11 +1957,15 @@
       Selection.filter((item) => item.kind == "Connector").forEach(({ id: id2 }) => Connectors.remove(id2, true));
       Selection.clear(true);
     }
-    addNode(type, values) {
-      return this.application.Nodes.create({ type, values });
+    addNode(type, values, properties) {
+      const node = this.application.Nodes.create({ type, values, properties });
+      this.deselectAll();
+      this.deselectAll();
+      this.select(node);
+      return node;
     }
-    linkPorts(sourceNode, targetNode, options = { output: "output", input: "input" }) {
-      const { output: outputPort, input: inputPort } = options;
+    linkPorts(sourceNode, targetNode, options = {}) {
+      const { output: outputPort, input: inputPort } = Object.assign({ output: "output", input: "input" }, options);
       return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id });
     }
     async execute(node, port = "output") {
@@ -2117,7 +2121,7 @@
     Input;
     Output;
     Execute;
-    constructor({ id: id2, type, values, application: application2 }) {
+    constructor({ id: id2, type, values, properties, application: application2 } = {}) {
       super();
       this.#application = application2;
       this.values = values || {};
@@ -2135,7 +2139,7 @@
       archetype.output.forEach((o) => {
         this.Output.create(o);
       });
-      const props = {
+      const options = {
         id: id2 || v4_default(),
         type,
         backgroundColor: "magenta",
@@ -2145,7 +2149,7 @@
         nodeHeight: 32,
         depthLevel: 0
       };
-      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      Object.entries({ ...options, ...properties }).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
     }
@@ -2159,7 +2163,7 @@
       const outputCandidate = this.Output.find((port) => port.name == name);
       if (outputCandidate)
         return outputCandidate;
-      if (!output)
+      if (!outputCandidate)
         throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
     }
     get kind() {
@@ -2803,13 +2807,13 @@
       container.add(inputPod);
       data.Output.forEach((data2, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({ height: 32, width: 150, radius: 3, margin: 2 });
+        port.setBounds({ height: 32, width: 200, radius: 3, margin: 2 });
         port.setData(data2);
         outputPod.add(port);
       });
       data.Input.forEach((data2, index) => {
         const port = new Line(`port${index}`);
-        port.setBounds({ height: 32, width: 150, radius: 3 });
+        port.setBounds({ height: 32, width: 200, radius: 3 });
         port.setData(data2);
         inputPod.add(port);
       });
@@ -3077,7 +3081,7 @@
         const text2 = text(typeObject.type);
         p.appendChild(text2);
         p.addEventListener("click", () => {
-          this.view.application.Dream.addNode(typeObject.type);
+          this.view.application.Dream.addNode(typeObject.type, {}, { x: -this.view.transform.x + this.view.svg.getBoundingClientRect().width / 2, y: -this.view.transform.y + this.view.svg.getBoundingClientRect().width / 2 });
         });
       });
       const selectedNodes = html.p({ class: "border border-info rounded p-2" });
@@ -3209,12 +3213,12 @@
       this.#panzoom = (0, import_panzoom.default)(this.#scene, {
         smoothScroll: false,
         // this is the sluggish post  scrolling effect
-        transformOrigin: { x: 0.5, y: 0.5 },
-        maxZoom: 10,
-        minZoom: 0.1,
-        initialX: 500,
-        initialY: 500,
-        initialZoom: 0.5,
+        // transformOrigin: { x: 0.5, y: 0.5 },
+        maxZoom: 100,
+        minZoom: 0.01,
+        initialX: 0,
+        initialY: 0,
+        // initialZoom: .5,
         beforeMouseDown: function(e) {
           if (e.target.classList.contains("panel-caption"))
             return true;
@@ -3397,6 +3401,9 @@
     get element() {
       return this.#element;
     }
+    get svg() {
+      return this.#svg;
+    }
     get scene() {
       return this.#scene;
     }
@@ -3492,21 +3499,23 @@
   // src/setup.js
   var import_flattenDeep = __toESM(require_flattenDeep(), 1);
   function setup_default(application2) {
-    const testTwoThree = application2.Archetypes.create({ type: "test/two-three" });
-    testTwoThree.output.push({ name: "output1", generator: ({ value, string }) => {
-      return string;
-    } });
-    testTwoThree.output.push({ name: "output2", generator: ({ value, string }) => {
-      return string;
-    } });
-    testTwoThree.input.push({ name: "string1", type: "string", description: "a string of letters", value: "default value" });
-    testTwoThree.input.push({ name: "string2", type: "string", description: "a string of letters", value: "default value" });
-    testTwoThree.input.push({ name: "string3", type: "string", description: "a string of letters", value: "default value" });
+    {
+      const type = application2.Archetypes.create({ type: "test/layout" });
+      type.output.push({ name: "output1", generator: ({ value, string }) => {
+        return string;
+      } });
+      type.output.push({ name: "output2", generator: ({ value, string }) => {
+        return string;
+      } });
+      type.input.push({ name: "string1", type: "string", description: "a string of letters", value: "default value" });
+      type.input.push({ name: "string2", type: "string", description: "a string of letters", value: "default value" });
+      type.input.push({ name: "string3", type: "string", description: "a string of letters", value: "default value" });
+    }
     const textType = application2.Archetypes.create({ type: "text/string" });
     textType.output.push({ name: "output", generator: ({ value, string }) => {
       return string;
     } });
-    textType.input.push({ name: "string", type: "string", description: "a string of letters", value: "default value" });
+    textType.input.push({ name: "string", type: "string", description: "a string of letters", value: "default value long thing" });
     const colorType = application2.Archetypes.create({ type: "text/color" });
     colorType.output.push({ name: "output", generator: () => {
       return "TODO";
@@ -3534,32 +3543,53 @@
     arrayJoinType.input.push({ name: "input", type: "*", description: "data to join" });
     arrayJoinType.input.push({ name: "separator", type: "string", description: "separator to use" });
     arrayJoinType.input.push({ name: "duck", type: "string", description: "separator to use" });
+    {
+      const type = application2.Archetypes.create({ type: "midjourney/prompt" });
+      type.output.push({
+        name: "output",
+        generator: ({ input, separator }) => {
+          return (0, import_flattenDeep.default)(input);
+        }
+      });
+      type.input.push({ name: "input", type: "*", description: "data to join" });
+      type.input.push({ name: "template", type: "*", description: "base template" });
+      type.input.push({ name: "secondary", type: "*", description: "secondary characteristics" });
+      type.input.push({ name: "styles", type: "string", description: "styles" });
+      type.input.push({ name: "authors", type: "string", description: "authors" });
+      type.input.push({ name: "chaos", type: "string", description: "chaos" });
+      type.input.push({ name: "aspect-ratio", type: "string", description: "aspect-ratio" });
+      type.input.push({ name: "style", type: "string", description: "style" });
+      type.input.push({ name: "weird", type: "string", description: "weird" });
+      type.input.push({ name: "version", type: "string", description: "version" });
+    }
   }
 
   // src/usage.js
   async function usage_default(api2) {
-    if (1) {
-      const stringA = api2.addNode("text/string", { string: "Hello" });
-      const stringB = api2.addNode("text/string", { string: "World" });
-      const stringC = api2.addNode("text/string", { string: "Meow!" });
-      const arrayJn = api2.addNode("array/join");
-      const linkA = api2.linkPorts(stringA, arrayJn);
-      const linkB = api2.linkPorts(stringB, arrayJn);
-      const result = await api2.execute(arrayJn);
+    const DEBUG = 0;
+    if (!DEBUG) {
+      const primaryPromptText1 = api2.addNode("text/string", { string: "Hello" }, { x: 100, y: 100 });
+      const primaryPromptText2 = api2.addNode("text/string", { string: "World" }, { x: 100, y: 300 });
+      const secondaryPromptText = api2.addNode("text/string", { string: "World" }, { x: 100, y: 600 });
+      const stringC = api2.addNode("text/string", { string: "Meow!" }, { x: 100, y: 800 });
+      const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 500 });
+      const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
+      const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
+      const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
+      const result = await api2.execute(midjourneyPrompt);
       console.log("usage.js api.execute said: ", result);
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
       console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
       const rerun = async function() {
-        const result2 = await api2.execute(arrayJn);
+        const result2 = await api2.execute(midjourneyPrompt);
         console.log("usage.js RERUN api.execute said: ", result2);
       };
       const app = api2.getApplication();
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
-    }
-    if (0) {
-      const stringA = api2.addNode("test/two-three", { string1: "Hello" });
+    } else {
+      const stringA = api2.addNode("test/layout", { string1: "Hello" });
     }
   }
 

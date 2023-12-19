@@ -15,6 +15,7 @@ CTRL+Click on caption or cable will select it.
 
 ### Urgent!
 
+- src/application/execute/Standard.js Must Recognize Juncion Objects
 - Finish Toolbox
 - Add Property Toolbox
 - Live Data Output Bottom Debugger

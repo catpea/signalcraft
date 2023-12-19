@@ -12,28 +12,26 @@ export default async function(api){
   //                           |        .run()
   //                           v
 
-  if(1){
+  const DEBUG = 0;
+  if(!DEBUG){
   // define your components
-  const stringA = api.addNode("text/string", { string: "Hello" } );
-  const stringB = api.addNode("text/string", { string: "World" } );
-  const stringC = api.addNode("text/string", { string: "Meow!" } );
-  const arrayJn = api.addNode("array/join");
+  const primaryPromptText1 = api.addNode("text/string", { string: "Hello" }, {x:100, y:100});
+  const primaryPromptText2 = api.addNode("text/string", { string: "World" }, {x:100, y:300});
+  const secondaryPromptText = api.addNode("text/string", { string: "World" }, {x:100, y:600});
+
+  const stringC = api.addNode("text/string", { string: "Meow!" }, {x:100, y:800});
+
+  const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:500});
 
   // create a flow between compoents
-  const linkA = api.linkPorts(stringA, arrayJn);
-  const linkB = api.linkPorts(stringB, arrayJn);
+  const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
+  const linkA2 = api.linkPorts(primaryPromptText2, midjourneyPrompt);
+  const linkB  = api.linkPorts(secondaryPromptText, midjourneyPrompt, {input:'secondary'});
 
-  // api.select(stringA);
-  // api.select(linkA);
-  //
-  // setTimeout(()=>{
-  //   api.deselect(stringA);
-  //   api.select(arrayJn);
-  //
-  // },5000);
+
 
   // execute your program;
-  const result = await api.execute(arrayJn);
+  const result = await api.execute(midjourneyPrompt);
   console.log('usage.js api.execute said: ', result);
 
   // tst
@@ -43,22 +41,15 @@ export default async function(api){
 
 
   const rerun = async function(){
-    const result = await api.execute(arrayJn);
+    const result = await api.execute(midjourneyPrompt);
     console.log('usage.js RERUN api.execute said: ', result);
   }
   const app = api.getApplication();
   app.Connectors.observe('created', rerun)
   app.Connectors.observe('removed', rerun)
 
+  }else{
+    const stringA = api.addNode("test/layout", { string1: "Hello" } );
   }
 
-
-
-
-
-  if(0){
-
-    const stringA = api.addNode("test/two-three", { string1: "Hello" } );
-
-  }
 }

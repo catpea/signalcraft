@@ -44,13 +44,18 @@ export default class DreamInterface {
     Selection.clear(true);
   }
 
-  addNode(type, values){
+  addNode(type, values, properties){
     // Procedure Step 1: create a node of the desired type in the reactive collection
-    return this.application.Nodes.create({type, values});
+    const node = this.application.Nodes.create({type, values, properties});
+    this.deselectAll();
+    this.deselectAll();
+    this.select(node);
+    return node;
   }
 
-  linkPorts(sourceNode, targetNode, options = {output:'output', input:'input'}){
-    const { output:outputPort, input:inputPort } = options;
+  linkPorts(sourceNode, targetNode, options = {}){
+    const { output:outputPort, input:inputPort } = Object.assign({output:'output', input:'input'}, options);
+
     return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id, });
   }
 

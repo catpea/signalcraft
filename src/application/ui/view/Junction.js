@@ -1,6 +1,8 @@
 import { html, svg, text, list, update } from "domek";
 //import { Removable } from './junction/Removable.js';
 // import { Selectable } from './junction/Selectable.js';
+// import { Selectable } from './junction/Connectable.js';
+// import { Selectable } from './junction/Movable.js';
 
 export default class Junction {
   el={};
