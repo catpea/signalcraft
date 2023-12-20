@@ -1,11 +1,9 @@
 import { html, svg, text, list, update } from "domek";
 //import { Removable } from './cable/Removable.js';
 import { Selectable } from './cable/Selectable.js';
+import Base from './Base.js';
 
-export default class Cable {
-  el={};
-  #cleanup = [];
-  constructor() {}
+export default class Cable extends Base {
 
   start({link, view }){
     const {Shortcuts, Dream, Nodes, Selection, Cable} = view.application;
@@ -73,15 +71,5 @@ export default class Cable {
 		}))
 
   } // start
-
-  cleanup(...arg){
-    this.#cleanup.push(...arg);
-  }
-
-  stop() {
-    console.log('Cable Cleanup');
-    this.#cleanup.map(x=>x());
-    this.el.Cable.remove();
-  }
 
 }

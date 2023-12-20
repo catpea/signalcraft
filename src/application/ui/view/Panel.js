@@ -1,14 +1,14 @@
 import oneOf from "oneof";
 import { html, svg, text, list, update } from "domek";
 
+import Base from './Base.js';
+
 import Container from "./panel/Container.js";
 import Caption from "./panel/Caption.js";
 import Pod from "./panel/Pod.js";
 import Line from "./panel/Line.js";
 
-export default class Panel {
-  el;
-  #cleanup = [];
+export default class Panel extends Base {
 
   start({data, view}){
 
@@ -25,7 +25,7 @@ export default class Panel {
       const caption = new Caption(`caption`);
       caption.setBounds({border:1, height: 32, width:'100%', radius:3, margin: 4});
       container.add(caption)
-      
+
       const inputPod = new Pod(`inputPod`);
       inputPod.setBounds({gap: 2, padding: 1, border:1, radius:3});
       container.add(inputPod);
@@ -54,12 +54,4 @@ export default class Panel {
       this.cleanup(()=>container.stop());
   }
 
-
-  stop(){
-    // console.log(this.#cleanup)
-    this.#cleanup.map(x=>x());
-  }
-  cleanup(...arg){
-    this.#cleanup.push(...arg);
-  }
 }

@@ -4484,6 +4484,21 @@
   // src/application/ui/view/Panel.js
   var import_oneof = __toESM(require_oneof(), 1);
 
+  // src/application/ui/view/Base.js
+  var Base = class {
+    el = {};
+    #cleanup = [];
+    cleanup(...arg) {
+      this.#cleanup.push(...arg);
+    }
+    start({ data, view }) {
+    }
+    stop() {
+      this.#cleanup.map((f) => f());
+      Object.values(this.el).map((el) => el.remove());
+    }
+  };
+
   // src/application/ui/view/panel/Component.js
   var Component = class {
     el = {};
@@ -4941,9 +4956,7 @@
   };
 
   // src/application/ui/view/Panel.js
-  var Panel = class {
-    el;
-    #cleanup = [];
+  var Panel = class extends Base {
     start({ data, view }) {
       const container = new Container(`container`);
       container.setBounds({ border: 1, gap: 5, radius: 5, padding: 2 });
@@ -4976,12 +4989,6 @@
       container.render();
       this.cleanup(() => container.stop());
     }
-    stop() {
-      this.#cleanup.map((x) => x());
-    }
-    cleanup(...arg) {
-      this.#cleanup.push(...arg);
-    }
   };
 
   // src/application/ui/view/cable/Selectable.js
@@ -5013,11 +5020,7 @@
   };
 
   // src/application/ui/view/Cable.js
-  var Cable = class {
-    el = {};
-    #cleanup = [];
-    constructor() {
-    }
+  var Cable = class extends Base {
     start({ link, view }) {
       const { Shortcuts, Dream, Nodes, Selection, Cable: Cable2 } = view.application;
       const sourceNode = Nodes.id(link.sourceNode);
@@ -5080,14 +5083,6 @@
       }));
     }
     // start
-    cleanup(...arg) {
-      this.#cleanup.push(...arg);
-    }
-    stop() {
-      console.log("Cable Cleanup");
-      this.#cleanup.map((x) => x());
-      this.el.Cable.remove();
-    }
   };
 
   // src/application/ui/view/Menus.js
@@ -5311,9 +5306,7 @@
   };
 
   // src/application/ui/view/Menus.js
-  var Menu = class {
-    el;
-    #cleanup = [];
+  var Menus = class extends Base {
     start(view) {
       const navbar = new Navbar(view.name);
       navbar.setView(view);
@@ -5326,12 +5319,6 @@
       navbar.setup();
       navbar.render(view.element);
       this.cleanup(navbar);
-    }
-    stop() {
-      this.#cleanup.map((x) => x());
-    }
-    cleanup(...arg) {
-      this.#cleanup.push(...arg);
     }
   };
 
@@ -5512,7 +5499,7 @@
       return svg2;
     }
     #installMenus() {
-      const menus = new Menu();
+      const menus = new Menus();
       menus.start(this);
       this.#unsubscribe.push(() => menus.stop());
     }

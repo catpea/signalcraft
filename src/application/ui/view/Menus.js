@@ -1,13 +1,13 @@
 import oneOf from "oneof";
 import { html, svg, text, list, update } from "domek";
 
+import Base from './Base.js';
+
 import Navbar from "./menu/Navbar.js";
 import Dropdown from "./menu/Dropdown.js";
 import Offcanvas from "./menu/Offcanvas.js";
 
-export default class Menu {
-  el;
-  #cleanup = [];
+export default class Menus extends Base {
 
   start(view){
 
@@ -32,11 +32,4 @@ export default class Menu {
       this.cleanup(navbar);
   }
 
-
-  stop(){
-    this.#cleanup.map(x=>x());
-  }
-  cleanup(...arg){
-    this.#cleanup.push(...arg);
-  }
 }
