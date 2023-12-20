@@ -10,7 +10,7 @@ CTRL+Click on caption or cable will select it.
 ### Bug Fix
 
 
-- Make Junctions Removable
+- Omni port should only connect to left ports, never right, (it can be deleted and recreated in that case, or SHIFT+Drag can be setup)
 - Drag Connecting lines between entire Line.js not just Port, it is easier to hit the targer
 - too hard to click on caption, at certain scale make the entire node draggable
 - default action for drag should be selection manager not panning, see NodeRED

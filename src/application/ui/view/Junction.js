@@ -25,7 +25,7 @@ export default class Junction extends Base {
 
     this.el.Junction = svg.circle({ class: 'junction-caption', cx: 0, cy: 0, r: 24 });
     this.el.OmniPort = svg.circle({ class: 'junction-port', cx: 0, cy: 0, r: 8 });
-    this.el.OmniPort.dataset.portAddress = ['Junction', junction.id, junction.port('input').id].join(':');
+    this.el.OmniPort.dataset.portAddress = [junction.port('input').kind,'Junction', junction.id, junction.port('input').id].join(':');
     this.el.Group.appendChild( this.el.Junction )
     this.el.Group.appendChild( this.el.OmniPort )
 
@@ -79,7 +79,10 @@ export default class Junction extends Base {
       canvas: view.scene,
       node: junction,
       port: junction.port('output'),
-      createConnector: ({targetType, sourceNode, sourcePort, targetNode, targetPort}) => view.application.Connectors.create({sourceType:'Junction', targetType, sourceNode, sourcePort, targetNode, targetPort }),
+      createConnector: ({targetKind, targetType, sourceNode, sourcePort, targetNode, targetPort}) => {
+        if(targetKind=='Input') view.application.Connectors.create({sourceType:'Junction', targetType, sourceNode, sourcePort, targetNode, targetPort })
+
+      },
       createJunction: ({x,y,  sourceNode, sourcePort}) => {
         const junction = view.application.Junctions.create({properties:{ x,y }});
         const targetNode = junction.id;

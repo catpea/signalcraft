@@ -4105,7 +4105,10 @@
       return this.application.Selection.forEach(({ id: id2 }) => this.application.Selection.remove(id2, true));
     }
     removeSelected() {
-      const { Selection, Nodes, Connectors } = this.application;
+      const { Selection, Nodes, Connectors, Junctions } = this.application;
+      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2), true);
+      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2), true);
+      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Junctions.remove(id2, true));
       Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2), true);
       Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2), true);
       Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Nodes.remove(id2, true));
@@ -4184,7 +4187,7 @@
           response[localPort.name].push(currentValue);
         } else {
           for (const incomingConnector of incomingConnectors) {
-            const parentNode = this.application.Nodes.find((node) => node.id == incomingConnector.sourceNode);
+            const parentNode = (incomingConnector.sourceType == "Junction" ? this.application.Junctions : this.application.Nodes).find((node) => node.id == incomingConnector.sourceNode);
             const connectedPort = parentNode.Output.find((item) => item.id == incomingConnector.sourcePort);
             const result = await parentNode.Execute.run(connectedPort.name);
             response[localPort.name].push(result);
@@ -4204,6 +4207,7 @@
 
   // src/application/model/node/Input.js
   var Input = class extends ReactiveObject {
+    kind = "Input";
     application;
     parent;
     #configuration;
@@ -4238,6 +4242,7 @@
 
   // src/application/model/node/Output.js
   var Output = class extends ReactiveObject {
+    kind = "Output";
     application;
     parent;
     #configuration;
@@ -4880,12 +4885,13 @@
         dy = 0;
       };
       this.#mouseUpHandler = (e) => {
-        const isOverAnotherPort = this.#dragging && e.target && e.target.classList.contains("panel-line-port");
+        const isOverAnotherPort = this.#dragging && e.target && (e.target.classList.contains("panel-line-port") || e.target.classList.contains("junction-port"));
         const isOverBackground = this.#dragging && e.target && e.target.classList.contains("view-scene-background");
         if (isOverAnotherPort) {
           const portAddress = e.target.dataset.portAddress;
-          const [targetType, targetNodeId, targetPortId] = portAddress.split(":");
+          const [targetKind, targetType, targetNodeId, targetPortId] = portAddress.split(":");
           const payload = {
+            targetKind,
             targetType,
             sourceNode: node.id,
             sourcePort: port.id,
@@ -4944,7 +4950,7 @@
         this.data.x = x;
         this.data.y = y;
       }
-      this.el.Port.dataset.portAddress = ["Node", this.parent.data.id, this.data.id].join(":");
+      this.el.Port.dataset.portAddress = [this.data.kind, "Node", this.parent.data.id, this.data.id].join(":");
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
     }
     render() {
@@ -5234,7 +5240,7 @@
       this.cleanup(junction.observe("y", (v) => update2(this.el.Group, { "transform": `translate(${junction.x},${v})` })));
       this.el.Junction = svg.circle({ class: "junction-caption", cx: 0, cy: 0, r: 24 });
       this.el.OmniPort = svg.circle({ class: "junction-port", cx: 0, cy: 0, r: 8 });
-      this.el.OmniPort.dataset.portAddress = ["Junction", junction.id, junction.port("input").id].join(":");
+      this.el.OmniPort.dataset.portAddress = [junction.port("input").kind, "Junction", junction.id, junction.port("input").id].join(":");
       this.el.Group.appendChild(this.el.Junction);
       this.el.Group.appendChild(this.el.OmniPort);
       const movable = new Movable2({
@@ -5281,7 +5287,10 @@
         canvas: view.scene,
         node: junction,
         port: junction.port("output"),
-        createConnector: ({ targetType, sourceNode, sourcePort, targetNode, targetPort }) => view.application.Connectors.create({ sourceType: "Junction", targetType, sourceNode, sourcePort, targetNode, targetPort }),
+        createConnector: ({ targetKind, targetType, sourceNode, sourcePort, targetNode, targetPort }) => {
+          if (targetKind == "Input")
+            view.application.Connectors.create({ sourceType: "Junction", targetType, sourceNode, sourcePort, targetNode, targetPort });
+        },
         createJunction: ({ x, y, sourceNode, sourcePort }) => {
           const junction2 = view.application.Junctions.create({ properties: { x, y } });
           const targetNode = junction2.id;

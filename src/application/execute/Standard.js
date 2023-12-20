@@ -30,7 +30,8 @@ export default class Standard {
 			} else {
 				for(const incomingConnector of incomingConnectors) {
 					// get their parent node,
-					const parentNode = this.application.Nodes.find(node => node.id == incomingConnector.sourceNode);
+
+					const parentNode = (incomingConnector.sourceType=='Junction'?this.application.Junctions:this.application.Nodes).find(node => node.id == incomingConnector.sourceNode);
 					const connectedPort = parentNode.Output.find(item => item.id == incomingConnector.sourcePort);
 					// and get them ran (parent node is requred as it pnows the properties the funcion needs)
 					const result = await parentNode.Execute.run(connectedPort.name);

@@ -23,7 +23,7 @@ export default class Line extends Component {
 			this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		}
 		//NOTE: all ports must have an address consisting of node.id:port:id, used in Cable connecting
-		this.el.Port.dataset.portAddress = ['Node', this.parent.data.id, this.data.id].join(':');
+		this.el.Port.dataset.portAddress = [ this.data.kind, 'Node', this.parent.data.id, this.data.id].join(':');
 
 		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 	}

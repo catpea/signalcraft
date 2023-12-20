@@ -3,6 +3,7 @@ import ReactiveObject from "../../system/ReactiveObject.js";
 import { v4 as uuid } from "uuid";
 
 export default class Input extends ReactiveObject {
+  kind = 'Input';
   application;
   parent;
   #configuration;

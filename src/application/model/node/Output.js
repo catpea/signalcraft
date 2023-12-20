@@ -3,7 +3,7 @@ import ReactiveObject from "../../system/ReactiveObject.js";
 import { v4 as uuid } from "uuid";
 
 export default class Output extends ReactiveObject {
-
+  kind = 'Output';
   application;
   parent;
   #configuration;

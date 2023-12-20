@@ -36,10 +36,16 @@ export default class DreamInterface {
     return this.application.Selection.forEach(({id})=>this.application.Selection.remove(id, true));
   }
   removeSelected(){
-    const { Selection, Nodes, Connectors } = this.application;
+    const { Selection, Nodes, Connectors, Junctions } = this.application;
+
+    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id), true);
+    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id), true);
+    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Junctions.remove(id, true));
+
     Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id), true);
     Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id), true);
     Selection.filter(item=>item.kind=='Node').forEach(({id})=>Nodes.remove(id, true));
+
     Selection.filter(item=>item.kind=='Connector').forEach(({id})=>Connectors.remove(id, true));
     Selection.clear(true);
   }
