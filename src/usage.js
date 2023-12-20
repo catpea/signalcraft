@@ -23,7 +23,6 @@ export default async function(api){
   const stringC = api.addNode("text/string", { string: "Meow!" }, {x:100, y:800});
 
   const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:300});
-  const testJunction = api.addJunction({x:50, y:50});
 
   // create a flow between compoents
   const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
@@ -50,6 +49,7 @@ export default async function(api){
   app.Connectors.observe('removed', rerun)
 
   }else{
+    const testJunction = api.addJunction({x:50, y:50});
     const stringA = api.addNode("test/layout", { string1: "Hello" } );
   }
 

@@ -5,7 +5,7 @@ import Base from './Base.js';
 //import { Removable } from './junction/Removable.js';
 import { Focus } from './junction/Focus.js';
 import { Selectable } from './junction/Selectable.js';
-// import { Connectable } from './junction/Connectable.js';
+import { Connectable } from './node/line/Connectable.js';
 import { Movable } from './junction/Movable.js';
 
 export default class Junction extends Base {
@@ -66,6 +66,37 @@ export default class Junction extends Base {
       }
     });
     this.cleanup(()=>focus.stop());
+
+
+
+
+
+
+
+    const connectable = new Connectable({
+      container: window, // <g> element representing an SVG scene
+      handle: this.el.OmniPort,
+      canvas: view.scene,
+      node: junction,
+      port: junction.port('output'),
+      createConnector: ({targetType, sourceNode, sourcePort, targetNode, targetPort}) => view.application.Connectors.create({sourceType:'Junction', targetType, sourceNode, sourcePort, targetNode, targetPort }),
+      createJunction: ({x,y,  sourceNode, sourcePort}) => {
+        const junction = view.application.Junctions.create({properties:{ x,y }});
+        const targetNode = junction.id;
+        const targetPort = junction.port('input').id;
+        view.application.Connectors.create({ sourceType:'Junction', targetType:'Junction' ,sourceNode, sourcePort, targetNode, targetPort });
+      },
+    });
+    this.cleanup(view.observe('transform', v=>connectable.scale = v.scale));
+    this.cleanup(()=>connectable.stop());
+
+
+
+
+
+
+
+
 
 
     view.scene.appendChild( this.el.Group )

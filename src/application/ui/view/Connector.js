@@ -10,7 +10,7 @@ export default class Link extends Base {
 
     console.log({link});
 
-    const sourceNode = Nodes .get(link.sourceNode);
+    const sourceNode = (link.sourceType=='Junction'?Junctions:Nodes) .get(link.sourceNode);
     const targetNode = (link.targetType=='Junction'?Junctions:Nodes) .get(link.targetNode);
 
     const sourcePort = sourceNode.Output       .get(link.sourcePort);

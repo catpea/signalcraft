@@ -5047,7 +5047,7 @@
     start({ link, view }) {
       const { Shortcuts, Dream, Nodes, Junctions, Selection, Cable } = view.application;
       console.log({ link });
-      const sourceNode = Nodes.get(link.sourceNode);
+      const sourceNode = (link.sourceType == "Junction" ? Junctions : Nodes).get(link.sourceNode);
       const targetNode = (link.targetType == "Junction" ? Junctions : Nodes).get(link.targetNode);
       const sourcePort = sourceNode.Output.get(link.sourcePort);
       const targetPort = targetNode.Input.get(link.targetPort);
@@ -5274,6 +5274,23 @@
         }
       });
       this.cleanup(() => focus.stop());
+      const connectable = new Connectable({
+        container: window,
+        // <g> element representing an SVG scene
+        handle: this.el.OmniPort,
+        canvas: view.scene,
+        node: junction,
+        port: junction.port("output"),
+        createConnector: ({ targetType, sourceNode, sourcePort, targetNode, targetPort }) => view.application.Connectors.create({ sourceType: "Junction", targetType, sourceNode, sourcePort, targetNode, targetPort }),
+        createJunction: ({ x, y, sourceNode, sourcePort }) => {
+          const junction2 = view.application.Junctions.create({ properties: { x, y } });
+          const targetNode = junction2.id;
+          const targetPort = junction2.port("input").id;
+          view.application.Connectors.create({ sourceType: "Junction", targetType: "Junction", sourceNode, sourcePort, targetNode, targetPort });
+        }
+      });
+      this.cleanup(view.observe("transform", (v) => connectable.scale = v.scale));
+      this.cleanup(() => connectable.stop());
       view.scene.appendChild(this.el.Group);
     }
     // start
@@ -5563,6 +5580,8 @@
           if (e.target.classList.contains("ant-trail"))
             return true;
           if (e.target.classList.contains("junction-caption"))
+            return true;
+          if (e.target.classList.contains("junction-port"))
             return true;
         }
       });
@@ -5936,7 +5955,6 @@
       const secondaryPromptText = api2.addNode("text/string", { string: "World" }, { x: 100, y: 600 });
       const stringC = api2.addNode("text/string", { string: "Meow!" }, { x: 100, y: 800 });
       const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 300 });
-      const testJunction = api2.addJunction({ x: 50, y: 50 });
       const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
       const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
       const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
@@ -5952,6 +5970,7 @@
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
     } else {
+      const testJunction = api2.addJunction({ x: 50, y: 50 });
       const stringA = api2.addNode("test/layout", { string1: "Hello" });
     }
     console.log(app.Junctions.dump());
