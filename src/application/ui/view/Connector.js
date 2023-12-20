@@ -1,17 +1,20 @@
 import { html, svg, text, list, update } from "domek";
 //import { Removable } from './cable/Removable.js';
-import { Selectable } from './cable/Selectable.js';
+import { Selectable } from './link/Selectable.js';
 import Base from './Base.js';
 
-export default class Cable extends Base {
+export default class Link extends Base {
 
   start({link, view }){
-    const {Shortcuts, Dream, Nodes, Selection, Cable} = view.application;
+    const {Shortcuts, Dream, Nodes, Junctions, Selection, Cable} = view.application;
 
-    const sourceNode = Nodes .id(link.sourceNode);
-    const targetNode = Nodes .id(link.targetNode);
-    const sourcePort = sourceNode.Output       .id(link.sourcePort);
-    const targetPort = targetNode.Input        .id(link.targetPort);
+    console.log({link});
+
+    const sourceNode = Nodes .get(link.sourceNode);
+    const targetNode = (link.targetType=='Junction'?Junctions:Nodes) .get(link.targetNode);
+
+    const sourcePort = sourceNode.Output       .get(link.sourcePort);
+    const targetPort = targetNode.Input        .get(link.targetPort);
 
     let x1 = sourceNode.x + sourcePort.x;
     let y1 = sourceNode.y + sourcePort.y;

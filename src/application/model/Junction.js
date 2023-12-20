@@ -20,11 +20,11 @@ export default class Junction extends ReactiveObject {
   Output;
   Execute;
 
-  constructor({id, values, application}){
+  constructor({id, properties, application}){
     super();
     this.#application = application;
 
-    this.values = values || {};
+    this.values = {};
 
     this.Execute = new Standard(this);
 
@@ -36,8 +36,8 @@ export default class Junction extends ReactiveObject {
 
     const props = {
       id: id||uuid(),
-      x: 999*Math.random(),
-      y: 999*Math.random(),
+      x:properties.x||0,
+      y:properties.y||0,
     };
 
     Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));

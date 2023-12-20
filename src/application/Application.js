@@ -84,6 +84,9 @@ export default class Brain extends ReactiveObject {
           case "Connectors":
             this.Connectors.subscribe(eventName, handlerFunction.bind(that));
             break;
+          case "Junctions":
+            this.Junctions.subscribe(eventName, handlerFunction.bind(that));
+            break;
           default:
         }
       }

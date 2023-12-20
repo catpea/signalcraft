@@ -8,20 +8,23 @@ export default class Connector extends ReactiveObject {
   application;
   #unsubscribe = [];
 
-  constructor({application, id, type, sourceNode, targetNode, sourcePort, targetPort }){
+  constructor({application, id, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }){
     super();
     this.application = application;
 
     //NOTE: once nodes are added to the system the x and y of edges are already calculated (sans the transformation).
 
+
     const props = {
       id:id||uuid(),
 
-      type,
 
+      sourceType,
       sourceNode,
-      targetNode,
       sourcePort,
+
+      targetType,
+      targetNode,
       targetPort,
 
       backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,

@@ -23,7 +23,7 @@ export default class Line extends Component {
 			this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		}
 		//NOTE: all ports must have an address consisting of node.id:port:id, used in Cable connecting
-		this.el.Port.dataset.portAddress = [this.parent.data.id, this.data.id].join(':');
+		this.el.Port.dataset.portAddress = ['Node', this.parent.data.id, this.data.id].join(':');
 
 		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 	}
@@ -38,10 +38,16 @@ export default class Line extends Component {
 			const connectable = new Connectable({
 				container: window, // <g> element representing an SVG scene
 				handle: this.el.Port,
-				canvas: this.group,
+				canvas: this.view.scene,
 				node: this.parent.data,
 				port: this.data,
-				link: ({sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Connectors.create({ sourceNode, sourcePort, targetNode, targetPort }),
+				createConnector: ({targetType, sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
+				createJunction: ({x,y,  sourceNode, sourcePort}) => {
+					const junction = this.view.application.Junctions.create({properties:{ x,y }});
+					const targetNode = junction.id;
+					const targetPort = junction.port('input').id;
+					this.view.application.Connectors.create({ targetType:'Junction' ,sourceNode, sourcePort, targetNode, targetPort });
+				},
 			});
 			this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));
 			this.cleanup(()=>connectable.stop());

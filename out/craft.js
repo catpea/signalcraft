@@ -4115,9 +4115,12 @@
     addNode(type, values, properties) {
       const node = this.application.Nodes.create({ type, values, properties });
       this.deselectAll();
-      this.deselectAll();
       this.select(node);
       return node;
+    }
+    addJunction(properties) {
+      const junction = this.application.Junctions.create({ properties });
+      return junction;
     }
     linkPorts(sourceNode, targetNode, options = {}) {
       const { output: outputPort, input: inputPort } = Object.assign({ output: "output", input: "input" }, options);
@@ -4334,15 +4337,16 @@
     #kind = "Connector";
     application;
     #unsubscribe = [];
-    constructor({ application: application2, id: id2, type, sourceNode, targetNode, sourcePort, targetPort }) {
+    constructor({ application: application2, id: id2, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }) {
       super();
       this.application = application2;
       const props = {
         id: id2 || v4_default(),
-        type,
+        sourceType,
         sourceNode,
-        targetNode,
         sourcePort,
+        targetType,
+        targetNode,
         targetPort,
         backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
         x1: 1e4 * Math.random(),
@@ -4373,10 +4377,10 @@
     Input;
     Output;
     Execute;
-    constructor({ id: id2, values, application: application2 }) {
+    constructor({ id: id2, properties, application: application2 }) {
       super();
       this.#application = application2;
-      this.values = values || {};
+      this.values = {};
       this.Execute = new Standard(this);
       this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
       this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
@@ -4384,8 +4388,8 @@
       this.Output.create({ name: "output", generator: ({ input }) => input });
       const props = {
         id: id2 || v4_default(),
-        x: 999 * Math.random(),
-        y: 999 * Math.random()
+        x: properties.x || 0,
+        y: properties.y || 0
       };
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
@@ -4481,7 +4485,7 @@
     return () => document.removeEventListener("keydown", listener);
   }
 
-  // src/application/ui/view/Panel.js
+  // src/application/ui/view/Node.js
   var import_oneof = __toESM(require_oneof(), 1);
 
   // src/application/ui/view/Base.js
@@ -4499,7 +4503,7 @@
     }
   };
 
-  // src/application/ui/view/panel/Component.js
+  // src/application/ui/view/node/Component.js
   var Component = class {
     el = {};
     // container of elements
@@ -4605,7 +4609,7 @@
     return output2;
   }
 
-  // src/application/ui/view/panel/Container.js
+  // src/application/ui/view/node/Container.js
   var Container = class extends Component {
     setup() {
       this.el.Panel = svg.rect({
@@ -4637,7 +4641,7 @@
     }
   };
 
-  // src/application/ui/view/panel/caption/Movable.js
+  // src/application/ui/view/node/caption/Movable.js
   var Movable = class {
     #container;
     #handle;
@@ -4696,7 +4700,7 @@
     }
   };
 
-  // src/application/ui/view/panel/caption/Selectable.js
+  // src/application/ui/view/node/caption/Selectable.js
   var Selectable = class {
     #scale;
     // set by setter
@@ -4724,7 +4728,7 @@
     }
   };
 
-  // src/application/ui/view/panel/caption/Focus.js
+  // src/application/ui/view/node/caption/Focus.js
   var Focus = class {
     #scale;
     // set by setter
@@ -4752,7 +4756,7 @@
     }
   };
 
-  // src/application/ui/view/panel/Caption.js
+  // src/application/ui/view/node/Caption.js
   var Caption = class extends Component {
     setup() {
       this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -4808,7 +4812,7 @@
     }
   };
 
-  // src/application/ui/view/panel/Pod.js
+  // src/application/ui/view/node/Pod.js
   var Pod = class extends Component {
     setup() {
       this.el.Pod = svg.rect({ class: "panel-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -4824,7 +4828,7 @@
     }
   };
 
-  // src/application/ui/view/panel/line/Connectable.js
+  // src/application/ui/view/node/line/Connectable.js
   var Connectable = class {
     #el = {};
     #scale;
@@ -4838,7 +4842,8 @@
     // used in stop/cleanup
     #container;
     #handle;
-    constructor({ container, handle, canvas, node, port, link }) {
+    #geometry = {};
+    constructor({ container, handle, canvas, node, port, createConnector, createJunction }) {
       this.#container = container;
       this.#handle = handle;
       this.#mouseDownHandler = (e) => {
@@ -4862,31 +4867,43 @@
         dy = dy + port.y * this.#scale;
         dx = dx / this.#scale;
         dy = dy / this.#scale;
-        const geometry = {
+        this.#geometry = {
           // origin of th eindicator line is the port
-          x1: port.x,
-          y1: port.y,
+          x1: port.x + node.x,
+          y1: port.y + node.y,
           // target of the indicator line is where the cursor is dragging
-          x2: dx,
-          y2: dy
+          x2: dx + node.x,
+          y2: dy + node.y
         };
-        update2(this.#el.indicatorLine, geometry);
+        update2(this.#el.indicatorLine, this.#geometry);
         dx = 0;
         dy = 0;
       };
       this.#mouseUpHandler = (e) => {
         const isOverAnotherPort = this.#dragging && e.target && e.target.classList.contains("panel-line-port");
+        const isOverBackground = this.#dragging && e.target && e.target.classList.contains("view-scene-background");
         if (isOverAnotherPort) {
           const portAddress = e.target.dataset.portAddress;
-          const [targetNodeId, targetPortId] = portAddress.split(":");
+          const [targetType, targetNodeId, targetPortId] = portAddress.split(":");
           const payload = {
+            targetType,
             sourceNode: node.id,
             sourcePort: port.id,
             targetNode: targetNodeId,
             targetPort: targetPortId
           };
-          if (payload.sourcePort != payload.targetPort)
-            link(payload);
+          const notTheSamePort = payload.sourcePort != payload.targetPort;
+          const notTheSameNode = payload.sourceNode != payload.targetNode;
+          if (notTheSamePort && notTheSameNode)
+            createConnector(payload);
+        }
+        if (isOverBackground) {
+          createJunction({
+            x: this.#geometry.x2,
+            y: this.#geometry.y2,
+            sourceNode: node.id,
+            sourcePort: port.id
+          });
         }
         if (this.#el.indicatorLine)
           this.#el.indicatorLine.remove();
@@ -4906,7 +4923,7 @@
     }
   };
 
-  // src/application/ui/view/panel/Line.js
+  // src/application/ui/view/node/Line.js
   var Line = class extends Component {
     setup() {
       this.el.Line = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
@@ -4927,7 +4944,7 @@
         this.data.x = x;
         this.data.y = y;
       }
-      this.el.Port.dataset.portAddress = [this.parent.data.id, this.data.id].join(":");
+      this.el.Port.dataset.portAddress = ["Node", this.parent.data.id, this.data.id].join(":");
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
     }
     render() {
@@ -4940,10 +4957,16 @@
           container: window,
           // <g> element representing an SVG scene
           handle: this.el.Port,
-          canvas: this.group,
+          canvas: this.view.scene,
           node: this.parent.data,
           port: this.data,
-          link: ({ sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Connectors.create({ sourceNode, sourcePort, targetNode, targetPort })
+          createConnector: ({ targetType, sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
+          createJunction: ({ x, y, sourceNode, sourcePort }) => {
+            const junction = this.view.application.Junctions.create({ properties: { x, y } });
+            const targetNode = junction.id;
+            const targetPort = junction.port("input").id;
+            this.view.application.Connectors.create({ targetType: "Junction", sourceNode, sourcePort, targetNode, targetPort });
+          }
         });
         this.cleanup(this.view.observe("transform", (v) => connectable.scale = v.scale));
         this.cleanup(() => connectable.stop());
@@ -4955,8 +4978,8 @@
     }
   };
 
-  // src/application/ui/view/Panel.js
-  var Panel = class extends Base {
+  // src/application/ui/view/Node.js
+  var Node3 = class extends Base {
     start({ data, view }) {
       const container = new Container(`container`);
       container.setBounds({ border: 1, gap: 5, radius: 5, padding: 2 });
@@ -4991,7 +5014,7 @@
     }
   };
 
-  // src/application/ui/view/cable/Selectable.js
+  // src/application/ui/view/link/Selectable.js
   var Selectable2 = class {
     #scale;
     // set by setter
@@ -5019,14 +5042,15 @@
     }
   };
 
-  // src/application/ui/view/Cable.js
-  var Cable = class extends Base {
+  // src/application/ui/view/Connector.js
+  var Link = class extends Base {
     start({ link, view }) {
-      const { Shortcuts, Dream, Nodes, Selection, Cable: Cable2 } = view.application;
-      const sourceNode = Nodes.id(link.sourceNode);
-      const targetNode = Nodes.id(link.targetNode);
-      const sourcePort = sourceNode.Output.id(link.sourcePort);
-      const targetPort = targetNode.Input.id(link.targetPort);
+      const { Shortcuts, Dream, Nodes, Junctions, Selection, Cable } = view.application;
+      console.log({ link });
+      const sourceNode = Nodes.get(link.sourceNode);
+      const targetNode = (link.targetType == "Junction" ? Junctions : Nodes).get(link.targetNode);
+      const sourcePort = sourceNode.Output.get(link.sourcePort);
+      const targetPort = targetNode.Input.get(link.targetPort);
       let x1 = sourceNode.x + sourcePort.x;
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
@@ -5081,6 +5105,93 @@
           this.el.Cable.classList.remove("selected");
         }
       }));
+    }
+    // start
+  };
+
+  // src/application/ui/view/junction/Movable.js
+  var Movable2 = class {
+    #container;
+    #handle;
+    #read;
+    #write;
+    #scale;
+    // NOTE: set by a setter in this class, it is externaly set as view scale may change
+    // local variables
+    #dragging = false;
+    #initialPosition = { x: 0, y: 0 };
+    // handlers for cleanup
+    #mouseDownHandler;
+    #mouseMoveHandler;
+    #mouseUpHandler;
+    constructor({ container, handle, read, write }) {
+      this.#container = container;
+      this.#handle = handle;
+      this.#read = read;
+      this.#write = write;
+      this.#mouseDownHandler = (e) => {
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+        this.#dragging = true;
+        this.#container.addEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#mouseMoveHandler = (e) => {
+        let dx = 0;
+        let dy = 0;
+        dx = e.clientX - this.#initialPosition.x;
+        dy = e.clientY - this.#initialPosition.y;
+        dx = dx + this.#read("x") * this.#scale;
+        dy = dy + this.#read("y") * this.#scale;
+        dx = dx / this.#scale;
+        dy = dy / this.#scale;
+        this.#write("x", dx);
+        this.#write("y", dy);
+        dx = 0;
+        dy = 0;
+        this.#initialPosition.x = e.clientX;
+        this.#initialPosition.y = e.clientY;
+      };
+      this.#mouseUpHandler = (e) => {
+        this.#dragging = false;
+        this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#container.removeEventListener("mousemove", this.#mouseMoveHandler);
+      this.#container.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
+  // src/application/ui/view/Junction.js
+  var Junction2 = class extends Base {
+    start({ junction, view }) {
+      const { Shortcuts, Dream, Nodes, Selection, Cable } = view.application;
+      console.log(`view/Junction got`, junction);
+      this.el.Group = svg.g();
+      this.cleanup(junction.observe("x", (v) => update2(this.el.Group, { "transform": `translate(${v},${junction.y})` })));
+      this.cleanup(junction.observe("y", (v) => update2(this.el.Group, { "transform": `translate(${junction.x},${v})` })));
+      this.el.Junction = svg.circle({ class: "panel-line-port", cx: 0, cy: 0, r: 24 });
+      this.el.OmniPort = svg.circle({ class: "panel-line-port", cx: 0, cy: 0, r: 8 });
+      this.el.OmniPort.dataset.portAddress = ["Junction", junction.id, junction.port("input").id].join(":");
+      this.el.Group.appendChild(this.el.Junction);
+      this.el.Group.appendChild(this.el.OmniPort);
+      const movable = new Movable2({
+        container: window,
+        // <g> element representing an SVG scene
+        handle: this.el.Junction,
+        // <rect> that is the caption of a window meant to be dragged
+        read: (property) => junction[property],
+        write: (property, value) => junction[property] = value
+      });
+      this.cleanup(view.observe("transform", (v) => movable.scale = v.scale));
+      this.cleanup(() => movable.stop());
+      view.scene.appendChild(this.el.Group);
     }
     // start
   };
@@ -5375,17 +5486,22 @@
         this.transform = { x, y, scale };
       });
       this.#unsubscribe.push(this.#panzoom.dispose);
-      this.application.Nodes.forEach((node) => this.#createPanel(node));
-      this.application.Connectors.forEach((node) => this.#createCable(node));
+      this.application.Nodes.forEach((node) => this.#createNode(node));
+      this.application.Connectors.forEach((connector) => this.#createConnector(connector));
+      this.application.Junctions.forEach((junction) => this.#createJunction(junction));
       const grandCentral = {
         "Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
-        "Nodes created ...": this.#createPanel,
+        "Nodes created ...": this.#createNode,
         //   NOTE:
-        "Nodes removed ...": this.#deletePanel,
+        "Nodes removed ...": this.#deleteNode,
         //   the node updates it self, here we only ensure it exists, or is removed as needed
-        "Connectors created ...": this.#createCable,
+        "Connectors created ...": this.#createConnector,
         //   NOTE:
-        "Connectors removed ...": this.#deleteCable
+        "Connectors removed ...": this.#deleteConnector,
+        //   the node updates it self, here we only ensure it exists, or is removed as needed
+        "Junctions created ...": this.#createJunction,
+        //   NOTE:
+        "Junctions removed ...": this.#deleteJunction
         //   the node updates it self, here we only ensure it exists, or is removed as needed
       };
       const unintegrate = this.application.integrate(this, grandCentral);
@@ -5517,22 +5633,29 @@
       scene.appendChild(rect2);
       return scene;
     }
-    #deletePanel({ item }) {
+    #deleteNode({ item }) {
       this.#renderers.get(item.id).stop();
     }
-    #createPanel({ item }) {
-      const panel = new Panel();
-      this.#renderers.set(item.id, panel);
-      panel.start({ data: item, view: this });
+    #createNode({ item }) {
+      const node = new Node3();
+      this.#renderers.set(item.id, node);
+      node.start({ data: item, view: this });
     }
-    #deleteCable({ item }) {
-      console.log("Delete Cable Issued on ", item);
+    #deleteConnector({ item }) {
       this.#renderers.get(item.id).stop();
     }
-    #createCable({ item }) {
-      const cable = new Cable();
-      this.#renderers.set(item.id, cable);
-      cable.start({ link: item, view: this });
+    #createConnector({ item }) {
+      const connector = new Link();
+      this.#renderers.set(item.id, connector);
+      connector.start({ link: item, view: this });
+    }
+    #deleteJunction({ item }) {
+      this.#renderers.get(item.id).stop();
+    }
+    #createJunction({ item }) {
+      const junction = new Junction2();
+      this.#renderers.set(item.id, junction);
+      junction.start({ junction: item, view: this });
     }
     get application() {
       return this.#application;
@@ -5631,6 +5754,9 @@
             case "Connectors":
               this.Connectors.subscribe(eventName, handlerFunction.bind(that));
               break;
+            case "Junctions":
+              this.Junctions.subscribe(eventName, handlerFunction.bind(that));
+              break;
             default:
           }
         }
@@ -5717,6 +5843,7 @@
 
   // src/usage.js
   async function usage_default(api2) {
+    const app = api2.getApplication();
     const DEBUG = 0;
     if (!DEBUG) {
       const primaryPromptText1 = api2.addNode("text/string", { string: "Hello" }, { x: 100, y: 100 });
@@ -5724,6 +5851,7 @@
       const secondaryPromptText = api2.addNode("text/string", { string: "World" }, { x: 100, y: 600 });
       const stringC = api2.addNode("text/string", { string: "Meow!" }, { x: 100, y: 800 });
       const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 300 });
+      const testJunction = api2.addJunction({ x: 50, y: 50 });
       const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
       const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
       const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
@@ -5736,12 +5864,12 @@
         const result2 = await api2.execute(midjourneyPrompt);
         console.log("usage.js RERUN api.execute said: ", result2);
       };
-      const app = api2.getApplication();
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
     } else {
       const stringA = api2.addNode("test/layout", { string1: "Hello" });
     }
+    console.log(app.Junctions.dump());
   }
 
   // src/craft.js

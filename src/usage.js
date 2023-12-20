@@ -5,6 +5,7 @@
   //                           |
   //                           v
 export default async function(api){
+  const app = api.getApplication();
   //                           |
   //                           |        .loadFile() .saveFile()
   //                           |        .addNode() ............................. type and value
@@ -22,6 +23,7 @@ export default async function(api){
   const stringC = api.addNode("text/string", { string: "Meow!" }, {x:100, y:800});
 
   const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:300});
+  const testJunction = api.addJunction({x:50, y:50});
 
   // create a flow between compoents
   const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
@@ -44,7 +46,6 @@ export default async function(api){
     const result = await api.execute(midjourneyPrompt);
     console.log('usage.js RERUN api.execute said: ', result);
   }
-  const app = api.getApplication();
   app.Connectors.observe('created', rerun)
   app.Connectors.observe('removed', rerun)
 
@@ -52,4 +53,6 @@ export default async function(api){
     const stringA = api.addNode("test/layout", { string1: "Hello" } );
   }
 
+
+  console.log( app.Junctions.dump() );
 }

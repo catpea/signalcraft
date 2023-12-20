@@ -5,8 +5,9 @@ import { v4 as uuid } from "uuid";
 
 import ReactiveObject from "../system/ReactiveObject.js";
 
-import Panel from './view/Panel.js';
-import Cable from './view/Cable.js';
+import Node from './view/Node.js';
+import Connector from './view/Connector.js';
+import Junction from './view/Junction.js';
 import Menus from './view/Menus.js';
 
 export default class View extends ReactiveObject {
@@ -32,7 +33,6 @@ export default class View extends ReactiveObject {
 		this.#name = name;
 		this.#element = element;
 		this.#application = application;
-
 
 		const props = {
 			id: uuid(),
@@ -84,17 +84,20 @@ export default class View extends ReactiveObject {
 
 
 		// setup all th einstances of nodes
-		this.application.Nodes.forEach(node => this.#createPanel(node));
-		this.application.Connectors.forEach(node => this.#createCable(node)); // reminder: Connectors contain strings with IDs of sourceNode, targetNode, sourcePort, targetPort,
+		this.application.Nodes.forEach(node => this.#createNode(node));
+		this.application.Connectors.forEach(connector => this.#createConnector(connector)); // reminder: Connectors contain strings with IDs of sourceNode, targetNode, sourcePort, targetPort,
+		this.application.Junctions.forEach(junction => this.#createJunction(junction));
 
 		// ...and keep an eye on changes
 		const grandCentral = {
 			"Setup bgColor": (v) => this.#svg.querySelector(".background").setAttributeNS(null, "fill", v),
 
-			'Nodes created ...': this.#createPanel, //   NOTE:
-			'Nodes removed ...': this.#deletePanel, //   the node updates it self, here we only ensure it exists, or is removed as needed
-			'Connectors created ...': this.#createCable, //   NOTE:
-			'Connectors removed ...': this.#deleteCable, //   the node updates it self, here we only ensure it exists, or is removed as needed
+			'Nodes created ...': this.#createNode, //   NOTE:
+			'Nodes removed ...': this.#deleteNode, //   the node updates it self, here we only ensure it exists, or is removed as needed
+			'Connectors created ...': this.#createConnector, //   NOTE:
+			'Connectors removed ...': this.#deleteConnector, //   the node updates it self, here we only ensure it exists, or is removed as needed
+			'Junctions created ...': this.#createJunction, //   NOTE:
+			'Junctions removed ...': this.#deleteJunction, //   the node updates it self, here we only ensure it exists, or is removed as needed
 
 
 		};
@@ -263,23 +266,31 @@ export default class View extends ReactiveObject {
 		return scene;
 	}
 
-	#deletePanel({ item }) {
+	#deleteNode({ item }) {
 		this.#renderers.get(item.id).stop();
 	}
-	#createPanel({ item }) {
-		const panel = new Panel();
-		this.#renderers.set(item.id, panel);
-		panel.start({ data: item, view: this });
+	#createNode({ item }) {
+		const node = new Node();
+		this.#renderers.set(item.id, node);
+		node.start({ data: item, view: this });
 	}
 
-	#deleteCable({ item }) {
-		console.log('Delete Cable Issued on ', item);
+	#deleteConnector({ item }) {
 		this.#renderers.get(item.id).stop();
 	}
-	#createCable({ item }) {
-		const cable = new Cable();
-		this.#renderers.set(item.id, cable);
-		cable.start({ link: item, view: this });
+	#createConnector({ item }) {
+		const connector = new Connector();
+		this.#renderers.set(item.id, connector);
+		connector.start({ link: item, view: this });
+	}
+
+	#deleteJunction({ item }) {
+		this.#renderers.get(item.id).stop();
+	}
+	#createJunction({ item }) {
+		const junction = new Junction();
+		this.#renderers.set(item.id, junction);
+		junction.start({ junction: item, view: this });
 	}
 
 	get application() { return this.#application; }

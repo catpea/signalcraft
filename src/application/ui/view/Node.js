@@ -3,12 +3,12 @@ import { html, svg, text, list, update } from "domek";
 
 import Base from './Base.js';
 
-import Container from "./panel/Container.js";
-import Caption from "./panel/Caption.js";
-import Pod from "./panel/Pod.js";
-import Line from "./panel/Line.js";
+import Container from "./node/Container.js";
+import Caption from "./node/Caption.js";
+import Pod from "./node/Pod.js";
+import Line from "./node/Line.js";
 
-export default class Panel extends Base {
+export default class Node extends Base {
 
   start({data, view}){
 

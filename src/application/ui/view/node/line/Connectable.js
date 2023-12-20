@@ -12,8 +12,9 @@ export class Connectable {
 	// used in stop/cleanup
 	#container;
 	#handle;
+	#geometry = {};
 
-	constructor({ container, handle, canvas, node, port, link, }) {
+	constructor({ container, handle, canvas, node, port, createConnector, createJunction }) {
 		this.#container = container;
 		this.#handle = handle;
 		this.#mouseDownHandler = (e) => {
@@ -40,38 +41,60 @@ export class Connectable {
 			// Add a scaled version of the node
 			dx = dx + (port.x * this.#scale);
 			dy = dy + (port.y * this.#scale);
+
 			// Apply Scale Transformation To Everything
 			dx = dx / this.#scale;
 			dy = dy / this.#scale;
+
+
+
 			// Final Asignment
-			const geometry = {
+			this.#geometry = {
 				// origin of th eindicator line is the port
-				x1: port.x,
-				y1: port.y,
+				x1: port.x+node.x,
+				y1: port.y+node.y,
 				// target of the indicator line is where the cursor is dragging
-				x2: dx,
-				y2: dy,
+				x2: dx+node.x,
+				y2: dy+node.y,
 			};
 			// the indicator is kept inside this class, the real line comes from the View
-			update(this.#el.indicatorLine, geometry);
+			update(this.#el.indicatorLine, this.#geometry);
 			// End
 			dx = 0;
 			dy = 0;
 		};
 		this.#mouseUpHandler = (e) => {
+
 			const isOverAnotherPort = this.#dragging && e.target && e.target.classList.contains('panel-line-port');
+			const isOverBackground = this.#dragging && e.target && e.target.classList.contains('view-scene-background');
+
 			if(isOverAnotherPort) {
 				const portAddress = e.target.dataset.portAddress;
-				const [targetNodeId, targetPortId] = portAddress.split(':');
+				const [targetType, targetNodeId, targetPortId] = portAddress.split(':');
 				const payload = {
+					targetType,
 					sourceNode: node.id,
 					sourcePort: port.id,
 					targetNode: targetNodeId,
 					targetPort: targetPortId
 				};
-
-				if(payload.sourcePort != payload.targetPort) link(payload);
+				const notTheSamePort = (payload.sourcePort != payload.targetPort);
+				const notTheSameNode = (payload.sourceNode != payload.targetNode);
+				if(notTheSamePort && notTheSameNode) createConnector(payload);
 			}
+
+			if(isOverBackground){
+					createJunction({
+						x: this.#geometry.x2,
+						y: this.#geometry.y2,
+						sourceNode: node.id,
+						sourcePort: port.id,
+					});
+
+
+			}
+
+
 			// when mouse up, the line is always removed
       if(this.#el.indicatorLine) this.#el.indicatorLine.remove();
 			this.#dragging = false;

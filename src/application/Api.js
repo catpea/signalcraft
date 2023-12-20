@@ -48,9 +48,13 @@ export default class DreamInterface {
     // Procedure Step 1: create a node of the desired type in the reactive collection
     const node = this.application.Nodes.create({type, values, properties});
     this.deselectAll();
-    this.deselectAll();
     this.select(node);
     return node;
+  }
+
+  addJunction(properties){
+    const junction = this.application.Junctions.create({properties});
+    return junction;
   }
 
   linkPorts(sourceNode, targetNode, options = {}){
