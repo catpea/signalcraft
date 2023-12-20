@@ -5109,6 +5109,62 @@
     // start
   };
 
+  // src/application/ui/view/junction/Focus.js
+  var Focus2 = class {
+    #scale;
+    // set by setter
+    // handlers
+    #mouseDownHandler;
+    #mouseUpHandler;
+    // used in stop/cleanup
+    #handle;
+    constructor({ handle, action }) {
+      this.#handle = handle;
+      this.#mouseDownHandler = (e) => {
+        action(e);
+      };
+      this.#mouseUpHandler = (e) => {
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
+  // src/application/ui/view/junction/Selectable.js
+  var Selectable3 = class {
+    #scale;
+    // set by setter
+    // handlers
+    #mouseDownHandler;
+    #mouseUpHandler;
+    // used in stop/cleanup
+    #handle;
+    constructor({ handle, action }) {
+      this.#handle = handle;
+      this.#mouseDownHandler = (e) => {
+        action(e);
+      };
+      this.#mouseUpHandler = (e) => {
+      };
+      this.#handle.addEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.addEventListener("mouseup", this.#mouseUpHandler);
+    }
+    set scale(value) {
+      this.#scale = value;
+    }
+    stop() {
+      this.#handle.removeEventListener("mousedown", this.#mouseDownHandler);
+      this.#handle.removeEventListener("mouseup", this.#mouseUpHandler);
+    }
+  };
+
   // src/application/ui/view/junction/Movable.js
   var Movable2 = class {
     #container;
@@ -5176,8 +5232,8 @@
       this.el.Group = svg.g();
       this.cleanup(junction.observe("x", (v) => update2(this.el.Group, { "transform": `translate(${v},${junction.y})` })));
       this.cleanup(junction.observe("y", (v) => update2(this.el.Group, { "transform": `translate(${junction.x},${v})` })));
-      this.el.Junction = svg.circle({ class: "panel-line-port", cx: 0, cy: 0, r: 24 });
-      this.el.OmniPort = svg.circle({ class: "panel-line-port", cx: 0, cy: 0, r: 8 });
+      this.el.Junction = svg.circle({ class: "junction-caption", cx: 0, cy: 0, r: 24 });
+      this.el.OmniPort = svg.circle({ class: "junction-port", cx: 0, cy: 0, r: 8 });
       this.el.OmniPort.dataset.portAddress = ["Junction", junction.id, junction.port("input").id].join(":");
       this.el.Group.appendChild(this.el.Junction);
       this.el.Group.appendChild(this.el.OmniPort);
@@ -5191,6 +5247,33 @@
       });
       this.cleanup(view.observe("transform", (v) => movable.scale = v.scale));
       this.cleanup(() => movable.stop());
+      const selectable = new Selectable3({
+        handle: this.el.Junction,
+        action: (e) => {
+          const selectingMultiple = Shortcuts.isSelecting(e);
+          if (selectingMultiple) {
+            Dream.toggleSelect(junction);
+          } else {
+            Dream.deselectAll();
+            Dream.toggleSelect(junction);
+          }
+        }
+      });
+      this.cleanup(() => selectable.stop());
+      this.cleanup(view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(junction.id)) {
+          this.el.Junction.classList.add("selected");
+        } else {
+          this.el.Junction.classList.remove("selected");
+        }
+      }));
+      const focus = new Focus2({
+        handle: this.el.Junction,
+        action: (e) => {
+          front(this.el.Group);
+        }
+      });
+      this.cleanup(() => focus.stop());
       view.scene.appendChild(this.el.Group);
     }
     // start
@@ -5478,6 +5561,8 @@
           if (e.target.classList.contains("panel-line-port"))
             return true;
           if (e.target.classList.contains("ant-trail"))
+            return true;
+          if (e.target.classList.contains("junction-caption"))
             return true;
         }
       });

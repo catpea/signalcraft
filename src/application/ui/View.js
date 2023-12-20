@@ -68,6 +68,7 @@ export default class View extends ReactiveObject {
 				if(e.target.classList.contains('panel-caption')) return true;
 				if(e.target.classList.contains('panel-line-port')) return true;
 				if(e.target.classList.contains('ant-trail')) return true;
+				if(e.target.classList.contains('junction-caption')) return true;
 			}
 		});
 

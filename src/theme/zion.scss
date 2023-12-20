@@ -113,3 +113,19 @@ svg.ui-view {
   stroke: $dark;
   stroke-width: 1;
 }
+
+
+.junction-caption {
+  fill: $primary;
+  stroke: $tertiary-bg;
+}
+
+.junction-caption.selected {
+  fill: $selected;
+
+}
+
+.junction-port {
+  fill: $primary;
+  stroke: $tertiary-bg;
+}

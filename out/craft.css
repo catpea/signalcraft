@@ -11408,6 +11408,17 @@ svg.ui-view {
   stroke: hsl(180, 1%, 10%);
   stroke-width: 1;
 }
+.junction-caption {
+  fill: hsl(206, 5%, 65%);
+  stroke: hsl(40, 6%, 90%);
+}
+.junction-caption.selected {
+  fill: hsl(18, 90%, 60%);
+}
+.junction-port {
+  fill: hsl(206, 5%, 65%);
+  stroke: hsl(40, 6%, 90%);
+}
 /*! Bundled license information:
 
 bootstrap/dist/css/bootstrap.min.css:
