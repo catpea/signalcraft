@@ -9,46 +9,35 @@ CTRL+Click on caption or cable will select it.
 
 ### Bug Fix
 
-
-- Omni port should only connect to left ports, never right, (it can be deleted and recreated in that case, or SHIFT+Drag can be setup)
-- Drag Connecting lines between entire Line.js not just Port, it is easier to hit the targer
-- too hard to click on caption, at certain scale make the entire node draggable
-- default action for drag should be selection manager not panning, see NodeRED
+- No bugs atm
 
 ### Urgent!
 
-- src/application/execute/Standard.js Must Recognize Juncion Objects
 - Finish Toolbox
-- Add Property Toolbox
+- Add Property Pane
 - Live Data Output Bottom Debugger
-
 - Add minimal previews to nodes (string, number color, etc...)
-- RPi Friendly Theme (zionui?)
-- Add Node Deletion and Link Cleanup
-- LOD: on scale 2+ show string preview in Line via FOreignObject
+- Drag Connecting lines between entire Line.js not just Port, it is easier to hit the target
+- default action for drag should be selection manager not panning, see NodeRED
+
 
 ### Main
-- Add A Game Like Tutorial with Achievement unlocked
-- Use OOP as the DX Interface for node creation.
-
-- Drag Cable at any point to take over XY of destination?
-
-- Node Property Editor (YAML First)
-
-- Remove Node w/t Cable Clean-up
 - Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
-- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
-
-- consider bounds padding to become a [0, 3, [0], [3]] with top right, bottom left like in CSS
-
-- Update Theme + Multiple Themes
 - Input/Output Line where both I/O ports visually align for neat programs (Line.js)
-
-- Node Alignment And Z-Order Tools (Bring To Front, Send To Back)
 - ForeignObjects in ZUI Mode
-- Add Node Search And Canvas Scroll
-
 - Give TODOM multiple code generation profiles
+- Node Property Editor (YAML First)
+- Add A Game Like Tutorial with Achievement unlocked
+
+### Unsure
+
+- LOD: on scale 2+ show string preview in Line via FOreignObject
+- Add Node Selection Manager (maybe groups, maybe lasso select with boolean math)
+- Add Node Search And Canvas Scroll
+- consider bounds padding to become a [0, 3, [0], [3]] with top right, bottom left like in CSS
+- too hard to click on caption, at certain scale make the entire node draggable?
+- Drag Cable at any point to take over XY of destination?
+- Node Alignment, Aligh Tops of Nodes (via shortcut key)
 
 ## How It Works
 
