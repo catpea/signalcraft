@@ -25,6 +25,18 @@ export default class Line extends Component {
 		//NOTE: all ports must have an address consisting of node.id:port:id, used in Cable connecting
 		this.el.Port.dataset.portAddress = [ this.data.kind, 'Node', this.parent.data.id, this.data.id].join(':');
 
+		this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
+      if(data.has(this.parent.data.id)){
+        // this.el.Panel.classList.add('selected');
+				Object.values(this.el).map(el=>el.classList.add('selected'))
+
+      }else{
+        // this.el.Panel.classList.remove('selected');
+				Object.values(this.el).map(el=>el.classList.remove('selected'))
+
+      }
+    }))
+
 		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 	}
 	render() {

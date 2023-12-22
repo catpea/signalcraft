@@ -97,6 +97,8 @@ svg.ui-view {
 }
 
 .cable-line {
+  pointer-events: none;
+  
   stroke: $gray;
   stroke-width: 1;
 }

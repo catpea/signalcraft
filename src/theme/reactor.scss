@@ -1,0 +1,134 @@
+$primary: hsl(36, 95, 58);
+$secondary: hsl(10, 92, 36);
+$selected: hsl(35, 93, 57);
+$glowing: hsl(7, 77%, 46%);
+
+$dark: rgb(2, 1, 14);
+
+$border: hsl(195, 25, 15);
+$border-selected: darken($border, 10%);
+
+$node-background: hsl(205, 33, 7);
+$node-background-active: hsl(206, 33%, 13%);
+
+svg.ui-view {
+  outline: none;
+}
+
+.view-scene {
+
+}
+
+.view-scene-background {
+  fill: hsl(207, 27, 6);
+}
+
+
+
+
+.panel-container {
+  fill: $node-background;
+  stroke: $border;
+  filter: drop-shadow(3px 6px 10px hsl(200,10%,0%));
+}
+
+.panel-container.selected {
+  fill: hsl(15, 90%, 35%);
+  stroke: hsl(38, 87, 84);
+  filter: drop-shadow(0px 0px 10px hsl(35, 80%, 55%));
+
+}
+
+.panel-caption {
+  fill: transparent;
+  stroke: transparent;
+
+}
+
+.panel-caption.selected {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.panel-caption-text {
+  fill: $primary;
+  // font-size: 1.5rem;
+  pointer-events: none;
+  user-select: none;
+}
+
+.panel-caption-text.selected {
+    fill: $primary;
+}
+.panel-pod {
+  fill: transparent;
+  // stroke: hsl(283,23%,10%);
+}
+
+.panel-line {
+  fill: transparent;
+  /* fill: hsl(283,23%,15%); */
+  /* stroke: hsl(283,23%,10%); */
+}
+
+.panel-line-text {
+  fill: gray;
+  // font-size: .75rem;
+  pointer-events: none;
+  user-select: none;
+}
+.panel-line-text.selected {
+  fill: hsl(34, 75, 87);
+}
+
+.panel-line-port {
+  fill: $primary;
+  stroke: $dark;
+  stroke-width: 0;
+}
+
+
+
+.cable-line {
+  pointer-events: none;
+  stroke: hsl(345, 74, 19);
+  stroke-width: 2;
+}
+.cable-line-zone {
+  stroke: hsl(355, 45, 10);
+  stroke-width: 16;
+}
+.cable-line-zone.selected {
+  stroke: hsl(39, 45%, 10%);
+}
+.cable-line.selected {
+  stroke: hsl(43, 76%, 49%);
+}
+.cable-line-indicator {
+  stroke: $primary;
+  stroke-width: 2;
+}
+
+
+
+
+
+.junction-caption {
+  fill: $secondary;
+  stroke: $dark;
+}
+.junction-caption.selected {
+  fill: $selected;
+  filter: drop-shadow(0px 0px 16px $glowing);
+  stroke: hsl(12, 92, 32);
+
+
+}
+.junction-port {
+  fill: $primary;
+  stroke: $dark;
+}
+.junction-port.selected {
+  stroke: hsl(34, 94, 71);
+  fill: hsl(50, 98, 71);
+}

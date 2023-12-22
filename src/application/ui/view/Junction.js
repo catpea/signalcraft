@@ -54,8 +54,10 @@ export default class Junction extends Base {
     this.cleanup( view.application.Selection.observe('changed', ({data}) => {
 			if(data.has(junction.id)){
 				this.el.Junction.classList.add('selected');
+				this.el.OmniPort.classList.add('selected');
 			}else{
 				this.el.Junction.classList.remove('selected');
+				this.el.OmniPort.classList.remove('selected');
 			}
 		}))
 

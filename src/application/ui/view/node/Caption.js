@@ -16,9 +16,9 @@ export default class Caption extends Component {
 
 		this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
 			if(data.has(this.data.id)){
-				this.el.Caption.classList.add('selected');
+				Object.values(this.el).map(el=>el.classList.add('selected'))
 			}else{
-				this.el.Caption.classList.remove('selected');
+				Object.values(this.el).map(el=>el.classList.remove('selected'))
 			}
 		}))
 

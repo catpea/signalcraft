@@ -1,6 +1,9 @@
 # signalcraft
 A tiny visual programming language.
 
+![art/fui-e.jpg](art/fui-e.jpg)
+
+
 ## Usage
 
 CTRL+Click on caption or cable will select it.
@@ -63,7 +66,7 @@ CTRL+Click on caption or cable will select it.
 - Reactivity Links everything together.
 
 ### Current State
-![art/fui-c.jpg](art/fui-d.jpg)
+![art/fui-d.jpg](art/fui-d.jpg)
 ![art/fui-c.jpg](art/fui-c.jpg)
 ![art/fui-b.jpg](art/fui-b.jpg)
 ![art/fui-a.jpg](art/fui-a.jpg)
