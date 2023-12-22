@@ -4306,8 +4306,8 @@
         id: id2 || v4_default(),
         type,
         backgroundColor: "magenta",
-        x: 999 * Math.random(),
-        y: 999 * Math.random(),
+        x: 0,
+        y: 0,
         nodeWidth: 300,
         nodeHeight: 32,
         depthLevel: 0
@@ -5451,7 +5451,12 @@
         const text2 = text(typeObject.type);
         p.appendChild(text2);
         p.addEventListener("click", () => {
-          this.view.application.Dream.addNode(typeObject.type, {}, { x: -this.view.transform.x + this.view.svg.getBoundingClientRect().width / 2, y: -this.view.transform.y + this.view.svg.getBoundingClientRect().width / 2 });
+          this.view.application.Dream.addNode(typeObject.type, {}, {
+            // x:  (0-this.view.transform.x+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale,
+            // y:  (0-this.view.transform.y+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale
+            x: (0 - this.view.transform.x) / this.view.transform.scale,
+            y: (0 - this.view.transform.y) / this.view.transform.scale
+          });
         });
       });
       const selectedNodes = html.p({ class: "border border-info rounded p-2" });
@@ -5530,6 +5535,8 @@
     start(view) {
       const navbar = new Navbar(view.name);
       navbar.setView(view);
+      const file = new Dropdown(`File`);
+      navbar.add(file);
       const toolbox = new Offcanvas(`Toolbox`, { location: "start" });
       navbar.add(toolbox);
       const propertiesPane = new Offcanvas(`Properties`, { location: "end" });
@@ -5820,27 +5827,28 @@
     // Node Instances
     Connectors;
     // Port Connections, remember it is not that are connected but the ports of a node
-    Views;
-    // Node UI
+    Junctions;
     Dream;
     // User API
+    Views;
+    // Node UI
     Selection;
     // Selection
+    Shortcuts;
     constructor() {
       super();
+      this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" });
+      this.Theme = new MyTheme(this);
       this.Archetypes = new ReactiveArray({ application: this, Item: Archetype, auto: false });
       this.Nodes = new ReactiveArray({ application: this, Item: Node2, auto: true });
       this.Connectors = new ReactiveArray({ application: this, Item: Connector, auto: true });
       this.Junctions = new ReactiveArray({ application: this, Item: Junction, auto: true });
-      this.Views = new ReactiveArray({ application: this, Item: View, auto: false });
-      this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" });
-      this.Theme = new MyTheme(this);
       this.Dream = new DreamInterface(this);
+      this.Views = new ReactiveArray({ application: this, Item: View, auto: false });
       this.Selection = new ReactiveArray({ application: this, Item: Selected });
       this.Shortcuts = {
         isDeleting: (e) => e.code == "Delete",
         isSelecting: (e) => e.ctrlKey
-        // selecting2: e=>e.ctrlKey&&shiftKey,
       };
     }
     async start() {

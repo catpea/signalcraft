@@ -19,33 +19,45 @@ export default class Brain extends ReactiveObject {
   Setup; // Application Configuration
   Theme; // Color/UI Theme
   Archetypes; // Node Library
+
   Nodes; // Node Instances
   Connectors; // Port Connections, remember it is not that are connected but the ports of a node
-  Views; // Node UI
-  Dream; // User API
+  Junctions;
 
+  Dream; // User API
+  Views; // Node UI
   Selection; // Selection
+
+  Shortcuts;
 
   constructor() {
     super();
+
+    // COnfiguration
+    this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
+    this.Theme = new UserTheme(this); // Theme Of Choice
     this.Archetypes = new ReactiveArray({application:this, Item:Archetype, auto:false }); // This is where node library resides
+
+    // Core Data
     this.Nodes = new ReactiveArray({application:this, Item:Node, auto:true }); // all nodes the user is working with
     this.Connectors = new ReactiveArray({application:this, Item:Connector, auto:true }); // all links (edges) that connect nodes
     this.Junctions = new ReactiveArray({application:this, Item:Junction, auto:true }); // all links (edges) that connect nodes
-    this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
 
-    this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
-    this.Theme = new UserTheme(this); // Theme Of Choice
+    // API
     this.Dream = new Api(this); // Pretty Dream API *FOR USER ONLY* eveything must be informative!
+
+    //UI
+    this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
 
     // Extended Concepts
     this.Selection = new ReactiveArray({application:this, Item:Selected}); // this is the screen, multiple screens are supported
+
+    // Keyboard
     this.Shortcuts = {
       isDeleting: e=>e.code=='Delete',
       isSelecting: e=>e.ctrlKey,
-      // selecting2: e=>e.ctrlKey&&shiftKey,
+    };
 
-    }
   }
 
   async start() {

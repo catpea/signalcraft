@@ -13,15 +13,20 @@ CTRL+Click on caption or cable will select it.
 
 ### Urgent!
 
+- Instead of centering nodes on add (which calls for rendering and measuring, and thus EventEmitter) allow drag and drop from the toolbox, allowing user to pick the position
+- Add File > Save
+- Add File > Load
 - Finish Toolbox
 - Add Property Pane
 - Live Data Output Bottom Debugger
 - Add minimal previews to nodes (string, number color, etc...)
 - Drag Connecting lines between entire Line.js not just Port, it is easier to hit the target
 - default action for drag should be selection manager not panning, see NodeRED
+- Prefer Api usage over manually interacting with collections: search for [A-Z][a-z]+\.create and replace with API methods
 
 
 ### Main
+- When deleting a Junction between two other junction reconnect them, investigate reconnecting of nodes as well
 - Cable Type Sensitivity - Should be type sensitive numbers, strings, objects.
 - Input/Output Line where both I/O ports visually align for neat programs (Line.js)
 - ForeignObjects in ZUI Mode
@@ -81,3 +86,14 @@ CTRL+Click on caption or cable will select it.
 ![art/fui-2.jpg](art/fui-2.jpg)
 ![art/fui-1.jpg](art/fui-1.jpg)
 ![art/fui-0.jpg](art/fui-0.jpg)
+
+
+### Notes
+
+```JavaScript
+// centering a node, it requires an even emitter trigerring "rendered" and then measuring width and height of the rendered node
+// using the calculation below as base, but then setting CX/XY (centerX, centerY) by substracting half with/height from below
+// this means that cx/cy calls for use of event emitter, good idea but too early in development atm.
+x:  (0-this.view.transform.x+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale,
+y:  (0-this.view.transform.y+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale
+```

@@ -43,10 +43,13 @@ export default class Line extends Component {
 				port: this.data,
 				createConnector: ({targetType, sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
 				createJunction: ({x,y,  sourceNode, sourcePort}) => {
+					// first create target junction
 					const junction = this.view.application.Junctions.create({properties:{ x,y }});
 					const targetNode = junction.id;
 					const targetPort = junction.port('input').id;
-					this.view.application.Connectors.create({ targetType:'Junction' ,sourceNode, sourcePort, targetNode, targetPort });
+					// now create this node to the junction
+					this.view.application.Connectors.create({ targetType:'Junction', sourceNode, sourcePort, targetNode, targetPort});
+
 				},
 			});
 			this.cleanup(this.view.observe('transform', v=>connectable.scale = v.scale));

@@ -91,8 +91,6 @@ export class Connectable {
 						sourceNode: node.id,
 						sourcePort: port.id,
 					});
-
-
 			}
 
 

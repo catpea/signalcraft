@@ -14,8 +14,12 @@ export default class Menus extends Base {
       const navbar = new Navbar(view.name);
       navbar.setView(view);
 
+      const file = new Dropdown(`File`);
+      navbar.add(file);
+
       // const dropdown = new Dropdown(`Add`);
       // navbar.add(dropdown);
+
 
       const toolbox = new Offcanvas(`Toolbox`, {location:'start'});
       navbar.add(toolbox);
