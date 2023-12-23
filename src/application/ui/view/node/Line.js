@@ -1,24 +1,39 @@
-import { svg } from "domek";
+import { svg, xhtml, html} from "domek";
 import { Connectable } from './line/Connectable.js';
 import Component from "./Component.js";
 
 export default class Line extends Component {
 	setup() {
+
+		// console.log(this, this.parent);
+		console.log(this.parent.data.values);
 		this.el.Line = svg.rect({ class: 'panel-line', ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
-		this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + (this.width * .02), y: this.y + (this.height - (this.height / 5))  }, this.data.name);
+		this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + (this.width * .03), y: this.y + (this.height - (this.height / 3))  }, this.data.name );
+		// this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + (this.width * .03), y: this.y + (this.height - (this.height / 3))  }, this.data.name + ': ' + this.parent.data.values[this.data.name]);
+
+
+		if(this.data.direction == 'input') {
+			this.el.InputBox = html.input({type:'text', class:`panel-line-input type-text`, value:this.parent.data[this.data.name]||"", style: 'width: 100%'})
+			this.el.InputBoxForeignObject = svg.foreignObject({width: this.width/2, x: this.x+this.width/2, y: this.y, height: this.height });
+			this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
+		}
+
 		this.children.map(child => child.setup())
+
+
+
 		let moveDown = (this.height / 2);
-		let moveHorizontally = 10;
+		let moveHorizontally = 4;
 		if(this.data.direction == 'input') {
 			const x = this.x - moveHorizontally;
 			const y = this.y + moveDown;
-			this.el.Port = svg.circle({ class: 'panel-line-port', cx: x, cy: y, r: 8, height: this.height / 3 });
+			this.el.Port = svg.circle({ class: 'panel-line-port', cx: x, cy: y, r: 6, height: this.height / 3 });
 			this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
 			this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		} else {
 			const x = this.x + this.width + moveHorizontally;
 			const y = this.y + moveDown;
-			this.el.Port = svg.circle({ class: 'panel-line-port', cx: x, cy: y, r: 8, height: this.height / 3 });
+			this.el.Port = svg.circle({ class: 'panel-line-port', cx: x, cy: y, r: 6, height: this.height / 3 });
 			this.data.x = x; // IMPORTANT: the geometric component sets wire coordinates here
 			this.data.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		}
@@ -39,10 +54,17 @@ export default class Line extends Component {
 
 		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 	}
+
 	render() {
 		this.group.appendChild(this.el.Line);
 		this.group.appendChild(this.el.LineText);
+
+		if(this.data.direction == 'input') this.group.appendChild(this.el.InputBoxForeignObject);
+
 		this.group.appendChild(this.el.Port);
+
+		// var bbox = this.el.LineText.getBBox();
+		// console.log(bbox);
 
 		if(this.data.direction == 'input') {
 			// this is an input port, it cannot be connectable

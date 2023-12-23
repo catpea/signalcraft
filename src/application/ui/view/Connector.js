@@ -6,7 +6,7 @@ import Base from './Base.js';
 export default class Link extends Base {
 
   start({link, view }){
-    const {Shortcuts, Dream, Nodes, Junctions, Selection, Cable} = view.application;
+    const {Shortcuts, Api, Nodes, Junctions, Selection, Cable} = view.application;
 
     console.log({link});
 
@@ -55,10 +55,10 @@ export default class Link extends Base {
       action: e=>{
         const selectingMultiple = Shortcuts.isSelecting(e);
         if(selectingMultiple){
-          Dream.toggleSelect(link);
+          Api.toggleSelect(link);
         }else{ // user simply chose a new selection
-          Dream.deselectAll();
-          Dream.toggleSelect(link);
+          Api.deselectAll();
+          Api.toggleSelect(link);
         }
       }
     });

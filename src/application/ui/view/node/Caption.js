@@ -29,7 +29,7 @@ export default class Caption extends Component {
 	}
 
 	render() {
-		const {Shortcuts, Dream} = this.view.application;
+		const {Shortcuts, Api} = this.view.application;
 
 		this.group.appendChild(this.el.Caption);
 		this.group.appendChild(this.el.CaptionText);
@@ -46,7 +46,7 @@ export default class Caption extends Component {
 		// const selectable = new Selectable({
     //      handle: this.el.Caption,
 		// 		 active: e=>Shortcuts.isSelecting(e),
-		//   	 action: ()=>Dream.toggleSelect(this.data),
+		//   	 action: ()=>Api.toggleSelect(this.data),
     // });
 
 		const selectable = new Selectable({
@@ -54,10 +54,10 @@ export default class Caption extends Component {
 			action: e=>{
 				const selectingMultiple = Shortcuts.isSelecting(e);
 				if(selectingMultiple){
-					Dream.toggleSelect(this.data);
+					Api.toggleSelect(this.data);
 				}else{ // user simply chose a new selection
-					Dream.deselectAll();
-					Dream.toggleSelect(this.data);
+					Api.deselectAll();
+					Api.toggleSelect(this.data);
 				}
 			}
 		});

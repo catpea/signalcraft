@@ -25,7 +25,7 @@ export default class Standard {
 
 			if(nothingConnected) {
 				let currentValue = localPort.value; // DEFAULT VALUE
-				if(this.node.values[localPort.name]) currentValue = this.node.values[localPort.name] // USER PRESET/OVVERIDE
+				if(this.node[localPort.name]) currentValue = this.node[localPort.name] // USER PRESET/OVVERIDE
 				response[localPort.name].push(currentValue);
 			} else {
 				for(const incomingConnector of incomingConnectors) {

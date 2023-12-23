@@ -3867,7 +3867,7 @@
     [Symbol.iterator]() {
       return this.#content.filter((item) => !item.deleted)[Symbol.iterator]();
     }
-    dump() {
+    get content() {
       return this.#content;
     }
     size() {
@@ -3997,6 +3997,9 @@
         }
       });
     }
+    get content() {
+      return this.#state;
+    }
     #notifyObservers(key, value) {
       if (Array.isArray(this.#observers[key]))
         this.#observers[key].forEach((observer) => observer(value));
@@ -4080,7 +4083,7 @@
   var v4_default = v4;
 
   // src/application/Api.js
-  var DreamInterface = class {
+  var Api = class {
     application;
     constructor(application2) {
       this.application = application2;
@@ -4115,8 +4118,8 @@
       Selection.filter((item) => item.kind == "Connector").forEach(({ id: id2 }) => Connectors.remove(id2, true));
       Selection.clear(true);
     }
-    addNode(type, values, properties) {
-      const node = this.application.Nodes.create({ type, values, properties });
+    addNode(archetype, properties) {
+      const node = this.application.Nodes.create({ type: archetype, properties });
       this.deselectAll();
       this.select(node);
       return node;
@@ -4135,6 +4138,17 @@
       const output2 = await node.Execute.run(port);
       console.log(`Output on port ${port} of node ${node.id}`, output2);
       return output2;
+    }
+    load(data) {
+      console.log("load got data", data);
+    }
+    save() {
+      const content = {
+        Nodes: this.application.Nodes.content.map((o) => o.content),
+        Connectors: this.application.Connectors.content.map((o) => o.content),
+        Junctions: this.application.Junctions.content.map((o) => o.content)
+      };
+      return content;
     }
   };
 
@@ -4182,8 +4196,8 @@
         const nothingConnected = incomingConnectors.length == 0;
         if (nothingConnected) {
           let currentValue = localPort.value;
-          if (this.node.values[localPort.name])
-            currentValue = this.node.values[localPort.name];
+          if (this.node[localPort.name])
+            currentValue = this.node[localPort.name];
           response[localPort.name].push(currentValue);
         } else {
           for (const incomingConnector of incomingConnectors) {
@@ -4284,10 +4298,9 @@
     Input;
     Output;
     Execute;
-    constructor({ id: id2, type, values, properties, application: application2 } = {}) {
+    constructor({ id: id2, type, properties, application: application2 } = {}) {
       super();
       this.#application = application2;
-      this.values = values || {};
       if (!type)
         throw new Error("You must initialize a node with a known type, type was not specified");
       this.Execute = new Standard(this);
@@ -4302,17 +4315,13 @@
       archetype.output.forEach((o) => {
         this.Output.create(o);
       });
+      const archetypeDefaults = Object.fromEntries(archetype.input.filter((o) => o.value).map((o) => [o.name, o.value]));
+      console.log({ archetypeDefaults });
       const options = {
         id: id2 || v4_default(),
-        type,
-        backgroundColor: "magenta",
-        x: 0,
-        y: 0,
-        nodeWidth: 300,
-        nodeHeight: 32,
-        depthLevel: 0
+        type
       };
-      Object.entries({ ...options, ...properties }).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      Object.entries({ ...{ x: 0, y: 0 }, ...archetypeDefaults, ...properties, ...options }).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
     }
@@ -4442,6 +4451,21 @@
       };
     }
   });
+  var xhtml = new Proxy({}, {
+    get: function(target, property) {
+      return function(properties, text2) {
+        const el = document.createElementNS("http://www.w3.org/1999/xhtml", property);
+        for (const key in properties) {
+          if (properties.hasOwnProperty(key)) {
+            el.setAttributeNS(null, kebabize(key), properties[key]);
+          }
+        }
+        if (text2)
+          el.appendChild(document.createTextNode(text2));
+        return el;
+      };
+    }
+  });
   var html = new Proxy({}, {
     get: function(target, property) {
       return function(properties, text2) {
@@ -4488,6 +4512,40 @@
     };
     document.addEventListener("keydown", listener);
     return () => document.removeEventListener("keydown", listener);
+  }
+  async function JSONWriter(data) {
+    const newHandle = await window.showSaveFilePicker({
+      suggestedName: "project.json",
+      types: [{
+        description: "JavaScript Object Notation",
+        accept: {
+          "application/json": [".json"]
+        }
+      }]
+    });
+    const writableStream = await newHandle.createWritable();
+    await writableStream.write(data);
+    await writableStream.close();
+  }
+  function JSONReader() {
+    return new Promise((resolve, reject) => {
+      const fileSelector = document.getElementById("fileSelector");
+      if (!fileSelector)
+        console.log(`this feature requires a hidden: <input type="file" id="fileSelector" multiple accept="application/json" style="display:none" />`);
+      fileSelector.addEventListener("change", handleFiles, false);
+      fileSelector.click();
+      function handleFiles() {
+        const fileList = this.files;
+        const fileReader = new FileReader();
+        fileReader.onload = function(event) {
+          console.log(event);
+          const result = JSON.parse(event.target.result);
+          console.log(result);
+          resolve(result);
+        };
+        fileReader.readAsText(fileList.item(0));
+      }
+    });
   }
 
   // src/application/ui/view/Node.js
@@ -4776,7 +4834,7 @@
       }));
     }
     render() {
-      const { Shortcuts, Dream } = this.view.application;
+      const { Shortcuts, Api: Api2 } = this.view.application;
       this.group.appendChild(this.el.Caption);
       this.group.appendChild(this.el.CaptionText);
       const movable = new Movable({
@@ -4794,10 +4852,10 @@
         action: (e) => {
           const selectingMultiple = Shortcuts.isSelecting(e);
           if (selectingMultiple) {
-            Dream.toggleSelect(this.data);
+            Api2.toggleSelect(this.data);
           } else {
-            Dream.deselectAll();
-            Dream.toggleSelect(this.data);
+            Api2.deselectAll();
+            Api2.toggleSelect(this.data);
           }
         }
       });
@@ -4932,21 +4990,27 @@
   // src/application/ui/view/node/Line.js
   var Line = class extends Component {
     setup() {
+      console.log(this.parent.data.values);
       this.el.Line = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
-      this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height / 5) }, this.data.name);
+      this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + this.width * 0.03, y: this.y + (this.height - this.height / 3) }, this.data.name);
+      if (this.data.direction == "input") {
+        this.el.InputBox = html.input({ type: "text", class: `panel-line-input type-text`, value: this.parent.data[this.data.name] || "", style: "width: 100%" });
+        this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width / 2, x: this.x + this.width / 2, y: this.y, height: this.height });
+        this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
+      }
       this.children.map((child) => child.setup());
       let moveDown = this.height / 2;
-      let moveHorizontally = 10;
+      let moveHorizontally = 4;
       if (this.data.direction == "input") {
         const x = this.x - moveHorizontally;
         const y = this.y + moveDown;
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 8, height: this.height / 3 });
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 6, height: this.height / 3 });
         this.data.x = x;
         this.data.y = y;
       } else {
         const x = this.x + this.width + moveHorizontally;
         const y = this.y + moveDown;
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 8, height: this.height / 3 });
+        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 6, height: this.height / 3 });
         this.data.x = x;
         this.data.y = y;
       }
@@ -4963,6 +5027,8 @@
     render() {
       this.group.appendChild(this.el.Line);
       this.group.appendChild(this.el.LineText);
+      if (this.data.direction == "input")
+        this.group.appendChild(this.el.InputBoxForeignObject);
       this.group.appendChild(this.el.Port);
       if (this.data.direction == "input") {
       } else {
@@ -5058,7 +5124,7 @@
   // src/application/ui/view/Connector.js
   var Link = class extends Base {
     start({ link, view }) {
-      const { Shortcuts, Dream, Nodes, Junctions, Selection, Cable } = view.application;
+      const { Shortcuts, Api: Api2, Nodes, Junctions, Selection, Cable } = view.application;
       console.log({ link });
       const sourceNode = (link.sourceType == "Junction" ? Junctions : Nodes).get(link.sourceNode);
       const targetNode = (link.targetType == "Junction" ? Junctions : Nodes).get(link.targetNode);
@@ -5103,10 +5169,10 @@
         action: (e) => {
           const selectingMultiple = Shortcuts.isSelecting(e);
           if (selectingMultiple) {
-            Dream.toggleSelect(link);
+            Api2.toggleSelect(link);
           } else {
-            Dream.deselectAll();
-            Dream.toggleSelect(link);
+            Api2.deselectAll();
+            Api2.toggleSelect(link);
           }
         }
       });
@@ -5242,7 +5308,7 @@
   // src/application/ui/view/Junction.js
   var Junction2 = class extends Base {
     start({ junction, view }) {
-      const { Shortcuts, Dream, Nodes, Selection, Cable } = view.application;
+      const { Shortcuts, Api: Api2, Nodes, Selection, Cable } = view.application;
       console.log(`view/Junction got`, junction);
       this.el.Group = svg.g();
       this.cleanup(junction.observe("x", (v) => update2(this.el.Group, { "transform": `translate(${v},${junction.y})` })));
@@ -5267,10 +5333,10 @@
         action: (e) => {
           const selectingMultiple = Shortcuts.isSelecting(e);
           if (selectingMultiple) {
-            Dream.toggleSelect(junction);
+            Api2.toggleSelect(junction);
           } else {
-            Dream.deselectAll();
-            Dream.toggleSelect(junction);
+            Api2.deselectAll();
+            Api2.toggleSelect(junction);
           }
         }
       });
@@ -5386,6 +5452,7 @@
       super(...args);
     }
     setup() {
+      const { Api: Api2 } = this.view.application;
       this.el.navItemDropdown = document.createElement("li");
       this.el.navItemDropdown.setAttribute("class", "nav-item dropdown");
       const navLinkDropdownToggle = document.createElement("a");
@@ -5400,17 +5467,25 @@
       const dropdownMenu = document.createElement("ul");
       dropdownMenu.setAttribute("class", "dropdown-menu");
       this.el.navItemDropdown.appendChild(dropdownMenu);
-      this.view.application.Archetypes.forEach((typeObject) => {
+      const data = [
+        {
+          caption: "Open File...",
+          program: async () => Api2.load(await JSONReader())
+        },
+        {
+          caption: "Save As...",
+          program: () => JSONWriter(JSON.stringify(Api2.save(), null, 2))
+        }
+      ];
+      data.forEach((menuItem) => {
         const listItem = document.createElement("li");
         dropdownMenu.appendChild(listItem);
         const dropdownItem = document.createElement("div");
         dropdownItem.setAttribute("class", "dropdown-item");
         listItem.appendChild(dropdownItem);
-        const text22 = document.createTextNode(typeObject.type);
+        const text22 = document.createTextNode(menuItem.caption);
         dropdownItem.appendChild(text22);
-        dropdownItem.addEventListener("click", () => {
-          this.view.application.Dream.addNode(typeObject.type);
-        });
+        dropdownItem.addEventListener("click", () => menuItem.program());
       });
     }
     render(container) {
@@ -5462,7 +5537,7 @@
         const text2 = text(typeObject.type);
         p.appendChild(text2);
         p.addEventListener("click", () => {
-          this.view.application.Dream.addNode(typeObject.type, {}, {
+          this.view.application.Api.addNode(typeObject.type, {}, {
             // x:  (0-this.view.transform.x+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale,
             // y:  (0-this.view.transform.y+((this.view.svg.getBoundingClientRect().width/2)))/this.view.transform.scale
             x: (0 - this.view.transform.x) / this.view.transform.scale,
@@ -5586,7 +5661,7 @@
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
-      keyboard((e) => this.#application.Shortcuts.isDeleting(e), () => this.#application.Dream.removeSelected());
+      keyboard((e) => this.#application.Shortcuts.isDeleting(e), () => this.#application.Api.removeSelected());
       this.#menus = this.#installMenus();
       this.#svg = this.#installCanvas();
       this.#scene = this.#installScene();
@@ -5839,7 +5914,7 @@
     Connectors;
     // Port Connections, remember it is not that are connected but the ports of a node
     Junctions;
-    Dream;
+    Api;
     // User API
     Views;
     // Node UI
@@ -5854,7 +5929,7 @@
       this.Nodes = new ReactiveArray({ application: this, Item: Node2, auto: true });
       this.Connectors = new ReactiveArray({ application: this, Item: Connector, auto: true });
       this.Junctions = new ReactiveArray({ application: this, Item: Junction, auto: true });
-      this.Dream = new DreamInterface(this);
+      this.Api = new Api(this);
       this.Views = new ReactiveArray({ application: this, Item: View, auto: false });
       this.Selection = new ReactiveArray({ application: this, Item: Selected });
       this.Shortcuts = {
@@ -5966,10 +6041,10 @@
       type.input.push({ name: "styles", type: "string", description: "styles" });
       type.input.push({ name: "authors", type: "string", description: "authors" });
       type.input.push({ name: "chaos", type: "string", description: "chaos" });
-      type.input.push({ name: "aspect-ratio", type: "string", description: "aspect-ratio" });
+      type.input.push({ name: "aspectRatio", type: "string", description: "aspect-ratio" });
       type.input.push({ name: "style", type: "string", description: "style" });
       type.input.push({ name: "weird", type: "string", description: "weird" });
-      type.input.push({ name: "version", type: "string", description: "version" });
+      type.input.push({ name: "version", type: "string", description: "version", value: "5.2" });
     }
   }
 
@@ -5978,11 +6053,11 @@
     const app = api2.getApplication();
     const DEBUG = 0;
     if (!DEBUG) {
-      const primaryPromptText1 = api2.addNode("text/string", { string: "Hello" }, { x: 100, y: 100 });
-      const primaryPromptText2 = api2.addNode("text/string", { string: "World" }, { x: 100, y: 300 });
-      const secondaryPromptText = api2.addNode("text/string", { string: "World" }, { x: 100, y: 600 });
-      const stringC = api2.addNode("text/string", { string: "Meow!" }, { x: 100, y: 800 });
-      const midjourneyPrompt = api2.addNode("midjourney/prompt", {}, { x: 500, y: 300 });
+      const primaryPromptText1 = api2.addNode("text/string", { string: "Hello", x: 100, y: 100 });
+      const primaryPromptText2 = api2.addNode("text/string", { string: "World", x: 100, y: 300 });
+      const secondaryPromptText = api2.addNode("text/string", { string: "World", x: 100, y: 600 });
+      const stringC = api2.addNode("text/string", { string: "Meow!", x: 100, y: 800 });
+      const midjourneyPrompt = api2.addNode("midjourney/prompt", { weird: 10, x: 500, y: 300 });
       const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
       const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
       const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
@@ -6001,7 +6076,7 @@
       const testJunction = api2.addJunction({ x: 50, y: 50 });
       const stringA = api2.addNode("test/layout", { string1: "Hello" });
     }
-    console.log(app.Junctions.dump());
+    console.log(api2.save());
   }
 
   // src/craft.js
@@ -6009,7 +6084,7 @@
   setup_default(application);
   application.Views.create({ name: "view-1", element: document.querySelector(".signalcraft-view-1") });
   application.start();
-  var api = application.Dream;
+  var api = application.Api;
   usage_default(api);
 })();
 /*! Bundled license information:

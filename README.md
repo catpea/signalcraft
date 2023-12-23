@@ -10,6 +10,15 @@ CTRL+Click on caption or cable will select it.
 
 ## TODO
 
+- give view/menu/Dropdown.js .setData() support and make it generic
+- finish load() in API
+- break up Line in preparation for more UI complexity as onmouseDown foreignObject magic is introduced
+
+- Ensure foreignObject data fields are created OnClick
+  - on mouse over indicate that the propery is editable by shifting the background color
+  - on mouse down create the foreignObject data editor, and on mouse leave (of xhtml field) destroy the edit field
+  - upon completion, ensure the value is clearly displayed where the foreignObject field was
+
 ### Bug Fix
 
 - No bugs atm
@@ -36,6 +45,7 @@ CTRL+Click on caption or cable will select it.
 - Give TODOM multiple code generation profiles
 - Node Property Editor (YAML First)
 - Add A Game Like Tutorial with Achievement unlocked
+- documentaion must state that use cannot create id and type named fields on a node as those are reserved
 
 ### Unsure
 

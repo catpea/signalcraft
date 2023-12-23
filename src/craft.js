@@ -18,7 +18,7 @@ application.Views.create({ name:'view-1', element: document.querySelector('.sign
 application.start();
 
 // we hide eveything from the user now
-const api = application.Dream;
+const api = application.Api;
 
 // and simply give them the dream
 usage(api);

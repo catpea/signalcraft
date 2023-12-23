@@ -46,7 +46,7 @@ export default class View extends ReactiveObject {
 
 	start() {
 
-		keyboard( e=>this.#application.Shortcuts.isDeleting(e), ()=>this.#application.Dream.removeSelected() )
+		keyboard( e=>this.#application.Shortcuts.isDeleting(e), ()=>this.#application.Api.removeSelected() )
 
 		// this.#unsubscribe.push( );
 

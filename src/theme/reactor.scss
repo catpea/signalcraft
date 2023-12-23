@@ -1,4 +1,4 @@
-$primary: hsl(36, 95, 58);
+$primary: #e66f10;
 $secondary: hsl(10, 92, 36);
 $selected: hsl(35, 93, 57);
 $glowing: hsl(7, 77%, 46%);
@@ -8,8 +8,7 @@ $dark: rgb(2, 1, 14);
 $border: hsl(195, 25, 15);
 $border-selected: darken($border, 10%);
 
-$node-background: hsl(205, 33, 7);
-$node-background-active: hsl(206, 33%, 13%);
+
 
 svg.ui-view {
   outline: none;
@@ -27,15 +26,18 @@ svg.ui-view {
 
 
 .panel-container {
-  fill: $node-background;
+  fill: hsl(205, 33, 7);
   stroke: $border;
   filter: drop-shadow(3px 6px 10px hsl(200,10%,0%));
 }
 
 .panel-container.selected {
-  fill: hsl(15, 90%, 35%);
-  stroke: hsl(38, 87, 84);
-  filter: drop-shadow(0px 0px 10px hsl(35, 80%, 55%));
+  fill: #6a2600;
+  // stroke-width: 5;
+
+
+  stroke: #a17d24;
+  filter: drop-shadow(0px 0px 30px #7e0000);
 
 }
 
@@ -77,14 +79,35 @@ svg.ui-view {
   pointer-events: none;
   user-select: none;
 }
+
+.panel-line-input {
+  background-color: transparent;
+}
+
+.panel-line-input.type-text {
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: dotted;
+  outline: none;
+}
+
 .panel-line-text.selected {
-  fill: hsl(34, 75, 87);
+  fill: hsl(40, 53%, 52%);
 }
 
 .panel-line-port {
   fill: $primary;
   stroke: $dark;
   stroke-width: 0;
+}
+
+.panel-line-port.selected {
+  fill: #ffbf00;
+  stroke:  #cd7308;
+  stroke-width: 2;
+  filter: drop-shadow(0px 0px 5px  rgb(237, 221, 13));
+
 }
 
 

@@ -18,6 +18,10 @@ export default class ReactiveObject {
       });
   }
 
+  get content(){
+    return this.#state;
+  }
+
   #notifyObservers(key, value) {
       if (Array.isArray(this.#observers[key]))
           this.#observers[key].forEach(observer => observer(value));

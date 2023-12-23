@@ -18,7 +18,7 @@ export default class ReactiveArray {
      return this.#content.filter((item) => !item.deleted)[Symbol.iterator]();
   }
 
-  dump() {
+  get content() {
      return this.#content;
   }
 

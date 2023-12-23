@@ -11,7 +11,7 @@ import { Movable } from './junction/Movable.js';
 export default class Junction extends Base {
 
   start({junction, view }){
-    const {Shortcuts, Dream, Nodes, Selection, Cable} = view.application;
+    const {Shortcuts, Api, Nodes, Selection, Cable} = view.application;
 
 
     console.log(`view/Junction got`, junction);
@@ -43,10 +43,10 @@ export default class Junction extends Base {
       action: e=>{
         const selectingMultiple = Shortcuts.isSelecting(e);
         if(selectingMultiple){
-          Dream.toggleSelect(junction);
+          Api.toggleSelect(junction);
         }else{ // user simply chose a new selection
-          Dream.deselectAll();
-          Dream.toggleSelect(junction);
+          Api.deselectAll();
+          Api.toggleSelect(junction);
         }
       }
     });

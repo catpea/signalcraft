@@ -11364,9 +11364,9 @@ svg.ui-view {
   filter: drop-shadow(3px 6px 10px hsl(200, 10%, 0%));
 }
 .panel-container.selected {
-  fill: hsl(15, 90%, 35%);
-  stroke: hsl(38, 87%, 84%);
-  filter: drop-shadow(0px 0px 10px hsl(35, 80%, 55%));
+  fill: #6a2600;
+  stroke: #a17d24;
+  filter: drop-shadow(0px 0px 30px #7e0000);
 }
 .panel-caption {
   fill: transparent;
@@ -11377,12 +11377,12 @@ svg.ui-view {
   stroke: transparent;
 }
 .panel-caption-text {
-  fill: hsl(36, 95%, 58%);
+  fill: #e66f10;
   pointer-events: none;
   user-select: none;
 }
 .panel-caption-text.selected {
-  fill: hsl(36, 95%, 58%);
+  fill: #e66f10;
 }
 .panel-pod {
   fill: transparent;
@@ -11395,13 +11395,29 @@ svg.ui-view {
   pointer-events: none;
   user-select: none;
 }
+.panel-line-input {
+  background-color: transparent;
+}
+.panel-line-input.type-text {
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: dotted;
+  outline: none;
+}
 .panel-line-text.selected {
-  fill: hsl(34, 75%, 87%);
+  fill: hsl(40, 53%, 52%);
 }
 .panel-line-port {
-  fill: hsl(36, 95%, 58%);
+  fill: #e66f10;
   stroke: rgb(2, 1, 14);
   stroke-width: 0;
+}
+.panel-line-port.selected {
+  fill: #ffbf00;
+  stroke: #cd7308;
+  stroke-width: 2;
+  filter: drop-shadow(0px 0px 5px rgb(237, 221, 13));
 }
 .cable-line {
   pointer-events: none;
@@ -11419,7 +11435,7 @@ svg.ui-view {
   stroke: hsl(43, 76%, 49%);
 }
 .cable-line-indicator {
-  stroke: hsl(36, 95%, 58%);
+  stroke: #e66f10;
   stroke-width: 2;
 }
 .junction-caption {
@@ -11432,7 +11448,7 @@ svg.ui-view {
   stroke: hsl(12, 92%, 32%);
 }
 .junction-port {
-  fill: hsl(36, 95%, 58%);
+  fill: #e66f10;
   stroke: rgb(2, 1, 14);
 }
 .junction-port.selected {

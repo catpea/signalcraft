@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 
-export default class DreamInterface {
+export default class Api {
 
   application;
 
@@ -50,9 +50,11 @@ export default class DreamInterface {
     Selection.clear(true);
   }
 
-  addNode(type, values, properties){
+  addNode(archetype, properties){
     // Procedure Step 1: create a node of the desired type in the reactive collection
-    const node = this.application.Nodes.create({type, values, properties});
+
+    const node = this.application.Nodes.create({type: archetype, properties});
+
     this.deselectAll();
     this.select(node);
     return node;
@@ -75,5 +77,29 @@ export default class DreamInterface {
     console.log(`Output on port ${port} of node ${node.id}`, output)
     return output;
   }
+
+
+
+
+
+
+
+
+
+  load(data){
+    console.log('load got data', data);
+  }
+
+  save(){
+    const content = {
+      Nodes: this.application.Nodes.content.map(o=>o.content),
+      Connectors: this.application.Connectors.content.map(o=>o.content),
+      Junctions: this.application.Junctions.content.map(o=>o.content),
+    }
+    return content;
+  }
+
+
+
 
 }

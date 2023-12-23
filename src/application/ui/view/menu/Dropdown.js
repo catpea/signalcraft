@@ -1,11 +1,17 @@
 import Component from "./Component.js";
 
+import { JSONReader, JSONWriter } from "domek";
+
+
 export default class Dropdown extends Component {
 
 	constructor(...args) {
 		super(...args);
 	}
 	setup() {
+
+		const {Api} = this.view.application;
+
 
 
 		this.el.navItemDropdown = document.createElement('li');
@@ -29,8 +35,21 @@ export default class Dropdown extends Component {
 
 
 
-		this.view.application.Archetypes.forEach(typeObject=>{
 
+
+		const data = [
+			{
+				caption: 'Open File...',
+				program: async ()=>Api.load(await JSONReader()),
+			},
+			{
+				caption: 'Save As...',
+				program: ()=>JSONWriter(JSON.stringify(Api.save(), null, 2)),
+			},
+		];
+
+
+		data.forEach(menuItem=>{
 
       const listItem = document.createElement('li');
   		dropdownMenu.appendChild(listItem);
@@ -39,15 +58,36 @@ export default class Dropdown extends Component {
   		dropdownItem.setAttribute('class', 'dropdown-item');
   		listItem.appendChild(dropdownItem);
 
-  		const text2 = document.createTextNode(typeObject.type);
+  		const text2 = document.createTextNode(menuItem.caption);
   		dropdownItem.appendChild(text2);
 
-      dropdownItem.addEventListener('click', ()=>{
-		    this.view.application.Dream.addNode(typeObject.type);
-		  });
-
+      dropdownItem.addEventListener('click', ()=>menuItem.program());
 
 		})
+
+		// this.view.application.Archetypes.forEach(typeObject=>{
+		//
+		//
+    //   const listItem = document.createElement('li');
+  	// 	dropdownMenu.appendChild(listItem);
+		//
+  	// 	const dropdownItem = document.createElement('div');
+  	// 	dropdownItem.setAttribute('class', 'dropdown-item');
+  	// 	listItem.appendChild(dropdownItem);
+		//
+  	// 	const text2 = document.createTextNode(typeObject.type);
+  	// 	dropdownItem.appendChild(text2);
+		//
+    //   dropdownItem.addEventListener('click', ()=>{
+		//     this.view.application.Api.addNode(typeObject.type);
+		//   });
+		//
+		//
+		// })
+
+
+
+
 	}
 	render(container) {
 		container.appendChild(this.el.navItemDropdown);

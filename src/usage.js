@@ -1,5 +1,5 @@
 // Hello user, you are provided a simple api object
-// see src/dream/DreamInterface.js for functions - this is all you need to know.
+// see src/dream/Api.js for functions - this is all you need to know.
 
   //                  use the api object, just the api object
   //                           |
@@ -16,13 +16,13 @@ export default async function(api){
   const DEBUG = 0;
   if(!DEBUG){
   // define your components
-  const primaryPromptText1 = api.addNode("text/string", { string: "Hello" }, {x:100, y:100});
-  const primaryPromptText2 = api.addNode("text/string", { string: "World" }, {x:100, y:300});
-  const secondaryPromptText = api.addNode("text/string", { string: "World" }, {x:100, y:600});
+  const primaryPromptText1 = api.addNode("text/string", {string: "Hello", x:100, y:100});
+  const primaryPromptText2 = api.addNode("text/string", {string: "World", x:100, y:300});
+  const secondaryPromptText = api.addNode("text/string", {string: "World", x:100, y:600});
 
-  const stringC = api.addNode("text/string", { string: "Meow!" }, {x:100, y:800});
+  const stringC = api.addNode("text/string", {string: "Meow!", x:100, y:800});
 
-  const midjourneyPrompt = api.addNode("midjourney/prompt", {}, {x:500, y:300});
+  const midjourneyPrompt = api.addNode("midjourney/prompt", {weird: 10, x:500, y:300});
 
   // create a flow between compoents
   const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
@@ -54,5 +54,5 @@ export default async function(api){
   }
 
 
-  console.log( app.Junctions.dump() );
+  console.log( api.save() );
 }

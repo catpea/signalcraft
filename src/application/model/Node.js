@@ -20,10 +20,9 @@ export default class Node extends ReactiveObject {
   Output;
   Execute;
 
-  constructor({id, type, values, properties, application}={}){
+  constructor({id, type, properties, application}={}){
     super();
     this.#application = application;
-    this.values = values || {};
 
     if(!type) throw new Error('You must initialize a node with a known type, type was not specified');
 
@@ -35,21 +34,19 @@ export default class Node extends ReactiveObject {
     //NOTE: archetype is not a reactive object, same for archetype's .input and .reply
     const archetype = application.Archetypes.find(o=>o.type==type);
     if(!archetype) throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
+
     archetype.input.forEach(o=>{ this.Input.create(o) })
     archetype.output.forEach(o=>{ this.Output.create(o) })
-    const options = {
 
+    const archetypeDefaults = Object.fromEntries( archetype.input.filter(o=>o.value).map(o=>[o.name, o.value]) ); // Convert {name:*, value:*},{},{}... to an object
+    console.log({archetypeDefaults});
+
+    const options = {
       id: id||uuid(),
       type,
-      backgroundColor: 'magenta',
-      x: 0,
-      y: 0,
-      nodeWidth: 300,
-      nodeHeight: 32,
-      depthLevel: 0,
     };
 
-    Object.entries({...options, ...properties}).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    Object.entries({...{x:0, y:0}, ...archetypeDefaults, ...properties, ...options}).forEach(([key, val]) => this.defineReactiveProperty(key, val));
 
   }
 

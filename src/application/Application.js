@@ -24,7 +24,7 @@ export default class Brain extends ReactiveObject {
   Connectors; // Port Connections, remember it is not that are connected but the ports of a node
   Junctions;
 
-  Dream; // User API
+  Api; // User API
   Views; // Node UI
   Selection; // Selection
 
@@ -44,7 +44,7 @@ export default class Brain extends ReactiveObject {
     this.Junctions = new ReactiveArray({application:this, Item:Junction, auto:true }); // all links (edges) that connect nodes
 
     // API
-    this.Dream = new Api(this); // Pretty Dream API *FOR USER ONLY* eveything must be informative!
+    this.Api = new Api(this); // Pretty Api API *FOR USER ONLY* eveything must be informative!
 
     //UI
     this.Views = new ReactiveArray({application:this, Item:View, auto:false}); // this is the screen, multiple screens are supported
