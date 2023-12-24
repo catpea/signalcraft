@@ -19,6 +19,7 @@ export default class View extends ReactiveObject {
 
 	#element;
 	#svg;
+	#defs;
 	#scene;
 	#menus;
 	#panzoom;
@@ -64,6 +65,10 @@ export default class View extends ReactiveObject {
 			initialX: 0,
 			initialY: 0,
 			// initialZoom: .5,
+			filterKey: function(/* e, dx, dy, dz */) {
+				 // don't let panzoom handle this event:
+				 return true;
+			},
 			beforeMouseDown: function(e) {
 				// console.log( e.target );
 				if(e.target.classList.contains('panel-caption')) return true;
@@ -125,7 +130,8 @@ export default class View extends ReactiveObject {
 
 		this.#element.appendChild(svg);
 
-		const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+		this.#defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+		svg.appendChild(this.#defs);
 
 		// NOTE: available gradients get installed here!
 
@@ -176,8 +182,7 @@ export default class View extends ReactiveObject {
 						stop.setAttributeNS(null, "stop-color", color);
 						lineargradient.appendChild(stop);
 					}
-					defs.appendChild(lineargradient);
-					svg.appendChild(defs);
+					this.#defs.appendChild(lineargradient);
 				}
 			}
 		}
@@ -195,7 +200,7 @@ export default class View extends ReactiveObject {
 
 		lineargradient.appendChild(stop);
 		lineargradient.appendChild(stop2);
-		defs.appendChild(lineargradient);
+		this.#defs.appendChild(lineargradient);
 
 
 
@@ -210,7 +215,7 @@ export default class View extends ReactiveObject {
 			fedropshadow.setAttribute('dy', '1');
 			fedropshadow.setAttribute('stdDeviation', '32');
 			filter.appendChild(fedropshadow);
-			defs.appendChild(filter);
+			this.#defs.appendChild(filter);
 		}
 
 		{
@@ -222,7 +227,7 @@ export default class View extends ReactiveObject {
 			fedropshadow.setAttribute('dy', '1');
 			fedropshadow.setAttribute('stdDeviation', '5');
 			filter.appendChild(fedropshadow);
-			defs.appendChild(filter);
+			this.#defs.appendChild(filter);
 		}
 
 		{
@@ -236,9 +241,9 @@ export default class View extends ReactiveObject {
 			fedropshadow.setAttribute('dy', '.4');
 			fedropshadow.setAttribute('stdDeviation', '.5');
 			filter.appendChild(fedropshadow);
-			defs.appendChild(filter);
+			this.#defs.appendChild(filter);
 		}
-		svg.appendChild(defs);
+
 		return svg;
 	}
 
@@ -306,6 +311,7 @@ export default class View extends ReactiveObject {
 	get element() { return this.#element; }
 	get svg() { return this.#svg; }
 	get scene() { return this.#scene; }
+	get defs() { return this.#defs; }
 	get theme() { return this.#theme; }
 	get name() { return this.#name; }
 

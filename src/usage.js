@@ -49,8 +49,8 @@ export default async function(api){
   app.Connectors.observe('removed', rerun)
 
   }else{
-    const testJunction = api.addJunction({x:50, y:50});
-    const stringA = api.addNode("test/layout", { string1: "Hello" } );
+    // const testJunction = api.addJunction({x:50, y:50});
+    const stringA = api.addNode("text/string", { string: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" } );
   }
 
 

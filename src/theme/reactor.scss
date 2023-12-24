@@ -80,6 +80,7 @@ svg.ui-view {
 
 .panel-editor {
   fill: transparent;
+  // stroke: red;
 }
 
 .editor-divider { // litte underline/horizontal rule
@@ -99,7 +100,7 @@ svg.ui-view {
 
 
 .editor-value {
-  fill: white;
+  fill: hsl(188, 20%, 53%);
   pointer-events: none;
   user-select: none;
 }

@@ -1,5 +1,4 @@
 import { svg, html, mouse, click, update, text } from "domek";
-import { v4 as uuid } from "uuid";
 
 import Component from "./Component.js";
 
@@ -7,50 +6,50 @@ export default class Editor extends Component {
 
   setup(){
 
-    this.el.Editor = svg.rect({class: 'panel-editor', width: this.width, x: this.x, y: this.y, height: this.height });
+    // this.el.Editor = svg.rect({ class: 'panel-editor', ry: this.radius, width: this.width, x:this.x, y:this.y, height: this.height});
+    this.el.Editor = svg.rect({class: 'panel-editor', width: this.width/2, x: this.x+this.width/2, y: this.y, height: this.height });
+
+    this.el.EditorZone = svg.rect({class: 'editor-zone', width: this.width, x: this.x, y: this.y, height: this.height, rx:8 });
+    this.el.EditorLine = svg.line({class: 'editor-divider',
+      width: this.width/2,
+      height: this.height,
+      x1: this.x,
+      y1: this.y+this.height,
+      x2: this.x+this.width,
+      y2: this.y+this.height,
+    });
 
     this.el.valueText = text("");
     this.el.EditorValue = svg.text({
       class: `editor-value`,
-      'dominant-baseline':'middle',
-      // 'text-anchor':'middle',
-      x: this.x ,
-      y: this.y+(this.height/2), // + (this.height - (this.height / 3)),
+      textAnchor: 'end',
+
+      x: this.width ,
+      y: this.y + (this.height - (this.height / 3)),
       width: this.width,
-      'clip-path':`path('M 0 0 H ${this.width} V ${this.height} H 0 V 0')`,
     } );
     this.el.EditorValue.appendChild(this.el.valueText);
-    this.cleanup(this.data.node.observe(this.data.port.name, v=>this.el.valueText.nodeValue = `${this.data.port.name}: ${v}` ));
+    this.cleanup(this.data.node.observe(this.data.port.name, v=>this.el.valueText.nodeValue = v?(v+"").substring(0,10):null ));
+
 
     // ZUI
     this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.EditorValue.style.scale = 1/scale ) );
-    this.cleanup( this.view.observe('transform',({x,y,scale})=>{
-
-      if(scale>1){
-        update(this.el.EditorValue, {
-          x: this.x*scale,
-          y: (this.y+this.height/2)*scale, //(this.y + (this.height - (this.height / 3)))*scale,
-          width: this.width*scale,
-          'clip-path':`path('M 0 0 H ${this.width*scale} V ${this.height*scale} H 0 V 0')`,
-        });
-      }
+    this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:update(this.el.EditorValue, {
+      x: (this.width )*scale,
+      y: (this.y + (this.height - (this.height / 3)))*scale,
+      width: (this.width)*scale,
+    } ) ));
 
 
-    }));
+    const hiddenables = [this.parent.el.Port, this.parent.el.PortCaption, this.el.EditorValue, this.el.EditorZone, this.el.EditorLine ];
 
+    this.cleanup(mouse(this.el.EditorZone, ()=>this.el.EditorZone.classList.add('active'), ()=>this.el.EditorZone.classList.remove('active')  ));
 
-
-    //INPUT CONTROL CANDIDATE
-    const hiddenables = [this.parent.el.Port,  this.el.EditorValue,   ];
-
-    this.cleanup(mouse(this.el.Editor, ()=>this.el.Editor.classList.add('active'), ()=>this.el.Editor.classList.remove('active')  ));
-
-    this.cleanup(click(this.el.Editor, ()=>{
+    this.cleanup(click(this.el.EditorZone, ()=>{
       console.log('Installing Editor');
       hiddenables.map(o=>o.style.display = 'none');
       this.el.InputBoxForeignObject = svg.foreignObject({width: this.width, x: this.x, y: this.y, height: this.height });
-
-      this.el.InputBox = html.textarea({type:'text', class:`editor-control type-text`, style: 'width: 100%; height: 100%; resize:none;'}, this.data.node[this.data.port.name]||"")
+      this.el.InputBox = html.input({type:'text', class:`editor-control type-text`, value:this.data.node[this.data.port.name]||"", style: 'width: 100%; height: 100%;'})
 
       // ZUI
       this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.InputBoxForeignObject.style.scale = 1/scale ) );
@@ -78,11 +77,9 @@ export default class Editor extends Component {
 
   render(){
     this.group.appendChild( this.el.Editor );
-    // this.group.appendChild( this.el.ClipPath );
-    // this.group.appendChild( this.el.EditorLine );
+    this.group.appendChild( this.el.EditorLine );
     this.group.appendChild( this.el.EditorValue );
-    // this.group.appendChild( this.el.EditorZone );
-    if(this.el.ClipPathRectangle1) this.group.appendChild( this.el.ClipPathRectangle1 );
+    this.group.appendChild( this.el.EditorZone );
 
     // if(this.data.port.direction == 'input') this.group.appendChild(this.el.InputBoxForeignObject);
 

@@ -4436,13 +4436,20 @@
 
   // modules/domek/index.js
   var kebabize = (str) => str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase());
+  function svgProperties(key) {
+    if (["clipPathUnits"].includes(key)) {
+      return key;
+    } else {
+      return kebabize(key);
+    }
+  }
   var svg = new Proxy({}, {
     get: function(target, property) {
       return function(properties, text2) {
         const el = document.createElementNS("http://www.w3.org/2000/svg", property);
         for (const key in properties) {
           if (properties.hasOwnProperty(key)) {
-            el.setAttributeNS(null, kebabize(key), properties[key]);
+            el.setAttributeNS(null, svgProperties(key), properties[key]);
           }
         }
         if (text2)
@@ -4599,6 +4606,7 @@
     root = null;
     // reference to root
     parent = null;
+    behavior = {};
     bounds = {
       x: 0,
       y: 0,
@@ -4676,6 +4684,10 @@
       if (Object.values(data).filter((item) => typeof item == "string").filter((item) => !item.endsWith("%")).length)
         throw new Error("String without percent is not supported.");
       Object.assign(this.bounds, data);
+      return this;
+    }
+    setBehavior(data) {
+      Object.assign(this.behavior, data);
       return this;
     }
     cleanup(...arg) {
@@ -5032,6 +5044,9 @@
 
   // src/application/ui/view/node/Port.js
   var Port = class extends Component {
+    behavior = {
+      showCaption: true
+    };
     setup() {
       let moveDown = this.height / 2;
       let moveHorizontally = 4;
@@ -5068,7 +5083,8 @@
       this.children.map((child) => child.setup());
     }
     render() {
-      this.group.appendChild(this.el.PortCaption);
+      if (this.behavior.showCaption)
+        this.group.appendChild(this.el.PortCaption);
       this.group.appendChild(this.el.Port);
       if (this.data.direction != "input") {
         const connectable = new Connectable({
@@ -5099,40 +5115,39 @@
   // src/application/ui/view/node/Editor.js
   var Editor = class extends Component {
     setup() {
-      this.el.Editor = svg.rect({ class: "panel-editor", width: this.width / 2, x: this.x + this.width / 2, y: this.y, height: this.height });
-      this.el.EditorZone = svg.rect({ class: "editor-zone", width: this.width, x: this.x, y: this.y, height: this.height, rx: 8 });
-      this.el.EditorLine = svg.line({
-        class: "editor-divider",
-        width: this.width / 2,
-        height: this.height,
-        x1: this.x,
-        y1: this.y + this.height,
-        x2: this.x + this.width,
-        y2: this.y + this.height
-      });
+      this.el.Editor = svg.rect({ class: "panel-editor", width: this.width, x: this.x, y: this.y, height: this.height });
       this.el.valueText = text("");
       this.el.EditorValue = svg.text({
         class: `editor-value`,
-        textAnchor: "end",
-        x: this.width,
-        y: this.y + (this.height - this.height / 3),
-        width: this.width
+        "dominant-baseline": "middle",
+        // 'text-anchor':'middle',
+        x: this.x,
+        y: this.y + this.height / 2,
+        // + (this.height - (this.height / 3)),
+        width: this.width,
+        "clip-path": `path('M 0 0 H ${this.width} V ${this.height} H 0 V 0')`
       });
       this.el.EditorValue.appendChild(this.el.valueText);
-      this.cleanup(this.data.node.observe(this.data.port.name, (v) => this.el.valueText.nodeValue = v ? (v + "").substring(0, 10) : null));
+      this.cleanup(this.data.node.observe(this.data.port.name, (v) => this.el.valueText.nodeValue = `${this.data.port.name}: ${v}`));
       this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.EditorValue.style.scale = 1 / scale));
-      this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : update2(this.el.EditorValue, {
-        x: this.width * scale,
-        y: (this.y + (this.height - this.height / 3)) * scale,
-        width: this.width * scale
-      })));
-      const hiddenables = [this.parent.el.Port, this.parent.el.PortCaption, this.el.EditorValue, this.el.EditorZone, this.el.EditorLine];
-      this.cleanup(mouse(this.el.EditorZone, () => this.el.EditorZone.classList.add("active"), () => this.el.EditorZone.classList.remove("active")));
-      this.cleanup(click(this.el.EditorZone, () => {
+      this.cleanup(this.view.observe("transform", ({ x, y, scale }) => {
+        if (scale > 1) {
+          update2(this.el.EditorValue, {
+            x: this.x * scale,
+            y: (this.y + this.height / 2) * scale,
+            //(this.y + (this.height - (this.height / 3)))*scale,
+            width: this.width * scale,
+            "clip-path": `path('M 0 0 H ${this.width * scale} V ${this.height * scale} H 0 V 0')`
+          });
+        }
+      }));
+      const hiddenables = [this.parent.el.Port, this.el.EditorValue];
+      this.cleanup(mouse(this.el.Editor, () => this.el.Editor.classList.add("active"), () => this.el.Editor.classList.remove("active")));
+      this.cleanup(click(this.el.Editor, () => {
         console.log("Installing Editor");
         hiddenables.map((o) => o.style.display = "none");
         this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width, x: this.x, y: this.y, height: this.height });
-        this.el.InputBox = html.input({ type: "text", class: `editor-control type-text`, value: this.data.node[this.data.port.name] || "", style: "width: 100%; height: 100%;" });
+        this.el.InputBox = html.textarea({ type: "text", class: `editor-control type-text`, style: "width: 100%; height: 100%; resize:none;" }, this.data.node[this.data.port.name] || "");
         this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.InputBoxForeignObject.style.scale = 1 / scale));
         this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : update2(this.el.InputBoxForeignObject, { width: this.width * scale, x: this.x * scale, y: this.y * scale, height: this.height * scale })));
         this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
@@ -5150,9 +5165,9 @@
     }
     render() {
       this.group.appendChild(this.el.Editor);
-      this.group.appendChild(this.el.EditorLine);
       this.group.appendChild(this.el.EditorValue);
-      this.group.appendChild(this.el.EditorZone);
+      if (this.el.ClipPathRectangle1)
+        this.group.appendChild(this.el.ClipPathRectangle1);
       this.children.map((child) => child.render());
     }
     update() {
@@ -5193,7 +5208,8 @@
         row.setData(portObject);
         inputPod.add(row);
         const port = new Port(`port{index}`);
-        port.setBounds({ space: 4, radius: 5 });
+        port.setBehavior({ showCaption: false });
+        port.setBounds({ space: 4, radius: 5, padding: 3 });
         port.setData({ node: data, port: portObject });
         row.add(port);
         const editor = new Editor(`port{index}`);
@@ -5757,6 +5773,7 @@
     #theme = "signalcraft-magenta-theme";
     #element;
     #svg;
+    #defs;
     #scene;
     #menus;
     #panzoom;
@@ -5788,6 +5805,9 @@
         initialX: 0,
         initialY: 0,
         // initialZoom: .5,
+        filterKey: function() {
+          return true;
+        },
         beforeMouseDown: function(e) {
           if (e.target.classList.contains("panel-caption"))
             return true;
@@ -5839,7 +5859,8 @@
       svg2.setAttributeNS(null, "width", "100%");
       svg2.setAttributeNS(null, "height", "1000");
       this.#element.appendChild(svg2);
-      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      this.#defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      svg2.appendChild(this.#defs);
       const gradientSpecification = {
         linearGradient: {
           background: {
@@ -5883,8 +5904,7 @@
               stop3.setAttributeNS(null, "stop-color", color);
               lineargradient2.appendChild(stop3);
             }
-            defs.appendChild(lineargradient2);
-            svg2.appendChild(defs);
+            this.#defs.appendChild(lineargradient2);
           }
         }
       }
@@ -5898,7 +5918,7 @@
       stop2.setAttributeNS(null, "stop-color", "#1c293b");
       lineargradient.appendChild(stop);
       lineargradient.appendChild(stop2);
-      defs.appendChild(lineargradient);
+      this.#defs.appendChild(lineargradient);
       {
         const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
         filter.setAttribute("id", "shadow-primary");
@@ -5908,7 +5928,7 @@
         fedropshadow.setAttribute("dy", "1");
         fedropshadow.setAttribute("stdDeviation", "32");
         filter.appendChild(fedropshadow);
-        defs.appendChild(filter);
+        this.#defs.appendChild(filter);
       }
       {
         const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
@@ -5919,7 +5939,7 @@
         fedropshadow.setAttribute("dy", "1");
         fedropshadow.setAttribute("stdDeviation", "5");
         filter.appendChild(fedropshadow);
-        defs.appendChild(filter);
+        this.#defs.appendChild(filter);
       }
       {
         const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
@@ -5931,9 +5951,8 @@
         fedropshadow.setAttribute("dy", ".4");
         fedropshadow.setAttribute("stdDeviation", ".5");
         filter.appendChild(fedropshadow);
-        defs.appendChild(filter);
+        this.#defs.appendChild(filter);
       }
-      svg2.appendChild(defs);
       return svg2;
     }
     #installMenus() {
@@ -5994,6 +6013,9 @@
     }
     get scene() {
       return this.#scene;
+    }
+    get defs() {
+      return this.#defs;
     }
     get theme() {
       return this.#theme;
@@ -6190,8 +6212,7 @@
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
     } else {
-      const testJunction = api2.addJunction({ x: 50, y: 50 });
-      const stringA = api2.addNode("test/layout", { string1: "Hello" });
+      const stringA = api2.addNode("text/string", { string: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
     }
     console.log(api2.save());
   }

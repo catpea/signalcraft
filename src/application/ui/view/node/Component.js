@@ -15,6 +15,7 @@ export default class Component {
   root = null; // reference to root
   parent = null;
 
+	behavior = {};
 	bounds = {
 		x: 0,
 		y: 0,
@@ -123,6 +124,11 @@ export default class Component {
 	setBounds(data) {
     if(Object.values(data).filter(item=>typeof item == 'string').filter(item=>!item.endsWith('%')).length) throw new Error('String without percent is not supported.')
     Object.assign(this.bounds, data);
+    return this;
+	}
+
+	setBehavior(data) {
+    Object.assign(this.behavior, data);
     return this;
 	}
 

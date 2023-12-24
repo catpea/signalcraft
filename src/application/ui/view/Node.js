@@ -57,7 +57,8 @@ export default class Node extends Base {
         inputPod.add( row )
 
         const port = new Port(`port{index}`);
-        port.setBounds({space:4, radius:5});
+        port.setBehavior({showCaption:false});
+        port.setBounds({space:4, radius:5, padding: 3});
         port.setData({node:data, port:portObject});
         row.add(port);
 

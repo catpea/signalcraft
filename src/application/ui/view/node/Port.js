@@ -5,8 +5,13 @@ import { Connectable } from './line/Connectable.js';
 
 
 export default class Port extends Component {
+  
+  behavior = {
+    showCaption: true,
+  };
 
   setup(){
+
 
     let moveDown = (this.height / 2);
 		let moveHorizontally = 4;
@@ -49,7 +54,7 @@ export default class Port extends Component {
   }
 
   render(){
-    this.group.appendChild(this.el.PortCaption);
+    if(this.behavior.showCaption) this.group.appendChild(this.el.PortCaption);
     this.group.appendChild( this.el.Port );
 
     if(this.data.direction != 'input') {

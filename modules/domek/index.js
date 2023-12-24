@@ -1,12 +1,22 @@
 const kebabize = (str) => str.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase())
 
+function svgProperties(key){
+
+	if( ['clipPathUnits',].includes(key) ){
+		return key;
+	} else {
+	  return kebabize(key);
+	}
+
+}
+
 const svg = new Proxy({}, {
 	get: function(target, property) {
 		return function(properties, text) {
 			const el = document.createElementNS('http://www.w3.org/2000/svg', property);
 			for(const key in properties) {
 				if(properties.hasOwnProperty(key)) {
-					el.setAttributeNS(null, kebabize(key), properties[key]);
+					el.setAttributeNS(null, svgProperties(key), properties[key]);
 				}
 			}
 			if(text) el.appendChild(document.createTextNode(text));
