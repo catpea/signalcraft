@@ -1,11 +1,11 @@
 $primary: #e66f10;
-$secondary: hsl(10, 92, 36);
-$selected: hsl(35, 93, 57);
+$secondary: hsl(10, 92%, 36);
+$selected: hsl(35, 93%, 57);
 $glowing: hsl(7, 77%, 46%);
 
 $dark: rgb(2, 1, 14);
 
-$border: hsl(195, 25, 15);
+$border: hsl(195, 25%, 15);
 $border-selected: darken($border, 10%);
 
 
@@ -26,7 +26,7 @@ svg.ui-view {
 
 
 .panel-container {
-  fill: hsl(205, 33, 7);
+  fill: hsl(205, 33%, 7);
   stroke: $border;
   filter: drop-shadow(3px 6px 10px hsl(200,10%,0%));
 }
@@ -83,7 +83,7 @@ svg.ui-view {
 }
 
 .editor-divider { // litte underline/horizontal rule
-  stroke: magenta;
+  stroke: hsl(185, 83%, 13%);
 }
 
 // The clickabe area that activates foreign object
@@ -92,14 +92,16 @@ svg.ui-view {
   fill: transparent;
 }
 .editor-zone.active {
-  stroke: lime;
-  fill: lime;
+  stroke: $primary;
+  // fill: lime;
 }
 
 
 
 .editor-value {
   fill: white;
+  pointer-events: none;
+  user-select: none;
 }
 
 .editor-control  {

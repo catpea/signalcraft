@@ -63,7 +63,7 @@ export default function(application){
   type.input.push( {name:"template", type: "*", description: "base template"} );
   type.input.push( {name:"secondary", type: "*", description: "secondary characteristics"} );
   type.input.push( {name:"styles", type: "string", description: "styles"} );
-  type.input.push( {name:"authors", type: "string", description: "authors"} );
+  type.input.push( {name:"authors", type: "string", description: "authors", value:'michael vrubel, valentin serov, kustodiev boris'} );
   type.input.push( {name:"chaos", type: "string", description: "chaos"} );
   type.input.push( {name:"aspectRatio", type: "string", description: "aspect-ratio"} );
   type.input.push( {name:"style", type: "string", description: "style"} );

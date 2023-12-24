@@ -38,7 +38,7 @@ export default class Node extends ReactiveObject {
     archetype.input.forEach(o=>{ this.Input.create(o) })
     archetype.output.forEach(o=>{ this.Output.create(o) })
 
-    const archetypeDefaults = Object.fromEntries( archetype.input.filter(o=>o.value).map(o=>[o.name, o.value]) ); // Convert {name:*, value:*},{},{}... to an object
+    const archetypeDefaults = Object.fromEntries( archetype.input.map(o=>[o.name, o.value]) ); // Convert {name:*, value:*},{},{}... to an object
     console.log({archetypeDefaults});
 
     const options = {

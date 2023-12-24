@@ -11401,18 +11401,19 @@ svg.ui-view {
   fill: transparent;
 }
 .editor-divider {
-  stroke: magenta;
+  stroke: hsl(185, 83%, 13%);
 }
 .editor-zone {
   stroke: transparent;
   fill: transparent;
 }
 .editor-zone.active {
-  stroke: lime;
-  fill: lime;
+  stroke: #e66f10;
 }
 .editor-value {
   fill: white;
+  pointer-events: none;
+  user-select: none;
 }
 .editor-control {
   background-color: transparent;
