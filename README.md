@@ -86,7 +86,6 @@ CTRL+Click on caption or cable will select it.
 
 ### Design Ideas
 
-![art/fui-12.jpg](art/fui-12.jpg)
 ![art/fui-11.jpg](art/fui-11.jpg)
 ![art/fui-10.jpg](art/fui-10.jpg)
 ![art/fui-9.jpg](art/fui-9.jpg)

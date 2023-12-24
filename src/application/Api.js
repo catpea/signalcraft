@@ -52,9 +52,7 @@ export default class Api {
 
   addNode(archetype, properties){
     // Procedure Step 1: create a node of the desired type in the reactive collection
-
     const node = this.application.Nodes.create({type: archetype, properties});
-
     this.deselectAll();
     this.select(node);
     return node;
@@ -67,9 +65,14 @@ export default class Api {
 
   linkPorts(sourceNode, targetNode, options = {}){
     const { output:outputPort, input:inputPort } = Object.assign({output:'output', input:'input'}, options);
-
     return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id, });
   }
+
+  
+
+
+
+
 
   async execute(node, port='output'){
     if(!node) throw new Error('you must specify which node to execute');

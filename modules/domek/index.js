@@ -167,11 +167,55 @@ function JSONReader() {
 }
 
 
+function dataset(element, data){
+	for (const key in data) {
+		element.dataset[key] = data[key];
+	}
+}
+
+function click(element, callback){
+	element.addEventListener('mouseup', handler);
+	function handler(event) {
+		callback();
+	}
+	return ()=>	element.removeEventListener('mouseup', handler);
+}
+
+function mouse(element, on, off){
+	element.addEventListener("mouseover", on);
+	element.addEventListener("mouseout", off);
+	return ()=>	{
+		element.removeEventListener('mouseover', on);
+		element.removeEventListener('mouseout', off);
+	}
+
+}
 
 
 
 
 
 
+export {
+	svg,
+	html,
+	xhtml,
+	text,
 
-export { svg, html, xhtml, text, list, update, id, back, front, keyboard, JSONReader, JSONWriter };
+	id,
+	list,
+	update,
+
+	back,
+	front,
+
+	keyboard,
+
+	JSONReader,
+	JSONWriter,
+
+	click,
+	mouse,
+	dataset,
+
+ };

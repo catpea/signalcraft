@@ -4547,6 +4547,26 @@
       }
     });
   }
+  function dataset(element, data) {
+    for (const key in data) {
+      element.dataset[key] = data[key];
+    }
+  }
+  function click(element, callback) {
+    element.addEventListener("mouseup", handler);
+    function handler(event) {
+      callback();
+    }
+    return () => element.removeEventListener("mouseup", handler);
+  }
+  function mouse(element, on, off) {
+    element.addEventListener("mouseover", on);
+    element.addEventListener("mouseout", off);
+    return () => {
+      element.removeEventListener("mouseover", on);
+      element.removeEventListener("mouseout", off);
+    };
+  }
 
   // src/application/ui/view/Node.js
   var import_oneof = __toESM(require_oneof(), 1);
@@ -4587,7 +4607,8 @@
       gap: 0,
       border: 0,
       padding: 0,
-      radius: 0
+      radius: 0,
+      space: 0
     };
     children = [];
     #cleanup = [];
@@ -4610,7 +4631,7 @@
     get y() {
       if (this.isRoot)
         return 0;
-      return 0 + this.parent.y + this.parent.bounds.border + this.parent.bounds.padding + this.#above.reduce((total, child) => total + child.height, 0) + this.parent.bounds.gap * this.#above.length;
+      return 0 + this.parent.y + this.parent.bounds.border + this.parent.bounds.padding + this.#above.reduce((total, child) => total + (this.bounds.absolute ? 0 : child.height), 0) + this.parent.bounds.gap * this.#above.length;
     }
     get width() {
       if (isPercentValue(this.bounds.width))
@@ -4891,6 +4912,28 @@
     }
   };
 
+  // src/application/ui/view/node/Row.js
+  var Row = class extends Component {
+    setup() {
+      this.el.Row = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.children.map((child) => child.setup());
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(this.parent.data.id)) {
+          Object.values(this.el).map((el) => el.classList.add("selected"));
+        } else {
+          Object.values(this.el).map((el) => el.classList.remove("selected"));
+        }
+      }));
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
+    }
+    render() {
+      this.group.appendChild(this.el.Row);
+      this.children.map((child) => child.render());
+    }
+    update() {
+    }
+  };
+
   // src/application/ui/view/node/line/Connectable.js
   var Connectable = class {
     #el = {};
@@ -4987,58 +5030,54 @@
     }
   };
 
-  // src/application/ui/view/node/Line.js
-  var Line = class extends Component {
+  // src/application/ui/view/node/Port.js
+  var Port = class extends Component {
     setup() {
-      console.log(this.parent.data.values);
-      this.el.Line = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
-      this.el.LineText = svg.text({ class: `panel-line-text`, x: this.x + this.width * 0.03, y: this.y + (this.height - this.height / 3) }, this.data.name);
-      if (this.data.direction == "input") {
-        this.el.InputBox = html.input({ type: "text", class: `panel-line-input type-text`, value: this.parent.data[this.data.name] || "", style: "width: 100%" });
-        this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width / 2, x: this.x + this.width / 2, y: this.y, height: this.height });
-        this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
-      }
-      this.children.map((child) => child.setup());
       let moveDown = this.height / 2;
       let moveHorizontally = 4;
-      if (this.data.direction == "input") {
+      if (this.data.port.direction == "input") {
         const x = this.x - moveHorizontally;
         const y = this.y + moveDown;
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 6, height: this.height / 3 });
-        this.data.x = x;
-        this.data.y = y;
+        this.el.PortCaption = svg.text({ class: `panel-line-text`, x: this.x + this.bounds.space, y: this.y + (this.height - this.height / 3) }, this.data.port.name);
+        this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+        this.data.port.x = x;
+        this.data.port.y = y;
       } else {
         const x = this.x + this.width + moveHorizontally;
         const y = this.y + moveDown;
-        this.el.Port = svg.circle({ class: "panel-line-port", cx: x, cy: y, r: 6, height: this.height / 3 });
-        this.data.x = x;
-        this.data.y = y;
+        this.el.PortCaption = svg.text({
+          class: `panel-line-text border border-info`,
+          textAnchor: "end",
+          x: this.width - this.bounds.space,
+          y: this.y + (this.height - this.height / 3),
+          width: this.width
+        }, this.data.port.name);
+        this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+        this.data.port.x = x;
+        this.data.port.y = y;
       }
-      this.el.Port.dataset.portAddress = [this.data.kind, "Node", this.parent.data.id, this.data.id].join(":");
-      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
-        if (data.has(this.parent.data.id)) {
-          Object.values(this.el).map((el) => el.classList.add("selected"));
-        } else {
-          Object.values(this.el).map((el) => el.classList.remove("selected"));
-        }
-      }));
+      dataset(this.el.Port, {
+        portAddress: [
+          this.data.port.kind,
+          this.data.node.kind,
+          this.data.node.id,
+          this.data.port.id
+        ].join(":")
+      });
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
+      this.children.map((child) => child.setup());
     }
     render() {
-      this.group.appendChild(this.el.Line);
-      this.group.appendChild(this.el.LineText);
-      if (this.data.direction == "input")
-        this.group.appendChild(this.el.InputBoxForeignObject);
+      this.group.appendChild(this.el.PortCaption);
       this.group.appendChild(this.el.Port);
-      if (this.data.direction == "input") {
-      } else {
+      if (this.data.direction != "input") {
         const connectable = new Connectable({
           container: window,
           // <g> element representing an SVG scene
           handle: this.el.Port,
           canvas: this.view.scene,
-          node: this.parent.data,
-          port: this.data,
+          node: this.data.node,
+          port: this.data.port,
           createConnector: ({ targetType, sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
           createJunction: ({ x, y, sourceNode, sourcePort }) => {
             const junction = this.view.application.Junctions.create({ properties: { x, y } });
@@ -5053,7 +5092,48 @@
       this.children.map((child) => child.render());
     }
     update() {
-      update(this.el.Line, {});
+      update(this.el.Port, {});
+    }
+  };
+
+  // src/application/ui/view/node/Editor.js
+  var Editor = class extends Component {
+    setup() {
+      this.el.Editor = svg.rect({ class: "panel-editor", width: this.width / 2, x: this.x + this.width / 2, y: this.y, height: this.height });
+      this.el.EditorZone = svg.rect({ class: "editor-zone", width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.EditorLine = svg.line({
+        class: "editor-divider",
+        width: this.width / 2,
+        height: this.height,
+        x1: this.x,
+        y1: this.y + this.height,
+        x2: this.x + this.width,
+        y2: this.y + this.height
+      });
+      this.el.EditorValue = svg.text({
+        class: `editor-value`,
+        textAnchor: "end",
+        x: this.width,
+        y: this.y + (this.height - this.height / 3),
+        width: this.width
+      }, this.data.node[this.data.port.name] || "");
+      if (this.data.port.direction == "input") {
+        this.el.InputBox = html.input({ type: "text", class: `editor-control type-text`, value: this.data.node[this.data.port.name] || "", style: "width: 100%" });
+        this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width / 2, x: this.x + this.width / 2, y: this.y, height: this.height });
+        this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
+      }
+      this.cleanup(mouse(this.el.EditorZone, () => this.el.EditorZone.classList.add("active"), () => this.el.EditorZone.classList.remove("active")));
+      this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
+      this.children.map((child) => child.setup());
+    }
+    render() {
+      this.group.appendChild(this.el.Editor);
+      this.group.appendChild(this.el.EditorZone);
+      this.group.appendChild(this.el.EditorLine);
+      this.group.appendChild(this.el.EditorValue);
+      this.children.map((child) => child.render());
+    }
+    update() {
     }
   };
 
@@ -5075,17 +5155,29 @@
       const outputPod = new Pod(`outputPod`);
       outputPod.setBounds({ gap: 2, padding: 1, border: 1, radius: 3 });
       container.add(outputPod);
-      data.Output.forEach((data2, index) => {
-        const port = new Line(`port${index}`);
-        port.setBounds({ height: 32, width: 200, radius: 3, margin: 2 });
-        port.setData(data2);
-        outputPod.add(port);
+      data.Output.forEach((portObject, index) => {
+        const row = new Row(`row{index}`);
+        row.setBounds({});
+        row.setData(portObject);
+        outputPod.add(row);
+        const port = new Port(`port{index}`);
+        port.setBounds({ width: 200, height: 32, space: 4, radius: 9 });
+        port.setData({ node: data, port: portObject });
+        row.add(port);
       });
-      data.Input.forEach((data2, index) => {
-        const port = new Line(`port${index}`);
-        port.setBounds({ height: 32, width: 200, radius: 3 });
-        port.setData(data2);
-        inputPod.add(port);
+      data.Input.forEach((portObject, index) => {
+        const row = new Row(`row{index}`);
+        row.setBounds({});
+        row.setData(portObject);
+        inputPod.add(row);
+        const port = new Port(`port{index}`);
+        port.setBounds({ space: 4, radius: 5 });
+        port.setData({ node: data, port: portObject });
+        row.add(port);
+        const editor = new Editor(`port{index}`);
+        editor.setBounds({ width: 200, height: 32 });
+        editor.setData({ node: data, port: portObject });
+        port.add(editor);
       });
       container.setup();
       container.render();
@@ -5837,6 +5929,7 @@
       rect2.setAttributeNS(null, "width", 11e3);
       rect2.setAttributeNS(null, "height", 8500);
       scene.appendChild(rect2);
+      this.#unsubscribe.push(click(rect2, () => this.#application.Api.deselectAll()));
       return scene;
     }
     #deleteNode({ item }) {

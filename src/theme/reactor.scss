@@ -19,7 +19,7 @@ svg.ui-view {
 }
 
 .view-scene-background {
-  fill: hsl(207, 27, 6);
+  fill: hsl(207, 27%, 6);
 }
 
 
@@ -32,13 +32,8 @@ svg.ui-view {
 }
 
 .panel-container.selected {
-  fill: #6a2600;
-  // stroke-width: 5;
-
-
-  stroke: #a17d24;
-  filter: drop-shadow(0px 0px 30px #7e0000);
-
+  fill: #091c22;
+  stroke: #154453;
 }
 
 .panel-caption {
@@ -72,6 +67,9 @@ svg.ui-view {
   /* fill: hsl(283,23%,15%); */
   /* stroke: hsl(283,23%,10%); */
 }
+.panel-line.active {
+  fill: magenta;
+}
 
 .panel-line-text {
   fill: gray;
@@ -80,11 +78,35 @@ svg.ui-view {
   user-select: none;
 }
 
-.panel-line-input {
+.panel-editor {
+  fill: transparent;
+}
+
+.editor-divider { // litte underline/horizontal rule
+  stroke: magenta;
+}
+
+// The clickabe area that activates foreign object
+.editor-zone {
+  stroke: transparent;
+  fill: transparent;
+}
+.editor-zone.active {
+  stroke: lime;
+  fill: lime;
+}
+
+
+
+.editor-value {
+  fill: white;
+}
+
+.editor-control  {
   background-color: transparent;
 }
 
-.panel-line-input.type-text {
+.editor-control.type-text {
   border-top-style: none;
   border-right-style: none;
   border-left-style: none;

@@ -24,6 +24,7 @@ export default class Component {
     border: 0,
     padding: 0,
     radius: 0,
+    space: 0,
 	}
 
 	children = [];
@@ -57,7 +58,7 @@ export default class Component {
     + this.parent.y
     + this.parent.bounds.border
     + this.parent.bounds.padding
-    + this.#above.reduce((total, child) => total + child.height , 0)
+    + this.#above.reduce((total, child) => total + (this.bounds.absolute?0:child.height) , 0)
     + (this.parent.bounds.gap * this.#above.length)
   }
 

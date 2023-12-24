@@ -1,6 +1,6 @@
 import panzoom from "panzoom";
 import calculatePercent from 'calculate-percent';
-import { html, svg, text, list, update, keyboard } from "domek";
+import { html, svg, text, list, update, keyboard, click } from "domek";
 import { v4 as uuid } from "uuid";
 
 import ReactiveObject from "../system/ReactiveObject.js";
@@ -47,6 +47,7 @@ export default class View extends ReactiveObject {
 	start() {
 
 		keyboard( e=>this.#application.Shortcuts.isDeleting(e), ()=>this.#application.Api.removeSelected() )
+
 
 		// this.#unsubscribe.push( );
 
@@ -264,6 +265,10 @@ export default class View extends ReactiveObject {
 		rect2.setAttributeNS(null, "width", 11_000);
 		rect2.setAttributeNS(null, "height", 8_500);
 		scene.appendChild(rect2);
+
+		//NOTE: this is click on cackground to deselect all
+		this.#unsubscribe.push(click(rect2, ()=>this.#application.Api.deselectAll() ));
+
 
 		return scene;
 	}
