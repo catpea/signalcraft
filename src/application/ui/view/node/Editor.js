@@ -9,7 +9,7 @@ export default class Editor extends Component {
     // this.el.Editor = svg.rect({ class: 'panel-editor', ry: this.radius, width: this.width, x:this.x, y:this.y, height: this.height});
     this.el.Editor = svg.rect({class: 'panel-editor', width: this.width/2, x: this.x+this.width/2, y: this.y, height: this.height });
 
-    this.el.EditorZone = svg.rect({class: 'editor-zone', width: this.width, x: this.x, y: this.y, height: this.height });
+    this.el.EditorZone = svg.rect({class: 'editor-zone', width: this.width, x: this.x, y: this.y, height: this.height, rx:8 });
     this.el.EditorLine = svg.line({class: 'editor-divider',
       width: this.width/2,
       height: this.height,
@@ -31,7 +31,17 @@ export default class Editor extends Component {
     this.el.EditorValue.appendChild(this.el.valueText);
     this.cleanup(this.data.node.observe(this.data.port.name, v=>this.el.valueText.nodeValue = v?(v+"").substring(0,10):null ));
 
-    const hiddenables = [this.parent.el.PortCaption, this.el.EditorValue, this.el.EditorZone, this.el.EditorLine ];
+
+    // ZUI
+    this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.EditorValue.style.scale = 1/scale ) );
+    this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:update(this.el.EditorValue, {
+      x: (this.width )*scale,
+      y: (this.y + (this.height - (this.height / 3)))*scale,
+      width: (this.width)*scale,
+    } ) ));
+
+
+    const hiddenables = [this.parent.el.Port, this.parent.el.PortCaption, this.el.EditorValue, this.el.EditorZone, this.el.EditorLine ];
 
     this.cleanup(mouse(this.el.EditorZone, ()=>this.el.EditorZone.classList.add('active'), ()=>this.el.EditorZone.classList.remove('active')  ));
 
@@ -39,10 +49,16 @@ export default class Editor extends Component {
       console.log('Installing Editor');
       hiddenables.map(o=>o.style.display = 'none');
       this.el.InputBoxForeignObject = svg.foreignObject({width: this.width, x: this.x, y: this.y, height: this.height });
-      this.el.InputBox = html.input({type:'text', class:`editor-control type-text`, value:this.data.node[this.data.port.name]||"", style: 'width: 100%'})
+      this.el.InputBox = html.input({type:'text', class:`editor-control type-text`, value:this.data.node[this.data.port.name]||"", style: 'width: 100%; height: 100%;'})
+
+      // ZUI
+      this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.InputBoxForeignObject.style.scale = 1/scale ) );
+      this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:update(this.el.InputBoxForeignObject, { width: this.width*scale, x: this.x*scale, y: this.y*scale, height: this.height*scale, } ) ));
+
       this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
       this.group.appendChild( this.el.InputBoxForeignObject );
       this.el.InputBox.focus();
+      this.el.InputBox.select();
 
       this.el.InputBox.addEventListener("focusout", ()=>{
         // console.log('Destroying Editor');

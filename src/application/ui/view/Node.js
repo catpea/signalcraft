@@ -63,7 +63,7 @@ export default class Node extends Base {
 
         //NOTE: Editor is only used for input values, as outputs are computed.
         const editor = new Editor(`port{index}`);
-        editor.setBounds({width:200, height: 32});
+        editor.setBounds({width:200, height: 32, });
         editor.setData({node:data, port:portObject});
         port.add(editor);
 

@@ -10,6 +10,7 @@ CTRL+Click on caption or cable will select it.
 
 ## TODO
 
+- add boolean math for this.el.EditorValue to hide text overflow, currently substr is in place
 - give view/menu/Dropdown.js .setData() support and make it generic
 - finish load() in API
 - break up Line in preparation for more UI complexity as onmouseDown foreignObject magic is introduced
