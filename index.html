@@ -32,8 +32,12 @@
                 Applications should be self editable. This area exists to display results generated from the program above.
               </p>
 
-              <p class="card-text rounded p-2" style="min-height: 16rem; background: black; color: hsl(83, 83%, 46%);">
+              <p id="output" class="card-text rounded p-2" style="min-height: 16rem; background: black; color: hsl(83, 83%, 46%);">
                 empty
+              </p>
+
+              <p class="card-text text-warning">
+                Change some text in the connected nodes, or disconnect/reconnect one.
               </p>
 
 
@@ -74,12 +78,21 @@
                 and only one editor is open at the same time.
               </p>
               <ul class="list-group list-group-flush">
+                <li class="list-group-item"><kbd>Click Property</kbd>
+                  You have to click a property to trigger its editor. But it won't work if you are zoomed out, since it would be too hard to see.
+                </li>
                 <li class="list-group-item"><kbd>Scrollwheel</kbd>
                   You may notice that <em class="text-info">not all text grows larger</em> when you zoom in.
                   That is not a bug, that is the zooming/zoomable user interface at play.
                   Zooming in under a ZUI means you get more room.
                 </li>
               </ul>
+
+              <p class="card-text text-warning">
+                If you can't see text, or need more room to edit it, zoom in with the scroll wheel.
+              </p>
+
+
             </div>
           </div>
         </div>

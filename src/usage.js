@@ -23,6 +23,8 @@ export default async function(api){
   const stringC = api.addNode("text/string", {string: "Meow!", x:100, y:800});
 
   const midjourneyPrompt = api.addNode("midjourney/prompt", {weird: 10, x:500, y:300});
+  const domWrite = api.addNode("dom/write", {weird: 10, x:800, y:300});
+  const linkOutput = api.linkPorts(midjourneyPrompt, domWrite);
 
   // create a flow between compoents
   const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
@@ -33,7 +35,7 @@ export default async function(api){
 
   // execute your program;
   const result = await api.execute(midjourneyPrompt);
-  console.log('usage.js api.execute said: ', result);
+  console.log('usage.js api.execute said: ', domWrite);
 
   // tst
   const actual = JSON.stringify(result);
@@ -42,9 +44,11 @@ export default async function(api){
 
 
   const rerun = async function(){
-    const result = await api.execute(midjourneyPrompt);
+    const result = await api.execute(domWrite);
     console.log('usage.js RERUN api.execute said: ', result);
   }
+  app.Nodes.forEach(o=>o.monitor(()=>rerun()));
+
   app.Connectors.observe('created', rerun)
   app.Connectors.observe('removed', rerun)
 

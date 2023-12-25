@@ -3843,6 +3843,16 @@
     }
   });
 
+  // node_modules/lodash/head.js
+  var require_head = __commonJS({
+    "node_modules/lodash/head.js"(exports, module) {
+      function head2(array) {
+        return array && array.length ? array[0] : void 0;
+      }
+      module.exports = head2;
+    }
+  });
+
   // src/craft.js
   var import_bootstrap_bundle_min = __toESM(require_bootstrap_bundle_min(), 1);
 
@@ -6149,6 +6159,7 @@
 
   // src/setup.js
   var import_flattenDeep = __toESM(require_flattenDeep(), 1);
+  var import_head = __toESM(require_head(), 1);
   function setup_default(application2) {
     {
       const type = application2.Archetypes.create({ type: "test/layout" });
@@ -6195,6 +6206,22 @@
     arrayJoinType.input.push({ name: "separator", type: "string", description: "separator to use" });
     arrayJoinType.input.push({ name: "duck", type: "string", description: "separator to use" });
     {
+      const type = application2.Archetypes.create({ type: "dom/write" });
+      type.output.push({
+        name: "output",
+        generator: ({ input, target }) => {
+          const data = JSON.stringify((0, import_flattenDeep.default)(input));
+          const targetId = (0, import_head.default)((0, import_flattenDeep.default)(target));
+          console.log(data, targetId);
+          const elem = document.getElementById(targetId);
+          elem.innerText = data;
+          return (0, import_flattenDeep.default)(input);
+        }
+      });
+      type.input.push({ name: "input", type: "*", description: "data to join" });
+      type.input.push({ name: "target", type: "*", value: "output", description: "data to join" });
+    }
+    {
       const type = application2.Archetypes.create({ type: "midjourney/prompt" });
       type.output.push({
         name: "output",
@@ -6234,18 +6261,21 @@
       const secondaryPromptText = api2.addNode("text/string", { string: "World", x: 100, y: 600 });
       const stringC = api2.addNode("text/string", { string: "Meow!", x: 100, y: 800 });
       const midjourneyPrompt = api2.addNode("midjourney/prompt", { weird: 10, x: 500, y: 300 });
+      const domWrite = api2.addNode("dom/write", { weird: 10, x: 800, y: 300 });
+      const linkOutput = api2.linkPorts(midjourneyPrompt, domWrite);
       const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
       const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
       const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
       const result = await api2.execute(midjourneyPrompt);
-      console.log("usage.js api.execute said: ", result);
+      console.log("usage.js api.execute said: ", domWrite);
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
       console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
       const rerun = async function() {
-        const result2 = await api2.execute(midjourneyPrompt);
+        const result2 = await api2.execute(domWrite);
         console.log("usage.js RERUN api.execute said: ", result2);
       };
+      app.Nodes.forEach((o) => o.monitor(() => rerun()));
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
     } else {

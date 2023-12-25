@@ -1,4 +1,5 @@
 import flattenDeep from 'lodash/flattenDeep';
+import head from 'lodash/head';
 
 export default function(application){
 
@@ -42,7 +43,25 @@ export default function(application){
 
 
 
+  {
+    const type = application.Archetypes.create({type:'dom/write'});
+    // arrayJoinType.output.push( {name:"output", generator:({array, separator}) => { return array.join(separator); }} );
+    type.output.push( {
+      name:"output",
+      generator: ({input, target,}) => {
+        const data = JSON.stringify(flattenDeep(input));
+        const targetId = head(flattenDeep(target));
+        console.log(data, targetId);
+        const elem = document.getElementById(targetId);
+        elem.innerText = data;
 
+        return flattenDeep(input); //separator.length?input.join( separator.join()):input;
+      }
+    });
+    type.input.push( {name:"input", type: "*", description: "data to join"} );
+
+    type.input.push( {name:"target", type: "*", value:"output", description: "data to join"} );
+  }
 
 
 
