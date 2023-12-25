@@ -23,12 +23,14 @@ export default class ReactiveObject {
   }
 
   #notifyObservers(key, value) {
-      if (Array.isArray(this.#observers[key]))
-          this.#observers[key].forEach(observer => observer(value));
+      // if (Array.isArray(this.#observers[key])) this.#observers[key].forEach(observer =>  console.log(`observer notify of ${key}: "${value}" (${this.#observers[key].length})`));
+      if (Array.isArray(this.#observers[key])) this.#observers[key].forEach(observer => observer(value));
   }
 
   #notifyMonitors(key, value) {
+
     Object.values(this.#monitors).forEach(callback => callback(key, value, this));
+
   }
 
   monitor(observer) {
@@ -38,6 +40,7 @@ export default class ReactiveObject {
   }
 
   observe(key, observer) { // triggers asap
+    // console.log('OBSERVE', key);
     observer(this[key]);
     return this.subscribe(key, observer);
   }

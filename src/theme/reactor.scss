@@ -1,11 +1,11 @@
 $primary: #e66f10;
-$secondary: hsl(10, 92%, 36);
-$selected: hsl(35, 93%, 57);
+$secondary: hsl(10, 92%, 36%);
+$selected: hsl(35, 93%, 57%);
 $glowing: hsl(7, 77%, 46%);
 
 $dark: rgb(2, 1, 14);
 
-$border: hsl(195, 25%, 15);
+$border: hsl(195, 25%, 15%);
 $border-selected: darken($border, 10%);
 
 
@@ -19,14 +19,14 @@ svg.ui-view {
 }
 
 .view-scene-background {
-  fill: hsl(207, 27%, 6);
+  fill: hsl(207, 27%, 6%);
 }
 
 
 
 
 .panel-container {
-  fill: hsl(205, 33%, 7);
+  fill: hsl(205, 33%, 7%);
   stroke: $border;
   filter: drop-shadow(3px 6px 10px hsl(200,10%,0%));
 }
@@ -139,11 +139,11 @@ svg.ui-view {
 
 .cable-line {
   pointer-events: none;
-  stroke: hsl(345, 74, 19);
+  stroke: hsl(345, 74%, 19%);
   stroke-width: 2;
 }
 .cable-line-zone {
-  stroke: hsl(355, 45, 10);
+  stroke: hsl(355, 45%, 10%);
   stroke-width: 16;
 }
 .cable-line-zone.selected {
@@ -168,7 +168,7 @@ svg.ui-view {
 .junction-caption.selected {
   fill: $selected;
   filter: drop-shadow(0px 0px 16px $glowing);
-  stroke: hsl(12, 92, 32);
+  stroke: hsl(12, 92%, 32%);
 
 
 }
@@ -177,6 +177,6 @@ svg.ui-view {
   stroke: $dark;
 }
 .junction-port.selected {
-  stroke: hsl(34, 94, 71);
-  fill: hsl(50, 98, 71);
+  stroke: hsl(34, 94%, 71%);
+  fill: hsl(50, 98%, 71%);
 }

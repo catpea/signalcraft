@@ -5113,6 +5113,30 @@
   };
 
   // src/application/ui/view/node/Editor.js
+  function truncateTextWithBrowserCompatibility({ text: text2, width, measure, assign, scale }) {
+    scale = scale || 1;
+    assign.nodeValue = text2;
+    let measureTwice;
+    if (scale >= 1) {
+      measureTwice = () => measure.getBBox().width / scale;
+    } else {
+      measureTwice = () => measure.getBBox().width;
+    }
+    let elementWidth = measureTwice();
+    let c = 0;
+    let elementIsOverflowing = elementWidth > width;
+    if (elementWidth == 0)
+      return;
+    while (elementIsOverflowing) {
+      text2 = text2.substr(0, text2.length - 1);
+      assign.nodeValue = text2;
+      elementWidth = measureTwice();
+      elementIsOverflowing = elementWidth > width;
+      c++;
+      if (c > 666)
+        break;
+    }
+  }
   var Editor = class extends Component {
     setup() {
       this.el.Editor = svg.rect({ class: "panel-editor", width: this.width, x: this.x, y: this.y, height: this.height });
@@ -5120,31 +5144,47 @@
       this.el.EditorValue = svg.text({
         class: `editor-value`,
         "dominant-baseline": "middle",
-        // 'text-anchor':'middle',
         x: this.x,
         y: this.y + this.height / 2,
         // + (this.height - (this.height / 3)),
         width: this.width,
-        "clip-path": `path('M 0 0 H ${this.width} V ${this.height} H 0 V 0')`
+        height: this.height
       });
       this.el.EditorValue.appendChild(this.el.valueText);
-      this.cleanup(this.data.node.observe(this.data.port.name, (v) => this.el.valueText.nodeValue = `${this.data.port.name}: ${v}`));
-      this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.EditorValue.style.scale = 1 / scale));
+      this.children.map((child) => child.setup());
+    }
+    render() {
+      this.cleanup(this.data.node.observe(this.data.port.name, (v) => {
+        truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${v}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale: this.view.transform.scale });
+      }));
+      this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? this.el.EditorValue.style.scale = 1 : this.el.EditorValue.style.scale = 1 / scale));
       this.cleanup(this.view.observe("transform", ({ x, y, scale }) => {
-        if (scale > 1) {
+        if (scale >= 1) {
           update2(this.el.EditorValue, {
             x: this.x * scale,
             y: (this.y + this.height / 2) * scale,
             //(this.y + (this.height - (this.height / 3)))*scale,
             width: this.width * scale,
-            "clip-path": `path('M 0 0 H ${this.width * scale} V ${this.height * scale} H 0 V 0')`
+            height: this.height * scale
+            //NOTE: only works in chromium, fails in firefox under various conditions and when a transform is applied 'clip-path': clip(this.width, this.height, scale),
+          });
+        } else {
+          update2(this.el.EditorValue, {
+            x: this.x,
+            y: this.y + this.height / 2,
+            width: this.width,
+            height: this.height
           });
         }
+        truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${this.data.node[this.data.port.name] || ""}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale });
       }));
       const hiddenables = [this.parent.el.Port, this.el.EditorValue];
       this.cleanup(mouse(this.el.Editor, () => this.el.Editor.classList.add("active"), () => this.el.Editor.classList.remove("active")));
       this.cleanup(click(this.el.Editor, () => {
+        if (this.view.transform.scale < 0.9)
+          return;
         console.log("Installing Editor");
+        console.log(hiddenables.map((o) => o.style.display));
         hiddenables.map((o) => o.style.display = "none");
         this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width, x: this.x, y: this.y, height: this.height });
         this.el.InputBox = html.textarea({ type: "text", class: `editor-control type-text`, style: "width: 100%; height: 100%; resize:none;" }, this.data.node[this.data.port.name] || "");
@@ -5155,15 +5195,12 @@
         this.el.InputBox.focus();
         this.el.InputBox.select();
         this.el.InputBox.addEventListener("focusout", () => {
+          hiddenables.map((o) => o.style.display = "");
           this.data.node[this.data.port.name] = this.el.InputBox.value;
           this.el.InputBoxForeignObject.remove();
-          hiddenables.map((o) => o.style.display = "block");
         });
       }));
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
-      this.children.map((child) => child.setup());
-    }
-    render() {
       this.group.appendChild(this.el.Editor);
       this.group.appendChild(this.el.EditorValue);
       if (this.el.ClipPathRectangle1)
@@ -5854,13 +5891,13 @@
       this.#element.empty();
     }
     #installCanvas() {
-      const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg2.setAttributeNS(null, "class", "ui-view");
-      svg2.setAttributeNS(null, "width", "100%");
-      svg2.setAttributeNS(null, "height", "1000");
-      this.#element.appendChild(svg2);
+      const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svgElement.setAttributeNS(null, "class", "ui-view");
+      svgElement.setAttributeNS(null, "width", "100%");
+      svgElement.setAttributeNS(null, "height", "1000");
+      this.#element.appendChild(svgElement);
       this.#defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      svg2.appendChild(this.#defs);
+      svgElement.appendChild(this.#defs);
       const gradientSpecification = {
         linearGradient: {
           background: {
@@ -5953,7 +5990,7 @@
         filter.appendChild(fedropshadow);
         this.#defs.appendChild(filter);
       }
-      return svg2;
+      return svgElement;
     }
     #installMenus() {
       const menus = new Menus();

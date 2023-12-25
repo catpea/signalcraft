@@ -122,16 +122,22 @@ export default class View extends ReactiveObject {
 	}
 
 	#installCanvas() {
-		const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		// svg.setAttributeNS(null, "style", "border: 1px solid gold;");
-		svg.setAttributeNS(null, "class", "ui-view");
-		svg.setAttributeNS(null, "width", "100%");
-		svg.setAttributeNS(null, "height", "1000");
+		const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		svgElement.setAttributeNS(null, "class", "ui-view");
+		svgElement.setAttributeNS(null, "width", "100%");
+		svgElement.setAttributeNS(null, "height", "1000");
 
-		this.#element.appendChild(svg);
+		this.#element.appendChild(svgElement);
 
 		this.#defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-		svg.appendChild(this.#defs);
+		svgElement.appendChild(this.#defs);
+
+		// const clipPath = svg.clipPath({ id:'text-property-clip' });
+		// this.#defs.appendChild( clipPath );
+		//
+		// const boxPath = svg.path({ d:'M 0 0 H 200 V 32 H 0 V 0 Z' });
+		// clipPath.appendChild( boxPath );
+		//clip-path="url(#text-property-clip)"
 
 		// NOTE: available gradients get installed here!
 
@@ -244,7 +250,7 @@ export default class View extends ReactiveObject {
 			this.#defs.appendChild(filter);
 		}
 
-		return svg;
+		return svgElement;
 	}
 
 	#installMenus() {

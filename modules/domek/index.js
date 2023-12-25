@@ -201,8 +201,10 @@ function mouse(element, on, off){
 
 }
 
-
-
+// fails in firefox
+function clip(width, height, scale=1){
+	return `path('M 0 0 L ${width*scale} 0 L ${width*scale} ${height*scale} L 0 ${height*scale} L 0 0 Z')`;
+}
 
 
 
@@ -228,4 +230,6 @@ export {
 	mouse,
 	dataset,
 
+	clip,
+ 
  };
