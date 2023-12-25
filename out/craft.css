@@ -11354,9 +11354,11 @@ fieldset:disabled .btn {
 /* src/theme/reactor.scss */
 svg.ui-view {
   outline: none;
+  background-color: hsl(207, 27%, 5%);
 }
 .view-scene-background {
   fill: hsl(207, 27%, 6%);
+  filter: drop-shadow(0 0 10px hsl(200, 10%, 0%));
 }
 .panel-container {
   fill: hsl(205, 33%, 7%);

@@ -12,6 +12,9 @@ $border-selected: darken($border, 10%);
 
 svg.ui-view {
   outline: none;
+  background-color: hsl(207, 27%, 5%);
+
+
 }
 
 .view-scene {
@@ -20,6 +23,8 @@ svg.ui-view {
 
 .view-scene-background {
   fill: hsl(207, 27%, 6%);
+  filter: drop-shadow(0 0 10px hsl(200,10%,0%));
+
 }
 
 
