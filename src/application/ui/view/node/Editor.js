@@ -108,10 +108,10 @@ export default class Editor extends Component {
         this.cleanup(mouse(this.el.Editor, ()=>this.el.Editor.classList.add('active'), ()=>this.el.Editor.classList.remove('active')  ));
 
         this.cleanup(click(this.el.Editor, ()=>{
-          if(this.view.transform.scale < .9) return; //TODO: .9 becasue zooming under the panzoom plugin is inexact, fix the panzoom system by rewriting it from scratch
+          if(this.view.transform.scale < .75) return; //TODO: .9 becasue zooming under the panzoom plugin is inexact, fix the panzoom system by rewriting it from scratch
           console.log('Installing Editor');
-          console.log( hiddenables.map(o=>o.style.display) );
-          hiddenables.map(o=>o.style.display = 'none');
+        hiddenables.map(o=>o.style.opacity = 0.01)
+          // hiddenables.map(o=>o.style.display = 'none');
           this.el.InputBoxForeignObject = svg.foreignObject({width: this.width, x: this.x, y: this.y, height: this.height });
 
           this.el.InputBox = html.textarea({type:'text', class:`editor-control type-text`, style: 'width: 100%; height: 100%; resize:none;'}, this.data.node[this.data.port.name]||"")
@@ -126,7 +126,7 @@ export default class Editor extends Component {
           this.el.InputBox.select();
 
           this.el.InputBox.addEventListener("focusout", ()=>{
-            hiddenables.map(o=>o.style.display = ''); //WARN: show everything before making assignment and thus causing measurements
+            hiddenables.map(o=>o.style.opacity = 1); //WARN: show everything before making assignment and thus causing measurements
             this.data.node[this.data.port.name] = this.el.InputBox.value;
             this.el.InputBoxForeignObject.remove();
           });

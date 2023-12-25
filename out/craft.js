@@ -5181,11 +5181,10 @@
       const hiddenables = [this.parent.el.Port, this.el.EditorValue];
       this.cleanup(mouse(this.el.Editor, () => this.el.Editor.classList.add("active"), () => this.el.Editor.classList.remove("active")));
       this.cleanup(click(this.el.Editor, () => {
-        if (this.view.transform.scale < 0.9)
+        if (this.view.transform.scale < 0.75)
           return;
         console.log("Installing Editor");
-        console.log(hiddenables.map((o) => o.style.display));
-        hiddenables.map((o) => o.style.display = "none");
+        hiddenables.map((o) => o.style.opacity = 0.01);
         this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width, x: this.x, y: this.y, height: this.height });
         this.el.InputBox = html.textarea({ type: "text", class: `editor-control type-text`, style: "width: 100%; height: 100%; resize:none;" }, this.data.node[this.data.port.name] || "");
         this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.InputBoxForeignObject.style.scale = 1 / scale));
@@ -5195,7 +5194,7 @@
         this.el.InputBox.focus();
         this.el.InputBox.select();
         this.el.InputBox.addEventListener("focusout", () => {
-          hiddenables.map((o) => o.style.display = "");
+          hiddenables.map((o) => o.style.opacity = 1);
           this.data.node[this.data.port.name] = this.el.InputBox.value;
           this.el.InputBoxForeignObject.remove();
         });
