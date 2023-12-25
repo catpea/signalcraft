@@ -70,8 +70,8 @@ export default function(application){
 
   type.output.push({
     name:"output",
-    generator: ({input, separator}) => {
-      return flattenDeep(input); //separator.length?input.join( separator.join()):input;
+    generator: ({input, secondary, separator}) => {
+      return flattenDeep([input, secondary]); //separator.length?input.join( separator.join()):input;
     }
   });
   type.output.push( {name:"JSON", generator:({value, string}) => { return string }} );

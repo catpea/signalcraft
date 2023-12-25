@@ -6225,8 +6225,8 @@
       const type = application2.Archetypes.create({ type: "midjourney/prompt" });
       type.output.push({
         name: "output",
-        generator: ({ input, separator }) => {
-          return (0, import_flattenDeep.default)(input);
+        generator: ({ input, secondary, separator }) => {
+          return (0, import_flattenDeep.default)([input, secondary]);
         }
       });
       type.output.push({ name: "JSON", generator: ({ value, string }) => {
