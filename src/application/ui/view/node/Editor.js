@@ -103,7 +103,7 @@ export default class Editor extends Component {
 
 
         //INPUT CONTROL CANDIDATE
-        const hiddenables = [this.parent.el.Port,  this.el.EditorValue,   ];
+        const hiddenables = [ this.parent.el.Port,  this.el.EditorValue ];
 
         this.cleanup(mouse(this.el.Editor, ()=>this.el.Editor.classList.add('active'), ()=>this.el.Editor.classList.remove('active')  ));
 

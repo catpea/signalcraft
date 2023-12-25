@@ -11416,7 +11416,7 @@ svg.ui-view {
   user-select: none;
 }
 .editor-control {
-  background-color: transparent;
+  background-color: hsl(186, 85%, 8%);
 }
 .editor-control.type-text {
   border-top-style: none;

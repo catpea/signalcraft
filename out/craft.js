@@ -5249,7 +5249,7 @@
         port.setData({ node: data, port: portObject });
         row.add(port);
         const editor = new Editor(`port{index}`);
-        editor.setBounds({ width: 200, height: 32 });
+        editor.setBounds({ width: 200, height: 18 });
         editor.setData({ node: data, port: portObject });
         port.add(editor);
       });
