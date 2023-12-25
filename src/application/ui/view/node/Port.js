@@ -5,7 +5,7 @@ import { Connectable } from './line/Connectable.js';
 
 
 export default class Port extends Component {
-  
+
   behavior = {
     showCaption: true,
   };
@@ -57,7 +57,8 @@ export default class Port extends Component {
     if(this.behavior.showCaption) this.group.appendChild(this.el.PortCaption);
     this.group.appendChild( this.el.Port );
 
-    if(this.data.direction != 'input') {
+    console.log(this.data.port.direction);
+    if(this.data.port.direction == 'reply') {
 			const connectable = new Connectable({
 				container: window, // <g> element representing an SVG scene
 				handle: this.el.Port,

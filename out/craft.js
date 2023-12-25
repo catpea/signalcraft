@@ -5086,7 +5086,8 @@
       if (this.behavior.showCaption)
         this.group.appendChild(this.el.PortCaption);
       this.group.appendChild(this.el.Port);
-      if (this.data.direction != "input") {
+      console.log(this.data.port.direction);
+      if (this.data.port.direction == "reply") {
         const connectable = new Connectable({
           container: window,
           // <g> element representing an SVG scene
