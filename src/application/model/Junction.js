@@ -31,8 +31,8 @@ export default class Junction extends ReactiveObject {
     this.Input = new ReactiveArray({application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
     this.Output = new ReactiveArray({application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
 
-    this.Input.create({name:"input"});
-    this.Output.create({name:"output", generator:({input}) => input });
+    this.Input.create({id:"input"});
+    this.Output.create({id:"output", generator:({input}) => input });
 
     const props = {
       id: id||uuid(),
@@ -51,10 +51,10 @@ export default class Junction extends ReactiveObject {
     this.#unsubscribe.map((o) => o());
   }
 
-  port(name){
-    const inputCandidate = this.Input.find(port=>port.name==name);
+  port(id){
+    const inputCandidate = this.Input.find(port=>port.id==id);
     if(inputCandidate) return inputCandidate;
-    const outputCandidate = this.Output.find(port=>port.name==name);
+    const outputCandidate = this.Output.find(port=>port.id==id);
     if(outputCandidate) return outputCandidate;
     if(!output) throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
   }

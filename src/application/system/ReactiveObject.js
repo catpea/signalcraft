@@ -39,9 +39,9 @@ export default class ReactiveObject {
     return () => {delete this.#monitors[id]};
   }
 
-  observe(key, observer) { // triggers asap
+  observe(key, observer, autorun=true) { // triggers asap
     // console.log('OBSERVE', key);
-    observer(this[key]);
+    if(autorun) observer(this[key]);
     return this.subscribe(key, observer);
   }
 

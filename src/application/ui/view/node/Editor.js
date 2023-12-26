@@ -49,15 +49,16 @@ export default class Editor extends Component {
 
   setup(){
 
-    this.el.Editor = svg.rect({class: 'panel-editor', width: this.width, x: this.x, y: this.y, height: this.height });
+    this.el.Editor = svg.rect({ fill:'transparent', width: this.width, x: this.x, y: this.y, height: this.height });
 
     this.el.valueText = text("");
     this.el.EditorValue = svg.text({
-      class: `editor-value`,
+      class: `port-text editor-text`,
+			style:'pointer-events: none; user-select: none;',
       'dominant-baseline':'middle',
-      x: this.x ,
+      x: this.x+this.bounds.space,
       y: this.y+(this.height/2), // + (this.height - (this.height / 3)),
-      width: this.width,
+      width: this.width-+this.bounds.space,
       height: this.height,
     } );
     this.el.EditorValue.appendChild(this.el.valueText);
@@ -65,13 +66,20 @@ export default class Editor extends Component {
     this.children.map(child=>child.setup())
 
 
+		this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
+      if(data.has(this.data.node.id)){
+        Object.values(this.el).filter(o=>o.classList).map(el=>el.classList.add('selected'))
+      }else{
+        Object.values(this.el).filter(o=>o.classList).map(el=>el.classList.remove('selected'))
+      }
+    }))
 
   }
 
   render(){
 
-        this.cleanup(this.data.node.observe(this.data.port.name, v =>{
-          truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${v}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale: this.view.transform.scale, })
+        this.cleanup(this.data.node.observe(this.data.port.id, v =>{
+          truncateTextWithBrowserCompatibility({ text: `${this.data.port.id}: ${v}`, width: this.width-this.bounds.space, measure: this.el.EditorValue, assign: this.el.valueText, scale: this.view.transform.scale, })
         }));
 
         // ZUI
@@ -81,22 +89,22 @@ export default class Editor extends Component {
 
           if(scale>=1){
             update(this.el.EditorValue, {
-              x: this.x*scale,
+              x: this.x+this.bounds.space*scale,
               y: (this.y+this.height/2)*scale, //(this.y + (this.height - (this.height / 3)))*scale,
-              width: this.width*scale,
+              width: this.width-this.bounds.space*scale,
               height: this.height*scale,
               //NOTE: only works in chromium, fails in firefox under various conditions and when a transform is applied 'clip-path': clip(this.width, this.height, scale),
             });
           }else{
             update(this.el.EditorValue, {
-              x: this.x,
+              x: this.x+this.bounds.space,
               y: (this.y+this.height/2),
-              width: this.width,
+              width: this.width-this.bounds.space,
               height: this.height,
             });
           }
 
-            truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${this.data.node[this.data.port.name]||""}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale, })
+            truncateTextWithBrowserCompatibility({ text: `${this.data.port.id}: ${this.data.node[this.data.port.id]||""}`, width: this.width-this.bounds.space, measure: this.el.EditorValue, assign: this.el.valueText, scale, })
 
         }));
 
@@ -109,26 +117,26 @@ export default class Editor extends Component {
 
         this.cleanup(click(this.el.Editor, ()=>{
           if(this.view.transform.scale < .75) return; //TODO: .9 becasue zooming under the panzoom plugin is inexact, fix the panzoom system by rewriting it from scratch
-          console.log('Installing Editor');
         hiddenables.map(o=>o.style.opacity = 0.01)
           // hiddenables.map(o=>o.style.display = 'none');
-          this.el.InputBoxForeignObject = svg.foreignObject({width: this.width, x: this.x, y: this.y, height: this.height });
+          this.el.TextareaForeignObject = svg.foreignObject({width: this.width, x: this.x, y: this.y, height: this.height });
 
-          this.el.InputBox = html.textarea({type:'text', class:`editor-control type-text`, style: 'width: 100%; height: 100%; resize:none;'}, this.data.node[this.data.port.name]||"")
+          this.el.Textarea = html.textarea({type:'text', class:`editor-control textarea`, style: 'width: 100%; height: 100%; resize:none;'}, this.data.node[this.data.port.id]||"")
 
           // ZUI
-          this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.InputBoxForeignObject.style.scale = 1/scale ) );
-          this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:update(this.el.InputBoxForeignObject, { width: this.width*scale, x: this.x*scale, y: this.y*scale, height: this.height*scale, } ) ));
+          this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:this.el.TextareaForeignObject.style.scale = 1/scale ) );
+          this.cleanup( this.view.observe('transform',({x,y,scale})=>scale<1?null:update(this.el.TextareaForeignObject, { width: this.width*scale, x: this.x*scale, y: this.y*scale, height: this.height*scale, } ) ));
 
-          this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
-          this.group.appendChild( this.el.InputBoxForeignObject );
-          this.el.InputBox.focus();
-          this.el.InputBox.select();
+          this.el.TextareaForeignObject.appendChild(this.el.Textarea);
+          this.group.appendChild( this.el.TextareaForeignObject );
+          this.el.Textarea.focus();
+					this.el.Textarea.setSelectionRange(this.el.Textarea.value.length, this.el.Textarea.value.length);
+          // this.el.Textarea.select();
 
-          this.el.InputBox.addEventListener("focusout", ()=>{
+          this.el.Textarea.addEventListener("focusout", ()=>{
             hiddenables.map(o=>o.style.opacity = 1); //WARN: show everything before making assignment and thus causing measurements
-            this.data.node[this.data.port.name] = this.el.InputBox.value;
-            this.el.InputBoxForeignObject.remove();
+            this.data.node[this.data.port.id] = this.el.Textarea.value;
+            this.el.TextareaForeignObject.remove();
           });
         }));
 
@@ -144,9 +152,9 @@ export default class Editor extends Component {
     // this.group.appendChild( this.el.EditorLine );
     this.group.appendChild( this.el.EditorValue );
     // this.group.appendChild( this.el.EditorZone );
-    if(this.el.ClipPathRectangle1) this.group.appendChild( this.el.ClipPathRectangle1 );
+    // if(this.el.ClipPathRectangle1) this.group.appendChild( this.el.ClipPathRectangle1 );
 
-    // if(this.data.port.direction == 'input') this.group.appendChild(this.el.InputBoxForeignObject);
+    // if(this.data.port.direction == 'input') this.group.appendChild(this.el.TextareaForeignObject);
 
     this.children.map(child=>child.render())
   }

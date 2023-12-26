@@ -6,6 +6,9 @@
   //                           v
 export default async function(api){
   const app = api.getApplication();
+
+  api.selectTheme('obsidian');
+
   //                           |
   //                           |        .loadFile() .saveFile()
   //                           |        .addNode() ............................. type and value
@@ -16,9 +19,9 @@ export default async function(api){
   const DEBUG = 0;
   if(!DEBUG){
   // define your components
-  const primaryPromptText1 = api.addNode("text/string", {string: "Hello", x:100, y:100});
-  const primaryPromptText2 = api.addNode("text/string", {string: "World", x:100, y:300});
-  const secondaryPromptText = api.addNode("text/string", {string: "World", x:100, y:600});
+  const primaryPromptText1 = api.addNode("text/string", {string: "Nostromo", x:100, y:100});
+  const primaryPromptText2 = api.addNode("text/string", {string: "Project 23", x:100, y:300});
+  const secondaryPromptText = api.addNode("text/string", {string: "USS Enterprise NCC-1701", x:100, y:600});
 
   const stringC = api.addNode("text/string", {string: "Meow!", x:100, y:800});
 
@@ -40,14 +43,14 @@ export default async function(api){
   // tst
   const actual = JSON.stringify(result);
   const expect = JSON.stringify(['Hello', 'World']);
-  console.assert(actual==expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
+  // console.assert(actual==expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
 
 
   const rerun = async function(){
     const result = await api.execute(domWrite);
     console.log('usage.js RERUN api.execute said: ', result);
   }
-  app.Nodes.forEach(o=>o.monitor(()=>rerun()));
+  //app.Nodes.forEach(o=>o.monitor(()=>rerun()));
 
   app.Connectors.observe('created', rerun)
   app.Connectors.observe('removed', rerun)
@@ -58,5 +61,5 @@ export default async function(api){
   }
 
 
-  console.log( api.save() );
+  // console.log( api.save() );
 }

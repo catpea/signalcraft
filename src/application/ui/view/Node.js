@@ -43,7 +43,7 @@ export default class Node extends Base {
         outputPod.add(row);
 
         const port = new Port(`port{index}`);
-        port.setBounds({width:200, height: 32, space:4, radius:9});
+        port.setBounds({width:200, height: 20, space:4, radius:7});
         port.setData({node:data, port:portObject});
         row.add(port);
 
@@ -58,13 +58,13 @@ export default class Node extends Base {
 
         const port = new Port(`port{index}`);
         port.setBehavior({showCaption:false});
-        port.setBounds({space:4, radius:5, padding: 3});
+        port.setBounds({radius:7});
         port.setData({node:data, port:portObject});
         row.add(port);
 
         //NOTE: Editor is only used for input values, as outputs are computed.
-        const editor = new Editor(`port{index}`);
-        editor.setBounds({width:200, height: 18, });
+        const editor = new Editor(`editor{index}`);
+        editor.setBounds({space:10, width:200, height: 20, });
         editor.setData({node:data, port:portObject});
         port.add(editor);
 

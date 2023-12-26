@@ -11351,131 +11351,194 @@ fieldset:disabled .btn {
   }
 }
 
-/* src/theme/reactor.scss */
-svg.ui-view {
+/* src/theme/nostromo/index.scss */
+[data-ui-theme=nostromo] svg.editor-interface {
   outline: none;
-  background-color: hsl(207, 27%, 5%);
+  background-color: black;
 }
-.view-scene-background {
-  fill: hsl(207, 27%, 6%);
-  filter: drop-shadow(0 0 10px hsl(200, 10%, 0%));
+[data-ui-theme=nostromo] .interface-background {
+  fill: hsl(60, 100%, 1%);
+  stroke: green;
 }
-.panel-container {
-  fill: hsl(205, 33%, 7%);
-  stroke: hsl(195, 25%, 15%);
-  filter: drop-shadow(3px 6px 10px hsl(200, 10%, 0%));
+[data-ui-theme=nostromo] .node-container {
+  fill: black;
+  stroke: green;
 }
-.panel-container.selected {
-  fill: #091c22;
-  stroke: #154453;
+[data-ui-theme=nostromo] .node-container.selected {
+  fill: transparent;
+  stroke: orange;
 }
-.panel-caption {
+[data-ui-theme=nostromo] .node-caption {
   fill: transparent;
   stroke: transparent;
 }
-.panel-caption.selected {
+[data-ui-theme=nostromo] .node-caption.selected {
+  fill: transparent;
+}
+[data-ui-theme=nostromo] .node-caption.caption-text {
+  fill: green;
+}
+[data-ui-theme=nostromo] .node-caption.caption-text.selected {
+  fill: orange;
+}
+[data-ui-theme=nostromo] .node-pod {
   fill: transparent;
   stroke: transparent;
 }
-.panel-caption-text {
-  fill: #e66f10;
-  pointer-events: none;
-  user-select: none;
-}
-.panel-caption-text.selected {
-  fill: #e66f10;
-}
-.panel-pod {
+[data-ui-theme=nostromo] .pod-row {
   fill: transparent;
-}
-.panel-line {
-  fill: transparent;
-}
-.panel-line.active {
-  fill: magenta;
-}
-.panel-line-text {
-  fill: gray;
-  pointer-events: none;
-  user-select: none;
-}
-.panel-editor {
-  fill: transparent;
-}
-.editor-divider {
-  stroke: hsl(185, 83%, 13%);
-}
-.editor-zone {
   stroke: transparent;
+}
+[data-ui-theme=nostromo] .pod-row.selected {
   fill: transparent;
+  stroke: transparent;
 }
-.editor-zone.active {
-  stroke: #e66f10;
+[data-ui-theme=nostromo] .node-port {
+  fill: green;
 }
-.editor-value {
-  fill: hsl(188, 20%, 53%);
-  pointer-events: none;
-  user-select: none;
+[data-ui-theme=nostromo] .node-port.selected {
+  fill: orange;
 }
-.editor-control {
+[data-ui-theme=nostromo] .port-text {
+  fill: green;
+}
+[data-ui-theme=nostromo] .port-text.selected {
+  fill: orange;
+}
+[data-ui-theme=nostromo] .editor-control {
   background-color: hsl(186, 85%, 8%);
 }
-.editor-control.type-text {
+[data-ui-theme=nostromo] .editor-control.textarea {
   border-top-style: none;
   border-right-style: none;
   border-left-style: none;
   border-bottom-style: dotted;
   outline: none;
 }
-.panel-line-text.selected {
-  fill: hsl(40, 53%, 52%);
-}
-.panel-line-port {
-  fill: #e66f10;
-  stroke: rgb(2, 1, 14);
-  stroke-width: 0;
-}
-.panel-line-port.selected {
-  fill: #ffbf00;
-  stroke: #cd7308;
-  stroke-width: 2;
-  filter: drop-shadow(0px 0px 5px rgb(237, 221, 13));
-}
-.cable-line {
-  pointer-events: none;
-  stroke: hsl(345, 74%, 19%);
+[data-ui-theme=nostromo] .cable-line {
+  stroke: green;
   stroke-width: 2;
 }
-.cable-line-zone {
-  stroke: hsl(355, 45%, 10%);
+[data-ui-theme=nostromo] .cable-line-zone {
+  stroke: hsl(60, 100%, 4%);
   stroke-width: 16;
 }
-.cable-line-zone.selected {
-  stroke: hsl(39, 45%, 10%);
+[data-ui-theme=nostromo] .cable-line.selected {
+  stroke: orange;
 }
-.cable-line.selected {
-  stroke: hsl(43, 76%, 49%);
-}
-.cable-line-indicator {
-  stroke: #e66f10;
+[data-ui-theme=nostromo] .cable-line-indicator {
+  stroke: orange;
   stroke-width: 2;
 }
-.junction-caption {
-  fill: hsl(10, 92%, 36%);
-  stroke: rgb(2, 1, 14);
+[data-ui-theme=nostromo] .junction-caption {
+  fill: transparent;
+  stroke: green;
 }
-.junction-caption.selected {
-  fill: hsl(35, 93%, 57%);
-  filter: drop-shadow(0px 0px 16px hsl(7, 77%, 46%));
-  stroke: hsl(12, 92%, 32%);
+[data-ui-theme=nostromo] .junction-caption.selected {
+  fill: transparent;
+  stroke: orange;
 }
-.junction-port {
-  fill: #e66f10;
-  stroke: rgb(2, 1, 14);
+[data-ui-theme=nostromo] .junction-port {
+  fill: green;
+  stroke: hsl(60, 100%, 1%);
 }
-.junction-port.selected {
-  stroke: hsl(34, 94%, 71%);
-  fill: hsl(50, 98%, 71%);
+[data-ui-theme=nostromo] .junction-port.selected {
+  fill: orange;
+}
+
+/* src/theme/obsidian/index.scss */
+[data-ui-theme=obsidian] svg.editor-interface {
+  outline: none;
+  background-color: black;
+}
+[data-ui-theme=obsidian] .interface-background {
+  fill: hsl(220, 30%, 5%);
+}
+[data-ui-theme=obsidian] .node-container {
+  fill: #0e121b;
+  stroke: #001c5c;
+  filter: drop-shadow(3px 6px 10px hsl(220, 30%, 1%));
+}
+[data-ui-theme=obsidian] .node-container.selected {
+  fill: #170d1c;
+  stroke: #a300f5;
+}
+[data-ui-theme=obsidian] .node-caption {
+  fill: transparent;
+  stroke: transparent;
+}
+[data-ui-theme=obsidian] .node-caption.selected {
+  fill: transparent;
+}
+[data-ui-theme=obsidian] .node-caption.caption-text {
+  fill: hsl(220, 30%, 40%);
+}
+[data-ui-theme=obsidian] .node-caption.caption-text.selected {
+  fill: hsl(280, 35%, 40%);
+}
+[data-ui-theme=obsidian] .node-pod {
+  fill: transparent;
+  stroke: transparent;
+}
+[data-ui-theme=obsidian] .pod-row {
+  fill: transparent;
+  stroke: transparent;
+}
+[data-ui-theme=obsidian] .pod-row.selected {
+  fill: transparent;
+  stroke: transparent;
+}
+[data-ui-theme=obsidian] .node-port {
+  fill: hsl(220, 30%, 40%);
+}
+[data-ui-theme=obsidian] .node-port.selected {
+  fill: hsl(280, 35%, 40%);
+}
+[data-ui-theme=obsidian] .port-text {
+  fill: hsl(220, 30%, 40%);
+}
+[data-ui-theme=obsidian] .port-text.selected {
+  fill: hsl(280, 35%, 40%);
+}
+[data-ui-theme=obsidian] .editor-control {
+  background-color: hsl(186, 85%, 8%);
+}
+[data-ui-theme=obsidian] .editor-control.textarea {
+  border-top-style: none;
+  border-right-style: none;
+  border-left-style: none;
+  border-bottom-style: dotted;
+  outline: none;
+}
+[data-ui-theme=obsidian] .cable-line {
+  stroke: #445b88;
+  stroke-width: 2;
+}
+[data-ui-theme=obsidian] .cable-line-zone {
+  stroke: rgba(255, 251, 0, 0.001);
+  stroke-width: 16;
+}
+[data-ui-theme=obsidian] .cable-line.selected {
+  stroke: #801ab3;
+}
+[data-ui-theme=obsidian] .cable-line-indicator {
+  stroke: #8800cc;
+  stroke-width: 2;
+}
+[data-ui-theme=obsidian] .junction-caption {
+  fill: hsl(220, 30%, 40%);
+  stroke: #001c5c;
+}
+[data-ui-theme=obsidian] .junction-caption.selected {
+  fill: hsl(280, 35%, 40%);
+  stroke: #a300f5;
+}
+[data-ui-theme=obsidian] .junction-port {
+  fill: hsl(220, 30%, 40%);
+  stroke: hsl(220, 30%, 1%);
+}
+[data-ui-theme=obsidian] .junction-port.selected {
+  fill: hsl(280, 35%, 40%);
 }
 /*! Bundled license information:
 

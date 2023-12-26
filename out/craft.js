@@ -3493,8 +3493,8 @@
         function triggerZoomEnd() {
           triggerEvent("zoomend");
         }
-        function triggerEvent(name) {
-          api2.fire(name, api2);
+        function triggerEvent(name2) {
+          api2.fire(name2, api2);
         }
       }
       function parseTransformOrigin(options) {
@@ -3603,9 +3603,9 @@
           var isPanZoomAttribute = attr.name[0] === "p" && attr.name[1] === "z" && attr.name[2] === "-";
           if (!isPanZoomAttribute)
             return;
-          var name = attr.name.substr(3);
+          var name2 = attr.name.substr(3);
           var value = JSON.parse(attr.value);
-          return { name, value };
+          return { name: name2, value };
         }
       }
       autoRun();
@@ -3640,17 +3640,235 @@
     }
   });
 
-  // node_modules/lodash/_arrayPush.js
-  var require_arrayPush = __commonJS({
-    "node_modules/lodash/_arrayPush.js"(exports, module) {
-      function arrayPush(array, values) {
-        var index = -1, length = values.length, offset = array.length;
-        while (++index < length) {
-          array[offset + index] = values[index];
+  // node_modules/lodash/_arrayReduce.js
+  var require_arrayReduce = __commonJS({
+    "node_modules/lodash/_arrayReduce.js"(exports, module) {
+      function arrayReduce(array, iteratee, accumulator, initAccum) {
+        var index = -1, length = array == null ? 0 : array.length;
+        if (initAccum && length) {
+          accumulator = array[++index];
         }
-        return array;
+        while (++index < length) {
+          accumulator = iteratee(accumulator, array[index], index, array);
+        }
+        return accumulator;
       }
-      module.exports = arrayPush;
+      module.exports = arrayReduce;
+    }
+  });
+
+  // node_modules/lodash/_basePropertyOf.js
+  var require_basePropertyOf = __commonJS({
+    "node_modules/lodash/_basePropertyOf.js"(exports, module) {
+      function basePropertyOf(object) {
+        return function(key) {
+          return object == null ? void 0 : object[key];
+        };
+      }
+      module.exports = basePropertyOf;
+    }
+  });
+
+  // node_modules/lodash/_deburrLetter.js
+  var require_deburrLetter = __commonJS({
+    "node_modules/lodash/_deburrLetter.js"(exports, module) {
+      var basePropertyOf = require_basePropertyOf();
+      var deburredLetters = {
+        // Latin-1 Supplement block.
+        "\xC0": "A",
+        "\xC1": "A",
+        "\xC2": "A",
+        "\xC3": "A",
+        "\xC4": "A",
+        "\xC5": "A",
+        "\xE0": "a",
+        "\xE1": "a",
+        "\xE2": "a",
+        "\xE3": "a",
+        "\xE4": "a",
+        "\xE5": "a",
+        "\xC7": "C",
+        "\xE7": "c",
+        "\xD0": "D",
+        "\xF0": "d",
+        "\xC8": "E",
+        "\xC9": "E",
+        "\xCA": "E",
+        "\xCB": "E",
+        "\xE8": "e",
+        "\xE9": "e",
+        "\xEA": "e",
+        "\xEB": "e",
+        "\xCC": "I",
+        "\xCD": "I",
+        "\xCE": "I",
+        "\xCF": "I",
+        "\xEC": "i",
+        "\xED": "i",
+        "\xEE": "i",
+        "\xEF": "i",
+        "\xD1": "N",
+        "\xF1": "n",
+        "\xD2": "O",
+        "\xD3": "O",
+        "\xD4": "O",
+        "\xD5": "O",
+        "\xD6": "O",
+        "\xD8": "O",
+        "\xF2": "o",
+        "\xF3": "o",
+        "\xF4": "o",
+        "\xF5": "o",
+        "\xF6": "o",
+        "\xF8": "o",
+        "\xD9": "U",
+        "\xDA": "U",
+        "\xDB": "U",
+        "\xDC": "U",
+        "\xF9": "u",
+        "\xFA": "u",
+        "\xFB": "u",
+        "\xFC": "u",
+        "\xDD": "Y",
+        "\xFD": "y",
+        "\xFF": "y",
+        "\xC6": "Ae",
+        "\xE6": "ae",
+        "\xDE": "Th",
+        "\xFE": "th",
+        "\xDF": "ss",
+        // Latin Extended-A block.
+        "\u0100": "A",
+        "\u0102": "A",
+        "\u0104": "A",
+        "\u0101": "a",
+        "\u0103": "a",
+        "\u0105": "a",
+        "\u0106": "C",
+        "\u0108": "C",
+        "\u010A": "C",
+        "\u010C": "C",
+        "\u0107": "c",
+        "\u0109": "c",
+        "\u010B": "c",
+        "\u010D": "c",
+        "\u010E": "D",
+        "\u0110": "D",
+        "\u010F": "d",
+        "\u0111": "d",
+        "\u0112": "E",
+        "\u0114": "E",
+        "\u0116": "E",
+        "\u0118": "E",
+        "\u011A": "E",
+        "\u0113": "e",
+        "\u0115": "e",
+        "\u0117": "e",
+        "\u0119": "e",
+        "\u011B": "e",
+        "\u011C": "G",
+        "\u011E": "G",
+        "\u0120": "G",
+        "\u0122": "G",
+        "\u011D": "g",
+        "\u011F": "g",
+        "\u0121": "g",
+        "\u0123": "g",
+        "\u0124": "H",
+        "\u0126": "H",
+        "\u0125": "h",
+        "\u0127": "h",
+        "\u0128": "I",
+        "\u012A": "I",
+        "\u012C": "I",
+        "\u012E": "I",
+        "\u0130": "I",
+        "\u0129": "i",
+        "\u012B": "i",
+        "\u012D": "i",
+        "\u012F": "i",
+        "\u0131": "i",
+        "\u0134": "J",
+        "\u0135": "j",
+        "\u0136": "K",
+        "\u0137": "k",
+        "\u0138": "k",
+        "\u0139": "L",
+        "\u013B": "L",
+        "\u013D": "L",
+        "\u013F": "L",
+        "\u0141": "L",
+        "\u013A": "l",
+        "\u013C": "l",
+        "\u013E": "l",
+        "\u0140": "l",
+        "\u0142": "l",
+        "\u0143": "N",
+        "\u0145": "N",
+        "\u0147": "N",
+        "\u014A": "N",
+        "\u0144": "n",
+        "\u0146": "n",
+        "\u0148": "n",
+        "\u014B": "n",
+        "\u014C": "O",
+        "\u014E": "O",
+        "\u0150": "O",
+        "\u014D": "o",
+        "\u014F": "o",
+        "\u0151": "o",
+        "\u0154": "R",
+        "\u0156": "R",
+        "\u0158": "R",
+        "\u0155": "r",
+        "\u0157": "r",
+        "\u0159": "r",
+        "\u015A": "S",
+        "\u015C": "S",
+        "\u015E": "S",
+        "\u0160": "S",
+        "\u015B": "s",
+        "\u015D": "s",
+        "\u015F": "s",
+        "\u0161": "s",
+        "\u0162": "T",
+        "\u0164": "T",
+        "\u0166": "T",
+        "\u0163": "t",
+        "\u0165": "t",
+        "\u0167": "t",
+        "\u0168": "U",
+        "\u016A": "U",
+        "\u016C": "U",
+        "\u016E": "U",
+        "\u0170": "U",
+        "\u0172": "U",
+        "\u0169": "u",
+        "\u016B": "u",
+        "\u016D": "u",
+        "\u016F": "u",
+        "\u0171": "u",
+        "\u0173": "u",
+        "\u0174": "W",
+        "\u0175": "w",
+        "\u0176": "Y",
+        "\u0177": "y",
+        "\u0178": "Y",
+        "\u0179": "Z",
+        "\u017B": "Z",
+        "\u017D": "Z",
+        "\u017A": "z",
+        "\u017C": "z",
+        "\u017E": "z",
+        "\u0132": "IJ",
+        "\u0133": "ij",
+        "\u0152": "Oe",
+        "\u0153": "oe",
+        "\u0149": "'n",
+        "\u017F": "s"
+      };
+      var deburrLetter = basePropertyOf(deburredLetters);
+      module.exports = deburrLetter;
     }
   });
 
@@ -3678,6 +3896,28 @@
       var root = require_root();
       var Symbol2 = root.Symbol;
       module.exports = Symbol2;
+    }
+  });
+
+  // node_modules/lodash/_arrayMap.js
+  var require_arrayMap = __commonJS({
+    "node_modules/lodash/_arrayMap.js"(exports, module) {
+      function arrayMap(array, iteratee) {
+        var index = -1, length = array == null ? 0 : array.length, result = Array(length);
+        while (++index < length) {
+          result[index] = iteratee(array[index], index, array);
+        }
+        return result;
+      }
+      module.exports = arrayMap;
+    }
+  });
+
+  // node_modules/lodash/isArray.js
+  var require_isArray = __commonJS({
+    "node_modules/lodash/isArray.js"(exports, module) {
+      var isArray = Array.isArray;
+      module.exports = isArray;
     }
   });
 
@@ -3751,6 +3991,357 @@
     }
   });
 
+  // node_modules/lodash/isSymbol.js
+  var require_isSymbol = __commonJS({
+    "node_modules/lodash/isSymbol.js"(exports, module) {
+      var baseGetTag = require_baseGetTag();
+      var isObjectLike = require_isObjectLike();
+      var symbolTag = "[object Symbol]";
+      function isSymbol(value) {
+        return typeof value == "symbol" || isObjectLike(value) && baseGetTag(value) == symbolTag;
+      }
+      module.exports = isSymbol;
+    }
+  });
+
+  // node_modules/lodash/_baseToString.js
+  var require_baseToString = __commonJS({
+    "node_modules/lodash/_baseToString.js"(exports, module) {
+      var Symbol2 = require_Symbol();
+      var arrayMap = require_arrayMap();
+      var isArray = require_isArray();
+      var isSymbol = require_isSymbol();
+      var INFINITY = 1 / 0;
+      var symbolProto = Symbol2 ? Symbol2.prototype : void 0;
+      var symbolToString = symbolProto ? symbolProto.toString : void 0;
+      function baseToString(value) {
+        if (typeof value == "string") {
+          return value;
+        }
+        if (isArray(value)) {
+          return arrayMap(value, baseToString) + "";
+        }
+        if (isSymbol(value)) {
+          return symbolToString ? symbolToString.call(value) : "";
+        }
+        var result = value + "";
+        return result == "0" && 1 / value == -INFINITY ? "-0" : result;
+      }
+      module.exports = baseToString;
+    }
+  });
+
+  // node_modules/lodash/toString.js
+  var require_toString = __commonJS({
+    "node_modules/lodash/toString.js"(exports, module) {
+      var baseToString = require_baseToString();
+      function toString(value) {
+        return value == null ? "" : baseToString(value);
+      }
+      module.exports = toString;
+    }
+  });
+
+  // node_modules/lodash/deburr.js
+  var require_deburr = __commonJS({
+    "node_modules/lodash/deburr.js"(exports, module) {
+      var deburrLetter = require_deburrLetter();
+      var toString = require_toString();
+      var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+      var rsComboMarksRange = "\\u0300-\\u036f";
+      var reComboHalfMarksRange = "\\ufe20-\\ufe2f";
+      var rsComboSymbolsRange = "\\u20d0-\\u20ff";
+      var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+      var rsCombo = "[" + rsComboRange + "]";
+      var reComboMark = RegExp(rsCombo, "g");
+      function deburr(string) {
+        string = toString(string);
+        return string && string.replace(reLatin, deburrLetter).replace(reComboMark, "");
+      }
+      module.exports = deburr;
+    }
+  });
+
+  // node_modules/lodash/_asciiWords.js
+  var require_asciiWords = __commonJS({
+    "node_modules/lodash/_asciiWords.js"(exports, module) {
+      var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+      function asciiWords(string) {
+        return string.match(reAsciiWord) || [];
+      }
+      module.exports = asciiWords;
+    }
+  });
+
+  // node_modules/lodash/_hasUnicodeWord.js
+  var require_hasUnicodeWord = __commonJS({
+    "node_modules/lodash/_hasUnicodeWord.js"(exports, module) {
+      var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+      function hasUnicodeWord(string) {
+        return reHasUnicodeWord.test(string);
+      }
+      module.exports = hasUnicodeWord;
+    }
+  });
+
+  // node_modules/lodash/_unicodeWords.js
+  var require_unicodeWords = __commonJS({
+    "node_modules/lodash/_unicodeWords.js"(exports, module) {
+      var rsAstralRange = "\\ud800-\\udfff";
+      var rsComboMarksRange = "\\u0300-\\u036f";
+      var reComboHalfMarksRange = "\\ufe20-\\ufe2f";
+      var rsComboSymbolsRange = "\\u20d0-\\u20ff";
+      var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+      var rsDingbatRange = "\\u2700-\\u27bf";
+      var rsLowerRange = "a-z\\xdf-\\xf6\\xf8-\\xff";
+      var rsMathOpRange = "\\xac\\xb1\\xd7\\xf7";
+      var rsNonCharRange = "\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf";
+      var rsPunctuationRange = "\\u2000-\\u206f";
+      var rsSpaceRange = " \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000";
+      var rsUpperRange = "A-Z\\xc0-\\xd6\\xd8-\\xde";
+      var rsVarRange = "\\ufe0e\\ufe0f";
+      var rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+      var rsApos = "['\u2019]";
+      var rsBreak = "[" + rsBreakRange + "]";
+      var rsCombo = "[" + rsComboRange + "]";
+      var rsDigits = "\\d+";
+      var rsDingbat = "[" + rsDingbatRange + "]";
+      var rsLower = "[" + rsLowerRange + "]";
+      var rsMisc = "[^" + rsAstralRange + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + "]";
+      var rsFitz = "\\ud83c[\\udffb-\\udfff]";
+      var rsModifier = "(?:" + rsCombo + "|" + rsFitz + ")";
+      var rsNonAstral = "[^" + rsAstralRange + "]";
+      var rsRegional = "(?:\\ud83c[\\udde6-\\uddff]){2}";
+      var rsSurrPair = "[\\ud800-\\udbff][\\udc00-\\udfff]";
+      var rsUpper = "[" + rsUpperRange + "]";
+      var rsZWJ = "\\u200d";
+      var rsMiscLower = "(?:" + rsLower + "|" + rsMisc + ")";
+      var rsMiscUpper = "(?:" + rsUpper + "|" + rsMisc + ")";
+      var rsOptContrLower = "(?:" + rsApos + "(?:d|ll|m|re|s|t|ve))?";
+      var rsOptContrUpper = "(?:" + rsApos + "(?:D|LL|M|RE|S|T|VE))?";
+      var reOptMod = rsModifier + "?";
+      var rsOptVar = "[" + rsVarRange + "]?";
+      var rsOptJoin = "(?:" + rsZWJ + "(?:" + [rsNonAstral, rsRegional, rsSurrPair].join("|") + ")" + rsOptVar + reOptMod + ")*";
+      var rsOrdLower = "\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])";
+      var rsOrdUpper = "\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])";
+      var rsSeq = rsOptVar + reOptMod + rsOptJoin;
+      var rsEmoji = "(?:" + [rsDingbat, rsRegional, rsSurrPair].join("|") + ")" + rsSeq;
+      var reUnicodeWord = RegExp([
+        rsUpper + "?" + rsLower + "+" + rsOptContrLower + "(?=" + [rsBreak, rsUpper, "$"].join("|") + ")",
+        rsMiscUpper + "+" + rsOptContrUpper + "(?=" + [rsBreak, rsUpper + rsMiscLower, "$"].join("|") + ")",
+        rsUpper + "?" + rsMiscLower + "+" + rsOptContrLower,
+        rsUpper + "+" + rsOptContrUpper,
+        rsOrdUpper,
+        rsOrdLower,
+        rsDigits,
+        rsEmoji
+      ].join("|"), "g");
+      function unicodeWords(string) {
+        return string.match(reUnicodeWord) || [];
+      }
+      module.exports = unicodeWords;
+    }
+  });
+
+  // node_modules/lodash/words.js
+  var require_words = __commonJS({
+    "node_modules/lodash/words.js"(exports, module) {
+      var asciiWords = require_asciiWords();
+      var hasUnicodeWord = require_hasUnicodeWord();
+      var toString = require_toString();
+      var unicodeWords = require_unicodeWords();
+      function words(string, pattern, guard) {
+        string = toString(string);
+        pattern = guard ? void 0 : pattern;
+        if (pattern === void 0) {
+          return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
+        }
+        return string.match(pattern) || [];
+      }
+      module.exports = words;
+    }
+  });
+
+  // node_modules/lodash/_createCompounder.js
+  var require_createCompounder = __commonJS({
+    "node_modules/lodash/_createCompounder.js"(exports, module) {
+      var arrayReduce = require_arrayReduce();
+      var deburr = require_deburr();
+      var words = require_words();
+      var rsApos = "['\u2019]";
+      var reApos = RegExp(rsApos, "g");
+      function createCompounder(callback) {
+        return function(string) {
+          return arrayReduce(words(deburr(string).replace(reApos, "")), callback, "");
+        };
+      }
+      module.exports = createCompounder;
+    }
+  });
+
+  // node_modules/lodash/_baseSlice.js
+  var require_baseSlice = __commonJS({
+    "node_modules/lodash/_baseSlice.js"(exports, module) {
+      function baseSlice(array, start, end) {
+        var index = -1, length = array.length;
+        if (start < 0) {
+          start = -start > length ? 0 : length + start;
+        }
+        end = end > length ? length : end;
+        if (end < 0) {
+          end += length;
+        }
+        length = start > end ? 0 : end - start >>> 0;
+        start >>>= 0;
+        var result = Array(length);
+        while (++index < length) {
+          result[index] = array[index + start];
+        }
+        return result;
+      }
+      module.exports = baseSlice;
+    }
+  });
+
+  // node_modules/lodash/_castSlice.js
+  var require_castSlice = __commonJS({
+    "node_modules/lodash/_castSlice.js"(exports, module) {
+      var baseSlice = require_baseSlice();
+      function castSlice(array, start, end) {
+        var length = array.length;
+        end = end === void 0 ? length : end;
+        return !start && end >= length ? array : baseSlice(array, start, end);
+      }
+      module.exports = castSlice;
+    }
+  });
+
+  // node_modules/lodash/_hasUnicode.js
+  var require_hasUnicode = __commonJS({
+    "node_modules/lodash/_hasUnicode.js"(exports, module) {
+      var rsAstralRange = "\\ud800-\\udfff";
+      var rsComboMarksRange = "\\u0300-\\u036f";
+      var reComboHalfMarksRange = "\\ufe20-\\ufe2f";
+      var rsComboSymbolsRange = "\\u20d0-\\u20ff";
+      var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+      var rsVarRange = "\\ufe0e\\ufe0f";
+      var rsZWJ = "\\u200d";
+      var reHasUnicode = RegExp("[" + rsZWJ + rsAstralRange + rsComboRange + rsVarRange + "]");
+      function hasUnicode(string) {
+        return reHasUnicode.test(string);
+      }
+      module.exports = hasUnicode;
+    }
+  });
+
+  // node_modules/lodash/_asciiToArray.js
+  var require_asciiToArray = __commonJS({
+    "node_modules/lodash/_asciiToArray.js"(exports, module) {
+      function asciiToArray(string) {
+        return string.split("");
+      }
+      module.exports = asciiToArray;
+    }
+  });
+
+  // node_modules/lodash/_unicodeToArray.js
+  var require_unicodeToArray = __commonJS({
+    "node_modules/lodash/_unicodeToArray.js"(exports, module) {
+      var rsAstralRange = "\\ud800-\\udfff";
+      var rsComboMarksRange = "\\u0300-\\u036f";
+      var reComboHalfMarksRange = "\\ufe20-\\ufe2f";
+      var rsComboSymbolsRange = "\\u20d0-\\u20ff";
+      var rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+      var rsVarRange = "\\ufe0e\\ufe0f";
+      var rsAstral = "[" + rsAstralRange + "]";
+      var rsCombo = "[" + rsComboRange + "]";
+      var rsFitz = "\\ud83c[\\udffb-\\udfff]";
+      var rsModifier = "(?:" + rsCombo + "|" + rsFitz + ")";
+      var rsNonAstral = "[^" + rsAstralRange + "]";
+      var rsRegional = "(?:\\ud83c[\\udde6-\\uddff]){2}";
+      var rsSurrPair = "[\\ud800-\\udbff][\\udc00-\\udfff]";
+      var rsZWJ = "\\u200d";
+      var reOptMod = rsModifier + "?";
+      var rsOptVar = "[" + rsVarRange + "]?";
+      var rsOptJoin = "(?:" + rsZWJ + "(?:" + [rsNonAstral, rsRegional, rsSurrPair].join("|") + ")" + rsOptVar + reOptMod + ")*";
+      var rsSeq = rsOptVar + reOptMod + rsOptJoin;
+      var rsSymbol = "(?:" + [rsNonAstral + rsCombo + "?", rsCombo, rsRegional, rsSurrPair, rsAstral].join("|") + ")";
+      var reUnicode = RegExp(rsFitz + "(?=" + rsFitz + ")|" + rsSymbol + rsSeq, "g");
+      function unicodeToArray(string) {
+        return string.match(reUnicode) || [];
+      }
+      module.exports = unicodeToArray;
+    }
+  });
+
+  // node_modules/lodash/_stringToArray.js
+  var require_stringToArray = __commonJS({
+    "node_modules/lodash/_stringToArray.js"(exports, module) {
+      var asciiToArray = require_asciiToArray();
+      var hasUnicode = require_hasUnicode();
+      var unicodeToArray = require_unicodeToArray();
+      function stringToArray(string) {
+        return hasUnicode(string) ? unicodeToArray(string) : asciiToArray(string);
+      }
+      module.exports = stringToArray;
+    }
+  });
+
+  // node_modules/lodash/_createCaseFirst.js
+  var require_createCaseFirst = __commonJS({
+    "node_modules/lodash/_createCaseFirst.js"(exports, module) {
+      var castSlice = require_castSlice();
+      var hasUnicode = require_hasUnicode();
+      var stringToArray = require_stringToArray();
+      var toString = require_toString();
+      function createCaseFirst(methodName) {
+        return function(string) {
+          string = toString(string);
+          var strSymbols = hasUnicode(string) ? stringToArray(string) : void 0;
+          var chr = strSymbols ? strSymbols[0] : string.charAt(0);
+          var trailing = strSymbols ? castSlice(strSymbols, 1).join("") : string.slice(1);
+          return chr[methodName]() + trailing;
+        };
+      }
+      module.exports = createCaseFirst;
+    }
+  });
+
+  // node_modules/lodash/upperFirst.js
+  var require_upperFirst = __commonJS({
+    "node_modules/lodash/upperFirst.js"(exports, module) {
+      var createCaseFirst = require_createCaseFirst();
+      var upperFirst = createCaseFirst("toUpperCase");
+      module.exports = upperFirst;
+    }
+  });
+
+  // node_modules/lodash/startCase.js
+  var require_startCase = __commonJS({
+    "node_modules/lodash/startCase.js"(exports, module) {
+      var createCompounder = require_createCompounder();
+      var upperFirst = require_upperFirst();
+      var startCase3 = createCompounder(function(result, word, index) {
+        return result + (index ? " " : "") + upperFirst(word);
+      });
+      module.exports = startCase3;
+    }
+  });
+
+  // node_modules/lodash/_arrayPush.js
+  var require_arrayPush = __commonJS({
+    "node_modules/lodash/_arrayPush.js"(exports, module) {
+      function arrayPush(array, values) {
+        var index = -1, length = values.length, offset = array.length;
+        while (++index < length) {
+          array[offset + index] = values[index];
+        }
+        return array;
+      }
+      module.exports = arrayPush;
+    }
+  });
+
   // node_modules/lodash/_baseIsArguments.js
   var require_baseIsArguments = __commonJS({
     "node_modules/lodash/_baseIsArguments.js"(exports, module) {
@@ -3778,14 +4369,6 @@
         return isObjectLike(value) && hasOwnProperty.call(value, "callee") && !propertyIsEnumerable.call(value, "callee");
       };
       module.exports = isArguments;
-    }
-  });
-
-  // node_modules/lodash/isArray.js
-  var require_isArray = __commonJS({
-    "node_modules/lodash/isArray.js"(exports, module) {
-      var isArray = Array.isArray;
-      module.exports = isArray;
     }
   });
 
@@ -3890,8 +4473,6 @@
       const item = new this.#Item({ ...argv, application: this.#application, parent: this.#parent });
       const itemExists = this.#content.find((o) => o.id === item.id);
       if (itemExists)
-        console.log(item);
-      if (itemExists)
         throw new Error("Item Exixts");
       this.#content.push(item);
       if (this.#auto && item.start)
@@ -3943,6 +4524,11 @@
       if (typeof callback !== "function")
         throw new TypeError("Find needs a function.");
       return this.#content.filter((item) => !item.deleted).filter(callback);
+    }
+    map(callback) {
+      if (typeof callback !== "function")
+        throw new TypeError("Find needs a function.");
+      return this.#content.filter((item) => !item.deleted).map(callback);
     }
     update(id2, property, value) {
       const item = this.#content.find((item2) => item2.id === id2);
@@ -4024,8 +4610,9 @@
         delete this.#monitors[id2];
       };
     }
-    observe(key, observer) {
-      observer(this[key]);
+    observe(key, observer, autorun = true) {
+      if (autorun)
+        observer(this[key]);
       return this.subscribe(key, observer);
     }
     subscribe(key, observer) {
@@ -4101,6 +4688,13 @@
     getApplication() {
       return this.application;
     }
+    selectTheme(name2) {
+      this.application.Setup.theme = name2;
+      document.querySelector("html").dataset.uiTheme = name2;
+    }
+    selectedTheme(name2) {
+      return this.application.Setup.theme;
+    }
     select(reference) {
       return this.application.Selection.create({ id: reference.id, kind: reference.kind, reference });
     }
@@ -4129,7 +4723,7 @@
       Selection.clear(true);
     }
     addNode(archetype, properties) {
-      const node = this.application.Nodes.create({ type: archetype, properties });
+      const node = this.application.Nodes.create({ type: archetype, ...properties });
       this.deselectAll();
       this.select(node);
       return node;
@@ -4146,14 +4740,17 @@
       if (!node)
         throw new Error("you must specify which node to execute");
       const output2 = await node.Execute.run(port);
-      console.log(`Output on port ${port} of node ${node.id}`, output2);
       return output2;
     }
     load(data) {
-      console.log("load got data", data);
+      for (const collectionName in data) {
+        this.application[collectionName].clear(true);
+        data[collectionName].forEach((item) => this.application[collectionName].create(item));
+      }
     }
     save() {
       const content = {
+        // Archetypes: this.application.Archetypes.content,
         Nodes: this.application.Nodes.content.map((o) => o.content),
         Connectors: this.application.Connectors.content.map((o) => o.content),
         Junctions: this.application.Junctions.content.map((o) => o.content)
@@ -4162,19 +4759,16 @@
     }
   };
 
-  // src/application/ui/Theme.js
-  var Theme = class {
-    captionHeight = 48;
-    lineHeight = 32;
-    gapHeight = 5;
-    padding = 5;
-    margin = 5;
-    panelBackground = "blue";
-  };
-
-  // src/Theme.js
-  var MyTheme = class extends Theme {
-    panelBackground = "blue";
+  // src/application/model/Setup.js
+  var Setup = class extends ReactiveObject {
+    constructor(properties) {
+      super();
+      const props = {
+        id: v4_default(),
+        ...properties
+      };
+      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    }
   };
 
   // src/application/model/Archetype.js
@@ -4221,10 +4815,10 @@
       return response;
     }
     async run(port) {
-      const outputPort = this.node.Output.find((item) => item.name == port);
+      const outputPort = this.node.Output.find((item) => item.id == port);
       if (!outputPort)
-        throw new Error(`Port named ${port} was not found on node of type ${this.node.type}`);
-      const response = await outputPort.generator({ ...await this.#upstream(), value: outputPort.value });
+        throw new Error(`Port id ${port} was not found on node of type ${this.node.type}`);
+      const response = {};
       return response;
     }
   };
@@ -4279,7 +4873,7 @@
       const defaults = {
         id: v4_default(),
         name: "unnamed",
-        direction: "reply",
+        direction: "output",
         type: "string",
         description: "none",
         x: 0,
@@ -4287,6 +4881,7 @@
         generator: () => ({})
       };
       this.#setup = Object.assign({}, defaults, configuration);
+      console.log(this.#setup);
       Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     get configuration() {
@@ -4308,15 +4903,16 @@
     Input;
     Output;
     Execute;
-    constructor({ id: id2, type, properties, application: application2 } = {}) {
+    constructor(x) {
       super();
-      this.#application = application2;
+      this.#application = x.application;
+      const type = x.type;
       if (!type)
         throw new Error("You must initialize a node with a known type, type was not specified");
       this.Execute = new Standard(this);
-      this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
-      this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
-      const archetype = application2.Archetypes.find((o) => o.type == type);
+      this.Input = new ReactiveArray({ application: this.application, parent: this, Item: Input, auto: true });
+      this.Output = new ReactiveArray({ application: this.application, parent: this, Item: Output, auto: true });
+      const archetype = this.application.Archetypes.find((o) => o.type == type);
       if (!archetype)
         throw new Error(`Archetype not found. Unrecognized type detected "${type}"`);
       archetype.input.forEach((o) => {
@@ -4325,28 +4921,29 @@
       archetype.output.forEach((o) => {
         this.Output.create(o);
       });
-      const archetypeDefaults = Object.fromEntries(archetype.input.map((o) => [o.name, o.value]));
-      console.log({ archetypeDefaults });
+      const archetypeDefaults = Object.fromEntries(archetype.input.map((o) => [o.id, o.value]));
       const options = {
-        id: id2 || v4_default(),
+        id: x.id || v4_default(),
         type
       };
-      Object.entries({ ...{ x: 0, y: 0 }, ...archetypeDefaults, ...properties, ...options }).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      const payload = { ...{ x: 0, y: 0 }, ...archetypeDefaults, ...x, ...options };
+      delete payload.application;
+      Object.entries(payload).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
     }
     stop() {
       this.#unsubscribe.map((o) => o());
     }
-    port(name) {
-      const inputCandidate = this.Input.find((port) => port.name == name);
+    port(id2) {
+      const inputCandidate = this.Input.find((port) => port.id == id2);
       if (inputCandidate)
         return inputCandidate;
-      const outputCandidate = this.Output.find((port) => port.name == name);
+      const outputCandidate = this.Output.find((port) => port.id == id2);
       if (outputCandidate)
         return outputCandidate;
       if (!outputCandidate)
-        throw new Error(`Port named ${name} was not found on node of type ${this.type}`);
+        throw new Error(`Port id ${id2} was not found on node of type ${this.type}`);
     }
     get kind() {
       return this.#kind;
@@ -4356,12 +4953,27 @@
     }
   };
 
+  // src/application/model/Theme.js
+  var Theme = class {
+    id;
+    name;
+    reference;
+    // NOTE: live reference to an object as serializing selected items is a strange thing to do.
+    data = {};
+    deleted = false;
+    constructor({ id: id2, name: name2, reference }) {
+      this.id = id2 || v4_default();
+      this.name = name2;
+      this.reference = reference;
+    }
+  };
+
   // src/application/model/Connector.js
   var Connector = class extends ReactiveObject {
     #kind = "Connector";
     application;
     #unsubscribe = [];
-    constructor({ application: application2, id: id2, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }) {
+    constructor({ id: id2, application: application2, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }) {
       super();
       this.application = application2;
       const props = {
@@ -4371,14 +4983,12 @@
         sourcePort,
         targetType,
         targetNode,
-        targetPort,
-        backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-        x1: 1e4 * Math.random(),
-        y1: 8e3 * Math.random(),
-        x2: 1e4 * Math.random(),
-        y2: 8e3 * Math.random(),
-        edgeWidth: 10,
-        depthLevel: 0
+        targetPort
+        // 
+        // x1:0,
+        // y1:0,
+        // x2:0,
+        // y2:0,
       };
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
@@ -4408,8 +5018,8 @@
       this.Execute = new Standard(this);
       this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
       this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
-      this.Input.create({ name: "input" });
-      this.Output.create({ name: "output", generator: ({ input }) => input });
+      this.Input.create({ id: "input" });
+      this.Output.create({ id: "output", generator: ({ input }) => input });
       const props = {
         id: id2 || v4_default(),
         x: properties.x || 0,
@@ -4422,11 +5032,11 @@
     stop() {
       this.#unsubscribe.map((o) => o());
     }
-    port(name) {
-      const inputCandidate = this.Input.find((port) => port.name == name);
+    port(id2) {
+      const inputCandidate = this.Input.find((port) => port.id == id2);
       if (inputCandidate)
         return inputCandidate;
-      const outputCandidate = this.Output.find((port) => port.name == name);
+      const outputCandidate = this.Output.find((port) => port.id == id2);
       if (outputCandidate)
         return outputCandidate;
       if (!output)
@@ -4630,9 +5240,9 @@
     };
     children = [];
     #cleanup = [];
-    constructor(name, { view } = {}) {
+    constructor(name2, { view } = {}) {
       this.root = this;
-      this.name = name;
+      this.name = name2;
       this.view = view;
     }
     get #above() {
@@ -4719,7 +5329,7 @@
   var Container = class extends Component {
     setup() {
       this.el.Panel = svg.rect({
-        class: "panel-container",
+        class: "node-container",
         ry: this.radius,
         width: this.width,
         x: this.x,
@@ -4865,8 +5475,8 @@
   // src/application/ui/view/node/Caption.js
   var Caption = class extends Component {
     setup() {
-      this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
-      this.el.CaptionText = svg.text({ class: `panel-caption-text`, x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
+      this.el.Caption = svg.rect({ class: `node-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.CaptionText = svg.text({ class: `node-caption caption-text`, style: "pointer-events: none; user-select: none;", x: this.x + this.width * 0.02, y: this.y + (this.height - this.height * 0.12) }, this.data.type);
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
         if (data.has(this.data.id)) {
@@ -4921,7 +5531,7 @@
   // src/application/ui/view/node/Pod.js
   var Pod = class extends Component {
     setup() {
-      this.el.Pod = svg.rect({ class: "panel-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.Pod = svg.rect({ class: "node-pod", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.children.map((child) => child.setup());
     }
@@ -4937,7 +5547,7 @@
   // src/application/ui/view/node/Row.js
   var Row = class extends Component {
     setup() {
-      this.el.Row = svg.rect({ class: "panel-line", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.Row = svg.rect({ class: "pod-row", ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
       this.children.map((child) => child.setup());
       this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
         if (data.has(this.parent.data.id)) {
@@ -4956,7 +5566,7 @@
     }
   };
 
-  // src/application/ui/view/node/line/Connectable.js
+  // src/application/ui/view/node/port/Connectable.js
   var Connectable = class {
     #el = {};
     #scale;
@@ -5008,8 +5618,8 @@
         dy = 0;
       };
       this.#mouseUpHandler = (e) => {
-        const isOverAnotherPort = this.#dragging && e.target && (e.target.classList.contains("panel-line-port") || e.target.classList.contains("junction-port"));
-        const isOverBackground = this.#dragging && e.target && e.target.classList.contains("view-scene-background");
+        const isOverAnotherPort = this.#dragging && e.target && (e.target.classList.contains("node-port") || e.target.classList.contains("junction-port"));
+        const isOverBackground = this.#dragging && e.target && e.target.classList.contains("interface-background");
         if (isOverAnotherPort) {
           const portAddress = e.target.dataset.portAddress;
           const [targetKind, targetType, targetNodeId, targetPortId] = portAddress.split(":");
@@ -5063,24 +5673,32 @@
       if (this.data.port.direction == "input") {
         const x = this.x - moveHorizontally;
         const y = this.y + moveDown;
-        this.el.PortCaption = svg.text({ class: `panel-line-text`, x: this.x + this.bounds.space, y: this.y + (this.height - this.height / 3) }, this.data.port.name);
-        this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+        this.el.PortCaption = svg.text({ class: `port-text`, style: "pointer-events: none; user-select: none;", x: this.x + this.bounds.space, y: this.y + (this.height - this.height / 3) }, this.data.port.id);
+        this.el.Port = svg.circle({ class: `node-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
         this.data.port.x = x;
         this.data.port.y = y;
       } else {
         const x = this.x + this.width + moveHorizontally;
         const y = this.y + moveDown;
         this.el.PortCaption = svg.text({
-          class: `panel-line-text border border-info`,
+          class: `port-text`,
+          style: "pointer-events: none; user-select: none;",
           textAnchor: "end",
           x: this.width - this.bounds.space,
           y: this.y + (this.height - this.height / 3),
           width: this.width
-        }, this.data.port.name);
-        this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+        }, this.data.port.id);
+        this.el.Port = svg.circle({ class: `node-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
         this.data.port.x = x;
         this.data.port.y = y;
       }
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(this.data.node.id)) {
+          Object.values(this.el).map((el) => el.classList.add("selected"));
+        } else {
+          Object.values(this.el).map((el) => el.classList.remove("selected"));
+        }
+      }));
       dataset(this.el.Port, {
         portAddress: [
           this.data.port.kind,
@@ -5096,8 +5714,7 @@
       if (this.behavior.showCaption)
         this.group.appendChild(this.el.PortCaption);
       this.group.appendChild(this.el.Port);
-      console.log(this.data.port.direction);
-      if (this.data.port.direction == "reply") {
+      if (this.data.port.direction == "output") {
         const connectable = new Connectable({
           container: window,
           // <g> element representing an SVG scene
@@ -5150,71 +5767,76 @@
   }
   var Editor = class extends Component {
     setup() {
-      this.el.Editor = svg.rect({ class: "panel-editor", width: this.width, x: this.x, y: this.y, height: this.height });
+      this.el.Editor = svg.rect({ fill: "transparent", width: this.width, x: this.x, y: this.y, height: this.height });
       this.el.valueText = text("");
       this.el.EditorValue = svg.text({
-        class: `editor-value`,
+        class: `port-text editor-text`,
+        style: "pointer-events: none; user-select: none;",
         "dominant-baseline": "middle",
-        x: this.x,
+        x: this.x + this.bounds.space,
         y: this.y + this.height / 2,
         // + (this.height - (this.height / 3)),
-        width: this.width,
+        width: this.width - +this.bounds.space,
         height: this.height
       });
       this.el.EditorValue.appendChild(this.el.valueText);
       this.children.map((child) => child.setup());
+      this.cleanup(this.view.application.Selection.observe("changed", ({ data }) => {
+        if (data.has(this.data.node.id)) {
+          Object.values(this.el).filter((o) => o.classList).map((el) => el.classList.add("selected"));
+        } else {
+          Object.values(this.el).filter((o) => o.classList).map((el) => el.classList.remove("selected"));
+        }
+      }));
     }
     render() {
-      this.cleanup(this.data.node.observe(this.data.port.name, (v) => {
-        truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${v}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale: this.view.transform.scale });
+      this.cleanup(this.data.node.observe(this.data.port.id, (v) => {
+        truncateTextWithBrowserCompatibility({ text: `${this.data.port.id}: ${v}`, width: this.width - this.bounds.space, measure: this.el.EditorValue, assign: this.el.valueText, scale: this.view.transform.scale });
       }));
       this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? this.el.EditorValue.style.scale = 1 : this.el.EditorValue.style.scale = 1 / scale));
       this.cleanup(this.view.observe("transform", ({ x, y, scale }) => {
         if (scale >= 1) {
           update2(this.el.EditorValue, {
-            x: this.x * scale,
+            x: this.x + this.bounds.space * scale,
             y: (this.y + this.height / 2) * scale,
             //(this.y + (this.height - (this.height / 3)))*scale,
-            width: this.width * scale,
+            width: this.width - this.bounds.space * scale,
             height: this.height * scale
             //NOTE: only works in chromium, fails in firefox under various conditions and when a transform is applied 'clip-path': clip(this.width, this.height, scale),
           });
         } else {
           update2(this.el.EditorValue, {
-            x: this.x,
+            x: this.x + this.bounds.space,
             y: this.y + this.height / 2,
-            width: this.width,
+            width: this.width - this.bounds.space,
             height: this.height
           });
         }
-        truncateTextWithBrowserCompatibility({ text: `${this.data.port.name}: ${this.data.node[this.data.port.name] || ""}`, width: this.width, measure: this.el.EditorValue, assign: this.el.valueText, scale });
+        truncateTextWithBrowserCompatibility({ text: `${this.data.port.id}: ${this.data.node[this.data.port.id] || ""}`, width: this.width - this.bounds.space, measure: this.el.EditorValue, assign: this.el.valueText, scale });
       }));
       const hiddenables = [this.parent.el.Port, this.el.EditorValue];
       this.cleanup(mouse(this.el.Editor, () => this.el.Editor.classList.add("active"), () => this.el.Editor.classList.remove("active")));
       this.cleanup(click(this.el.Editor, () => {
         if (this.view.transform.scale < 0.75)
           return;
-        console.log("Installing Editor");
         hiddenables.map((o) => o.style.opacity = 0.01);
-        this.el.InputBoxForeignObject = svg.foreignObject({ width: this.width, x: this.x, y: this.y, height: this.height });
-        this.el.InputBox = html.textarea({ type: "text", class: `editor-control type-text`, style: "width: 100%; height: 100%; resize:none;" }, this.data.node[this.data.port.name] || "");
-        this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.InputBoxForeignObject.style.scale = 1 / scale));
-        this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : update2(this.el.InputBoxForeignObject, { width: this.width * scale, x: this.x * scale, y: this.y * scale, height: this.height * scale })));
-        this.el.InputBoxForeignObject.appendChild(this.el.InputBox);
-        this.group.appendChild(this.el.InputBoxForeignObject);
-        this.el.InputBox.focus();
-        this.el.InputBox.select();
-        this.el.InputBox.addEventListener("focusout", () => {
+        this.el.TextareaForeignObject = svg.foreignObject({ width: this.width, x: this.x, y: this.y, height: this.height });
+        this.el.Textarea = html.textarea({ type: "text", class: `editor-control textarea`, style: "width: 100%; height: 100%; resize:none;" }, this.data.node[this.data.port.id] || "");
+        this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : this.el.TextareaForeignObject.style.scale = 1 / scale));
+        this.cleanup(this.view.observe("transform", ({ x, y, scale }) => scale < 1 ? null : update2(this.el.TextareaForeignObject, { width: this.width * scale, x: this.x * scale, y: this.y * scale, height: this.height * scale })));
+        this.el.TextareaForeignObject.appendChild(this.el.Textarea);
+        this.group.appendChild(this.el.TextareaForeignObject);
+        this.el.Textarea.focus();
+        this.el.Textarea.setSelectionRange(this.el.Textarea.value.length, this.el.Textarea.value.length);
+        this.el.Textarea.addEventListener("focusout", () => {
           hiddenables.map((o) => o.style.opacity = 1);
-          this.data.node[this.data.port.name] = this.el.InputBox.value;
-          this.el.InputBoxForeignObject.remove();
+          this.data.node[this.data.port.id] = this.el.Textarea.value;
+          this.el.TextareaForeignObject.remove();
         });
       }));
       this.cleanup(() => Object.values(this.el).map((el) => el.remove()));
       this.group.appendChild(this.el.Editor);
       this.group.appendChild(this.el.EditorValue);
-      if (this.el.ClipPathRectangle1)
-        this.group.appendChild(this.el.ClipPathRectangle1);
       this.children.map((child) => child.render());
     }
     update() {
@@ -5245,7 +5867,7 @@
         row.setData(portObject);
         outputPod.add(row);
         const port = new Port(`port{index}`);
-        port.setBounds({ width: 200, height: 32, space: 4, radius: 9 });
+        port.setBounds({ width: 200, height: 20, space: 4, radius: 7 });
         port.setData({ node: data, port: portObject });
         row.add(port);
       });
@@ -5256,11 +5878,11 @@
         inputPod.add(row);
         const port = new Port(`port{index}`);
         port.setBehavior({ showCaption: false });
-        port.setBounds({ space: 4, radius: 5, padding: 3 });
+        port.setBounds({ radius: 7 });
         port.setData({ node: data, port: portObject });
         row.add(port);
-        const editor = new Editor(`port{index}`);
-        editor.setBounds({ width: 200, height: 18 });
+        const editor = new Editor(`editor{index}`);
+        editor.setBounds({ space: 10, width: 200, height: 20 });
         editor.setData({ node: data, port: portObject });
         port.add(editor);
       });
@@ -5302,11 +5924,13 @@
   var Link = class extends Base {
     start({ link, view }) {
       const { Shortcuts, Api: Api2, Nodes, Junctions, Selection, Cable } = view.application;
-      console.log({ link });
       const sourceNode = (link.sourceType == "Junction" ? Junctions : Nodes).get(link.sourceNode);
       const targetNode = (link.targetType == "Junction" ? Junctions : Nodes).get(link.targetNode);
       const sourcePort = sourceNode.Output.get(link.sourcePort);
       const targetPort = targetNode.Input.get(link.targetPort);
+      if ([sourceNode, targetNode, sourcePort, targetPort].some((o) => o == void 0)) {
+        console.log("MISSING DATA", { sourceNode, targetNode, sourcePort, targetPort });
+      }
       let x1 = sourceNode.x + sourcePort.x;
       let y1 = sourceNode.y + sourcePort.y;
       let x2 = targetNode.x + targetPort.x;
@@ -5322,7 +5946,8 @@
       });
       this.el.Cable = svg.line({
         class: "cable-line",
-        // class:'cable-line line-ant-trail',
+        style: "pointer-events: none;",
+        // NOTE: we must disable this line, to let CableZone fully take over
         x1,
         y1,
         x2,
@@ -5486,12 +6111,12 @@
   var Junction2 = class extends Base {
     start({ junction, view }) {
       const { Shortcuts, Api: Api2, Nodes, Selection, Cable } = view.application;
-      console.log(`view/Junction got`, junction);
       this.el.Group = svg.g();
       this.cleanup(junction.observe("x", (v) => update2(this.el.Group, { "transform": `translate(${v},${junction.y})` })));
       this.cleanup(junction.observe("y", (v) => update2(this.el.Group, { "transform": `translate(${junction.x},${v})` })));
       this.el.Junction = svg.circle({ class: "junction-caption", cx: 0, cy: 0, r: 24 });
       this.el.OmniPort = svg.circle({ class: "junction-port", cx: 0, cy: 0, r: 8 });
+      console.log({ junction }, junction.port("input"));
       this.el.OmniPort.dataset.portAddress = [junction.port("input").kind, "Junction", junction.id, junction.port("input").id].join(":");
       this.el.Group.appendChild(this.el.Junction);
       this.el.Group.appendChild(this.el.OmniPort);
@@ -5560,6 +6185,7 @@
   };
 
   // src/application/ui/view/Menus.js
+  var import_startCase2 = __toESM(require_startCase(), 1);
   var import_oneof2 = __toESM(require_oneof(), 1);
 
   // src/application/ui/view/menu/Component.js
@@ -5579,9 +6205,9 @@
     options = {};
     children = [];
     #cleanup = [];
-    constructor(name, options = {}) {
+    constructor(name2, options = {}) {
       this.root = this;
-      this.name = name;
+      this.name = name2;
       this.options = Object.assign({}, options, this.defaults);
     }
     get #above() {
@@ -5624,12 +6250,12 @@
   };
 
   // src/application/ui/view/menu/Dropdown.js
+  var import_startCase = __toESM(require_startCase(), 1);
   var Dropdown = class extends Component2 {
     constructor(...args) {
       super(...args);
     }
     setup() {
-      const { Api: Api2 } = this.view.application;
       this.el.navItemDropdown = document.createElement("li");
       this.el.navItemDropdown.setAttribute("class", "nav-item dropdown");
       const navLinkDropdownToggle = document.createElement("a");
@@ -5641,32 +6267,35 @@
       this.el.navItemDropdown.appendChild(navLinkDropdownToggle);
       const text2 = document.createTextNode(this.name);
       navLinkDropdownToggle.appendChild(text2);
-      const dropdownMenu = document.createElement("ul");
-      dropdownMenu.setAttribute("class", "dropdown-menu");
-      this.el.navItemDropdown.appendChild(dropdownMenu);
-      const data = [
-        {
-          caption: "Open File...",
-          program: async () => Api2.load(await JSONReader())
-        },
-        {
-          caption: "Save As...",
-          program: () => JSONWriter(JSON.stringify(Api2.save(), null, 2))
-        }
-      ];
-      data.forEach((menuItem) => {
-        const listItem = document.createElement("li");
-        dropdownMenu.appendChild(listItem);
-        const dropdownItem = document.createElement("div");
-        dropdownItem.setAttribute("class", "dropdown-item");
-        listItem.appendChild(dropdownItem);
-        const text22 = document.createTextNode(menuItem.caption);
-        dropdownItem.appendChild(text22);
-        dropdownItem.addEventListener("click", () => menuItem.program());
-      });
+      this.el.dropdownMenu = document.createElement("ul");
+      this.el.dropdownMenu.setAttribute("class", "dropdown-menu");
+      this.el.navItemDropdown.appendChild(this.el.dropdownMenu);
+      this.update();
     }
     render(container) {
       container.appendChild(this.el.navItemDropdown);
+    }
+    update() {
+      this.el.dropdownMenu.replaceChildren();
+      this.data.forEach((menuItem) => {
+        if (typeof menuItem === "string") {
+          const listItem2 = html.li();
+          this.el.dropdownMenu.appendChild(listItem2);
+          const dropdownDivider = html.hr({ class: "dropdown-divider" });
+          listItem2.appendChild(dropdownDivider);
+          return;
+        }
+        const listItem = document.createElement("li");
+        this.el.dropdownMenu.appendChild(listItem);
+        const dropdownItem = document.createElement("div");
+        dropdownItem.classList.add("dropdown-item");
+        if (menuItem.selected)
+          dropdownItem.classList.add("active");
+        listItem.appendChild(dropdownItem);
+        const text2 = document.createTextNode(menuItem.caption);
+        dropdownItem.appendChild(text2);
+        dropdownItem.addEventListener("click", () => menuItem.program());
+      });
     }
   };
 
@@ -5796,10 +6425,36 @@
   // src/application/ui/view/Menus.js
   var Menus = class extends Base {
     start(view) {
+      const { Api: Api2, Themes } = view.application;
       const navbar = new Navbar(view.name);
       navbar.setView(view);
-      const file = new Dropdown(`File`);
-      navbar.add(file);
+      const fileMenu = new Dropdown(`File`);
+      fileMenu.setData([
+        {
+          caption: "Open File...",
+          program: async () => Api2.load(await JSONReader())
+        },
+        {
+          caption: "Save As...",
+          program: () => JSONWriter(JSON.stringify(Api2.save(), null, 2))
+        },
+        "---------------------------------------------------------------",
+        {
+          caption: "Basic Example",
+          program: async () => Api2.load(await (await fetch("./templates/hello-world.json")).json())
+        }
+      ]);
+      navbar.add(fileMenu);
+      const themeMenu = new Dropdown(`Theme`);
+      const themes = () => Themes.map((theme) => ({ caption: (0, import_startCase2.default)(theme.name), selected: theme.name == Api2.selectedTheme(), program: () => Api2.selectTheme(theme.name) }));
+      console.log(Themes.content);
+      console.log(themes());
+      themeMenu.setData(themes());
+      view.application.Setup.observe("theme", (v) => {
+        themeMenu.setData(Themes.map((theme) => ({ caption: (0, import_startCase2.default)(theme.name), selected: theme.name == Api2.selectedTheme(), program: () => Api2.selectTheme(theme.name) })));
+        themeMenu.update();
+      }, false);
+      navbar.add(themeMenu);
       const toolbox = new Offcanvas(`Toolbox`, { location: "start" });
       navbar.add(toolbox);
       const propertiesPane = new Offcanvas(`Properties`, { location: "end" });
@@ -5827,9 +6482,9 @@
     #transform;
     #renderers = /* @__PURE__ */ new Map();
     #unsubscribe = [];
-    constructor({ name, element, application: application2 }) {
+    constructor({ name: name2, element, application: application2 }) {
       super();
-      this.#name = name;
+      this.#name = name2;
       this.#element = element;
       this.#application = application2;
       const props = {
@@ -5856,18 +6511,9 @@
           return true;
         },
         beforeMouseDown: function(e) {
-          if (e.target.classList.contains("panel-caption"))
-            return true;
-          if (e.target.classList.contains("panel-line-port"))
-            return true;
-          if (e.target.classList.contains("ant-trail"))
-            return true;
-          if (e.target.classList.contains("junction-caption"))
-            return true;
-          if (e.target.classList.contains("junction-port"))
-            return true;
-          if (e.target.classList.contains("editor-control"))
-            return true;
+          const DENY = true;
+          if (!e.target.classList.contains("interface-background"))
+            return DENY;
         }
       });
       this.#panzoom.on("transform", (e) => {
@@ -5902,7 +6548,7 @@
     }
     #installCanvas() {
       const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svgElement.setAttributeNS(null, "class", "ui-view");
+      svgElement.setAttributeNS(null, "class", "editor-interface");
       svgElement.setAttributeNS(null, "width", "100%");
       svgElement.setAttributeNS(null, "height", "1000");
       this.#element.appendChild(svgElement);
@@ -6009,11 +6655,9 @@
     }
     #installScene() {
       const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      scene.setAttributeNS(null, "class", "view-scene");
-      scene.setAttributeNS(null, "id", "scene");
       this.#svg.appendChild(scene);
       const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect2.setAttributeNS(null, "class", "view-scene-background");
+      rect2.setAttributeNS(null, "class", "interface-background");
       rect2.setAttributeNS(null, "x", "0");
       rect2.setAttributeNS(null, "y", "0");
       rect2.setAttributeNS(null, "width", 11e3);
@@ -6091,10 +6735,9 @@
   var Brain = class extends ReactiveObject {
     Setup;
     // Application Configuration
-    Theme;
-    // Color/UI Theme
     Archetypes;
     // Node Library
+    Themes;
     Nodes;
     // Node Instances
     Connectors;
@@ -6109,9 +6752,9 @@
     Shortcuts;
     constructor() {
       super();
-      this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" });
-      this.Theme = new MyTheme(this);
+      this.Setup = new Setup({ title: "Signalcraft Visual Programming Language System", theme: "none" });
       this.Archetypes = new ReactiveArray({ application: this, Item: Archetype, auto: false });
+      this.Themes = new ReactiveArray({ application: this, Item: Theme, auto: true });
       this.Nodes = new ReactiveArray({ application: this, Item: Node2, auto: true });
       this.Connectors = new ReactiveArray({ application: this, Item: Connector, auto: true });
       this.Junctions = new ReactiveArray({ application: this, Item: Junction, auto: true });
@@ -6160,105 +6803,129 @@
   // src/setup.js
   var import_flattenDeep = __toESM(require_flattenDeep(), 1);
   var import_head = __toESM(require_head(), 1);
+
+  // src/application/ui/Theme.js
+  var Theme2 = class {
+    captionHeight = 48;
+    lineHeight = 32;
+    gapHeight = 5;
+    padding = 5;
+    margin = 5;
+    panelBackground = "blue";
+  };
+
+  // src/theme/nostromo/index.js
+  var MyTheme = class extends Theme2 {
+    panelBackground = "blue";
+  };
+
+  // src/theme/obsidian/index.js
+  var MyTheme2 = class extends Theme2 {
+    panelBackground = "blue";
+  };
+
+  // src/setup.js
   function setup_default(application2) {
+    application2.Themes.create({ name: "nostromo", theme: MyTheme });
+    application2.Themes.create({ name: "obsidian", theme: MyTheme2 });
     {
       const type = application2.Archetypes.create({ type: "test/layout" });
-      type.output.push({ name: "output1", generator: ({ value, string }) => {
+      type.output.push({ id: "output1", generator: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ name: "output2", generator: ({ value, string }) => {
+      type.output.push({ id: "output2", generator: ({ value, string }) => {
         return string;
       } });
-      type.input.push({ name: "string1", type: "string", description: "a string of letters", value: "default value" });
-      type.input.push({ name: "string2", type: "string", description: "a string of letters", value: "default value" });
-      type.input.push({ name: "string3", type: "string", description: "a string of letters", value: "default value" });
+      type.input.push({ id: "string1", type: "string", description: "a string of letters", value: "default value" });
+      type.input.push({ id: "string2", type: "string", description: "a string of letters", value: "default value" });
+      type.input.push({ id: "string3", type: "string", description: "a string of letters", value: "default value" });
     }
     const textType = application2.Archetypes.create({ type: "text/string" });
-    textType.output.push({ name: "output", generator: ({ value, string }) => {
+    textType.output.push({ id: "output", generator: ({ value, string }) => {
       return string;
     } });
-    textType.input.push({ name: "string", type: "string", description: "a string of letters", value: "default value long thing" });
+    textType.input.push({ id: "string", type: "string", description: "a string of letters", value: "default value long thing" });
     const colorType = application2.Archetypes.create({ type: "text/color" });
-    colorType.output.push({ name: "output", generator: () => {
+    colorType.output.push({ id: "output", generator: () => {
       return "TODO";
     } });
-    colorType.input.push({ name: "color", type: "string", description: "color" });
-    colorType.input.push({ name: "model", type: "string", description: "preferred model" });
-    colorType.input.push({ name: "description", type: "string", description: "description" });
+    colorType.input.push({ id: "color", type: "string", description: "color" });
+    colorType.input.push({ id: "model", type: "string", description: "preferred model" });
+    colorType.input.push({ id: "description", type: "string", description: "description" });
     const uppercaseType = application2.Archetypes.create({ type: "text/case" });
-    uppercaseType.output.push({ name: "upper", generator: () => {
+    uppercaseType.output.push({ id: "upper", generator: () => {
       return "TODO";
     } });
-    uppercaseType.output.push({ name: "lower", generator: () => {
+    uppercaseType.output.push({ id: "lower", generator: () => {
       return "TODO";
     } });
-    uppercaseType.input.push({ name: "input" });
-    uppercaseType.input.push({ name: "template", type: "string", description: "string template use $input to interpolate" });
-    uppercaseType.input.push({ name: "description", type: "string", description: "description" });
+    uppercaseType.input.push({ id: "input" });
+    uppercaseType.input.push({ id: "template", type: "string", description: "string template use $input to interpolate" });
+    uppercaseType.input.push({ id: "description", type: "string", description: "description" });
     const arrayJoinType = application2.Archetypes.create({ type: "array/join" });
     arrayJoinType.output.push({
-      name: "output",
+      id: "output",
       generator: ({ input, separator }) => {
         return (0, import_flattenDeep.default)(input);
       }
     });
-    arrayJoinType.input.push({ name: "input", type: "*", description: "data to join" });
-    arrayJoinType.input.push({ name: "separator", type: "string", description: "separator to use" });
-    arrayJoinType.input.push({ name: "duck", type: "string", description: "separator to use" });
+    arrayJoinType.input.push({ id: "input", type: "*", description: "data to join" });
+    arrayJoinType.input.push({ id: "separator", type: "string", description: "separator to use" });
+    arrayJoinType.input.push({ id: "duck", type: "string", description: "separator to use" });
     {
       const type = application2.Archetypes.create({ type: "dom/write" });
       type.output.push({
-        name: "output",
+        id: "output",
         generator: ({ input, target }) => {
-          const data = JSON.stringify((0, import_flattenDeep.default)(input));
+          const data = (0, import_flattenDeep.default)(input).join(", ");
           const targetId = (0, import_head.default)((0, import_flattenDeep.default)(target));
-          console.log(data, targetId);
           const elem = document.getElementById(targetId);
           elem.innerText = data;
           return (0, import_flattenDeep.default)(input);
         }
       });
-      type.input.push({ name: "input", type: "*", description: "data to join" });
-      type.input.push({ name: "target", type: "*", value: "output", description: "data to join" });
+      type.input.push({ id: "input", type: "*", description: "data to join" });
+      type.input.push({ id: "target", type: "*", value: "output", description: "data to join" });
     }
     {
       const type = application2.Archetypes.create({ type: "midjourney/prompt" });
       type.output.push({
-        name: "output",
+        id: "output",
         generator: ({ input, secondary, separator }) => {
           return (0, import_flattenDeep.default)([input, secondary]);
         }
       });
-      type.output.push({ name: "JSON", generator: ({ value, string }) => {
+      type.output.push({ id: "JSON", generator: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ name: "debug", generator: ({ value, string }) => {
+      type.output.push({ id: "debug", generator: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ name: "log", generator: ({ value, string }) => {
+      type.output.push({ id: "log", generator: ({ value, string }) => {
         return string;
       } });
-      type.input.push({ name: "input", type: "*", description: "data to join" });
-      type.input.push({ name: "template", type: "*", description: "base template" });
-      type.input.push({ name: "secondary", type: "*", description: "secondary characteristics" });
-      type.input.push({ name: "styles", type: "string", description: "styles" });
-      type.input.push({ name: "authors", type: "string", description: "authors", value: "michael vrubel, valentin serov, kustodiev boris" });
-      type.input.push({ name: "chaos", type: "string", description: "chaos" });
-      type.input.push({ name: "aspectRatio", type: "string", description: "aspect-ratio" });
-      type.input.push({ name: "style", type: "string", description: "style" });
-      type.input.push({ name: "weird", type: "string", description: "weird" });
-      type.input.push({ name: "version", type: "string", description: "version", value: "5.2" });
+      type.input.push({ id: "input", type: "*", description: "data to join" });
+      type.input.push({ id: "template", type: "*", description: "base template" });
+      type.input.push({ id: "secondary", type: "*", description: "secondary characteristics" });
+      type.input.push({ id: "styles", type: "string", description: "styles" });
+      type.input.push({ id: "authors", type: "string", description: "authors", value: "michael vrubel, valentin serov, kustodiev boris" });
+      type.input.push({ id: "chaos", type: "string", description: "chaos" });
+      type.input.push({ id: "aspectRatio", type: "string", description: "aspect-ratio" });
+      type.input.push({ id: "style", type: "string", description: "style" });
+      type.input.push({ id: "weird", type: "string", description: "weird" });
+      type.input.push({ id: "version", type: "string", description: "version", value: "5.2" });
     }
   }
 
   // src/usage.js
   async function usage_default(api2) {
     const app = api2.getApplication();
+    api2.selectTheme("obsidian");
     const DEBUG = 0;
     if (!DEBUG) {
-      const primaryPromptText1 = api2.addNode("text/string", { string: "Hello", x: 100, y: 100 });
-      const primaryPromptText2 = api2.addNode("text/string", { string: "World", x: 100, y: 300 });
-      const secondaryPromptText = api2.addNode("text/string", { string: "World", x: 100, y: 600 });
+      const primaryPromptText1 = api2.addNode("text/string", { string: "Nostromo", x: 100, y: 100 });
+      const primaryPromptText2 = api2.addNode("text/string", { string: "Project 23", x: 100, y: 300 });
+      const secondaryPromptText = api2.addNode("text/string", { string: "USS Enterprise NCC-1701", x: 100, y: 600 });
       const stringC = api2.addNode("text/string", { string: "Meow!", x: 100, y: 800 });
       const midjourneyPrompt = api2.addNode("midjourney/prompt", { weird: 10, x: 500, y: 300 });
       const domWrite = api2.addNode("dom/write", { weird: 10, x: 800, y: 300 });
@@ -6270,18 +6937,15 @@
       console.log("usage.js api.execute said: ", domWrite);
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
-      console.assert(actual == expect, `./src/usage.js: Yay! the program failed to execute correctly, expected ${expect} but got "${actual}" instead.`);
       const rerun = async function() {
         const result2 = await api2.execute(domWrite);
         console.log("usage.js RERUN api.execute said: ", result2);
       };
-      app.Nodes.forEach((o) => o.monitor(() => rerun()));
       app.Connectors.observe("created", rerun);
       app.Connectors.observe("removed", rerun);
     } else {
       const stringA = api2.addNode("text/string", { string: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
     }
-    console.log(api2.save());
   }
 
   // src/craft.js

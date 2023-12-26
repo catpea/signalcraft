@@ -15,6 +15,7 @@ export default class Standard {
 
 	async #upstream() {
 		const response = {};
+
 		for(const localPort of this.node.Input) {
 			// NOTE: edges do not link nodes, they link ports
 			// NOTE: there can be multiple reply ports pointing to the input port, therefore array is used
@@ -45,9 +46,9 @@ export default class Standard {
 	}
 
 	async run(port) {
-		const outputPort = this.node.Output.find(item => item.name == port);
-		if(!outputPort) throw new Error(`Port named ${port} was not found on node of type ${this.node.type}`);
-		const response = await outputPort.generator({ ...await this.#upstream(), value: outputPort.value })
+		const outputPort = this.node.Output.find(item => item.id == port);
+		if(!outputPort) throw new Error(`Port id ${port} was not found on node of type ${this.node.type}`);
+		const response = {}// await outputPort.generator({ ...await this.#upstream(), value: outputPort.value })
 		return response;
 	}
 

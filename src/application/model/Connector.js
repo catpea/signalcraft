@@ -8,16 +8,14 @@ export default class Connector extends ReactiveObject {
   application;
   #unsubscribe = [];
 
-  constructor({application, id, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }){
+  constructor({id, application, sourceType, targetType, sourceNode, targetNode, sourcePort, targetPort }){
     super();
     this.application = application;
 
     //NOTE: once nodes are added to the system the x and y of edges are already calculated (sans the transformation).
 
-
     const props = {
       id:id||uuid(),
-
 
       sourceType,
       sourceNode,
@@ -26,17 +24,12 @@ export default class Connector extends ReactiveObject {
       targetType,
       targetNode,
       targetPort,
+      // 
+      // x1:0,
+      // y1:0,
+      // x2:0,
+      // y2:0,
 
-      backgroundColor: `hsl(${parseInt(Math.random() * 360)}, 40%, 35%)`,
-
-
-      x1: 10_000*Math.random(),
-      y1: 8_000*Math.random(),
-      x2: 10_000*Math.random(),
-      y2: 8_000*Math.random(),
-
-      edgeWidth: 10,
-      depthLevel: 0,
     };
 
     Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));

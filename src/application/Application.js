@@ -2,10 +2,11 @@ import ReactiveArray  from './system/ReactiveArray.js';
 import ReactiveObject from './system/ReactiveObject.js';
 
 import Api from "./Api.js";
-import UserTheme from "../Theme.js";
 
+import Setup from './model/Setup.js';
 import Archetype from './model/Archetype.js';
 import Node from './model/Node.js';
+import Theme from './model/Theme.js';
 import Input from './model/node/Input.js';
 import Output from './model/node/Output.js';
 import Connector from './model/Connector.js';
@@ -17,8 +18,9 @@ import Selected from './model/Selected.js';
 export default class Brain extends ReactiveObject {
 
   Setup; // Application Configuration
-  Theme; // Color/UI Theme
   Archetypes; // Node Library
+
+  Themes;
 
   Nodes; // Node Instances
   Connectors; // Port Connections, remember it is not that are connected but the ports of a node
@@ -34,9 +36,12 @@ export default class Brain extends ReactiveObject {
     super();
 
     // COnfiguration
-    this.Setup = new ReactiveObject(this, { title: "Signalcraft Visual Programming Language System" }); // Reactive Application Configuration
-    this.Theme = new UserTheme(this); // Theme Of Choice
+    this.Setup = new Setup({ title: "Signalcraft Visual Programming Language System", theme:'none' }); // Reactive Application Configuration
     this.Archetypes = new ReactiveArray({application:this, Item:Archetype, auto:false }); // This is where node library resides
+
+
+    // this.Theme = new UserTheme(this); // Theme Of Choice
+    this.Themes = new ReactiveArray({application:this, Item:Theme, auto:true }); // all nodes the user is working with
 
     // Core Data
     this.Nodes = new ReactiveArray({application:this, Item:Node, auto:true }); // all nodes the user is working with

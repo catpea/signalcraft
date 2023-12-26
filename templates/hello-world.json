@@ -1,0 +1,35 @@
+{
+  "Nodes": [
+    {
+      "x": 322,
+      "y": 257,
+      "string": "Meow!",
+      "type": "text/string",
+      "id": "e9fea4c0-747b-4440-982a-dbf2d6d68a69"
+    },
+    {
+      "x": 800,
+      "y": 300,
+      "target": "output",
+      "type": "dom/write",
+      "weird": 10,
+      "id": "70918303-d7ec-425b-8839-01750951adcb"
+    }
+  ],
+  "Connectors": [
+   
+    {
+      "id": "e80ea815-adae-4696-83f9-9eda4058421a",
+      "sourceNode": "e9fea4c0-747b-4440-982a-dbf2d6d68a69",
+      "sourcePort": "output",
+      "targetType": "Node",
+      "targetNode": "70918303-d7ec-425b-8839-01750951adcb",
+      "targetPort": "input",
+      "x1": 0,
+      "y1": 0,
+      "x2": 0,
+      "y2": 0
+    }
+  ],
+  "Junctions": []
+}

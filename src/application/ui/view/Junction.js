@@ -5,18 +5,13 @@ import Base from './Base.js';
 //import { Removable } from './junction/Removable.js';
 import { Focus } from './junction/Focus.js';
 import { Selectable } from './junction/Selectable.js';
-import { Connectable } from './node/line/Connectable.js';
+import { Connectable } from './node/port/Connectable.js';
 import { Movable } from './junction/Movable.js';
 
 export default class Junction extends Base {
 
   start({junction, view }){
     const {Shortcuts, Api, Nodes, Selection, Cable} = view.application;
-
-
-    console.log(`view/Junction got`, junction);
-
-
 
     this.el.Group = svg.g();
     this.cleanup(junction.observe('x',v=>update(this.el.Group, {'transform':`translate(${v},${junction.y})`} )));
@@ -25,7 +20,11 @@ export default class Junction extends Base {
 
     this.el.Junction = svg.circle({ class: 'junction-caption', cx: 0, cy: 0, r: 24 });
     this.el.OmniPort = svg.circle({ class: 'junction-port', cx: 0, cy: 0, r: 8 });
-    this.el.OmniPort.dataset.portAddress = [junction.port('input').kind,'Junction', junction.id, junction.port('input').id].join(':');
+
+    console.log({junction}, junction.port('input'));
+
+    this.el.OmniPort.dataset.portAddress = [junction.port('input').kind, 'Junction', junction.id, junction.port('input').id].join(':');
+
     this.el.Group.appendChild( this.el.Junction )
     this.el.Group.appendChild( this.el.OmniPort )
 

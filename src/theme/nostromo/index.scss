@@ -1,0 +1,193 @@
+$dark: hsl(60, 100%, 4%);
+$darker: hsl(120, 46%, 3%);
+$darkest: hsl(60, 100%, 1%);
+
+// -------------------
+
+$primary-color: green;
+$primary-background: black;
+$primary-border: $primary-color;
+
+$selected-color: orange;
+$selected-background: black;
+$selected-border: $selected-color;
+
+[data-ui-theme=nostromo] {
+
+  svg.editor-interface {
+    outline: none;
+    background-color: black;
+  }
+
+  .interface-background {
+    fill: $darkest;
+    stroke: $primary-color;
+  }
+
+  // Node is the main thing that contains caption ports, etc..
+
+  .node-container {
+    fill: $primary-background;
+    stroke: $primary-border;
+  }
+
+  .node-container.selected {
+    fill: transparent;
+    stroke: $selected-border;
+  }
+
+
+
+
+
+
+
+
+  .node-caption {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+  .node-caption.selected {
+    fill: transparent;
+  }
+
+  .node-caption.caption-text {
+    fill: $primary-color;
+  }
+
+  .node-caption.caption-text.selected {
+    fill: $selected-color;
+  }
+
+
+
+
+
+
+  .node-pod {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+
+
+
+
+
+
+
+
+  .pod-row {
+    fill: transparent;
+    stroke: transparent;
+
+  }
+  .pod-row.selected {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+
+
+
+
+
+
+
+
+
+
+  .node-port {
+    fill: $primary-color;
+  }
+  .node-port.selected {
+    fill: $selected-color;
+  }
+  .node-port.input-port {
+    // fill: green;
+  }
+  .node-port.output-port {
+    // fill: sienna;
+  }
+
+  .port-text {
+    fill: $primary-color;
+  }
+  .port-text.selected {
+    fill: $selected-color;
+  }
+
+
+  .editor-control  {
+    background-color: hsl(186, 85%, 8%);
+  }
+
+  .editor-control.textarea {
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;
+    border-bottom-style: dotted;
+    outline: none;
+  }
+
+  // .panel-line-text.selected {
+  //   fill: hsl(40, 53%, 52%);
+  // }
+  //
+  // .panel-line-port {
+  //   fill: magenta;
+  //   stroke: $dark;
+  //   stroke-width: 0;
+  // }
+  //
+  // .panel-line-port.selected {
+  //   fill: #ffbf00;
+  //   stroke:  #cd7308;
+  //   stroke-width: 2;
+  //
+  // }
+
+
+
+  .cable-line {
+    stroke: $primary-color;
+    stroke-width: 2;
+  }
+  .cable-line-zone {
+    stroke: $dark;
+    stroke-width: 16;
+  }
+  .cable-line-zone.selected {
+
+  }
+  .cable-line.selected {
+    stroke: $selected-color;
+  }
+  .cable-line-indicator {
+    stroke: $selected-color;
+    stroke-width: 2;
+  }
+
+
+
+
+
+  .junction-caption {
+    fill: transparent;
+    stroke: $primary-color;
+  }
+  .junction-caption.selected {
+    fill: transparent;
+    stroke: $selected-color
+  }
+
+  .junction-port {
+    fill: $primary-color;
+    stroke: $darkest;
+  }
+  .junction-port.selected {
+    fill: $selected-color
+  }
+
+}

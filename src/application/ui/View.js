@@ -70,13 +70,15 @@ export default class View extends ReactiveObject {
 				 return true;
 			},
 			beforeMouseDown: function(e) {
-				// console.log( e.target );
-				if(e.target.classList.contains('panel-caption')) return true;
-				if(e.target.classList.contains('panel-line-port')) return true;
-				if(e.target.classList.contains('ant-trail')) return true;
-				if(e.target.classList.contains('junction-caption')) return true;
-				if(e.target.classList.contains('junction-port')) return true;
-				if(e.target.classList.contains('editor-control')) return true;
+				const DENY = true;
+
+				if(!e.target.classList.contains('interface-background')) return DENY;
+				// if(e.target.classList.contains('panel-caption')) return true;
+				// if(e.target.classList.contains('panel-line-port')) return true;
+				// if(e.target.classList.contains('ant-trail')) return true;
+				// if(e.target.classList.contains('junction-caption')) return true;
+				// if(e.target.classList.contains('junction-port')) return true;
+				// if(e.target.classList.contains('editor-control')) return true;
 			}
 		});
 
@@ -123,7 +125,7 @@ export default class View extends ReactiveObject {
 
 	#installCanvas() {
 		const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		svgElement.setAttributeNS(null, "class", "ui-view");
+		svgElement.setAttributeNS(null, "class", "editor-interface");
 		svgElement.setAttributeNS(null, "width", "100%");
 		svgElement.setAttributeNS(null, "height", "1000");
 
@@ -266,12 +268,10 @@ export default class View extends ReactiveObject {
 
 
 		const scene = document.createElementNS("http://www.w3.org/2000/svg", "g");
-		scene.setAttributeNS(null, "class", "view-scene");
-		scene.setAttributeNS(null, "id", "scene");
 		this.#svg.appendChild(scene);
 
 		const rect2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-		rect2.setAttributeNS(null, "class", "view-scene-background");
+		rect2.setAttributeNS(null, "class", "interface-background");
 		rect2.setAttributeNS(null, "x", "0");
 		rect2.setAttributeNS(null, "y", "0");
 		rect2.setAttributeNS(null, "width", 11_000);

@@ -34,7 +34,6 @@ export default class ReactiveArray {
 
     const item = new this.#Item({...argv, application:this.#application, parent:this.#parent});
     const itemExists = this.#content.find((o) => o.id === item.id);
-    if(itemExists) console.log(item);
     if(itemExists) throw new Error('Item Exixts')
 
     this.#content.push(item);
@@ -100,6 +99,10 @@ export default class ReactiveArray {
   filter(callback) {
     if (typeof callback !== "function") throw new TypeError("Find needs a function.");
     return this.#content.filter((item) => !item.deleted).filter(callback);
+  }
+  map(callback) {
+    if (typeof callback !== "function") throw new TypeError("Find needs a function.");
+    return this.#content.filter((item) => !item.deleted).map(callback);
   }
 
   update(id, property, value) {

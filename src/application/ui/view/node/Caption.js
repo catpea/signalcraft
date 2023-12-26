@@ -9,8 +9,8 @@ import Component from "./Component.js";
 export default class Caption extends Component {
 
 	setup() {
-		this.el.Caption = svg.rect({ class: `panel-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
-		this.el.CaptionText = svg.text({ class: `panel-caption-text`, x:this.x+(this.width*.02), y: this.y + (this.height - (this.height * .12)) }, this.data.type);
+		this.el.Caption = svg.rect({ class: `node-caption`, ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+		this.el.CaptionText = svg.text({ class: `node-caption caption-text`, style:'pointer-events: none; user-select: none;', x:this.x+(this.width*.02), y: this.y + (this.height - (this.height * .12)) }, this.data.type);
 
 		this.cleanup(()=>Object.values(this.el).map(el=>el.remove()));
 

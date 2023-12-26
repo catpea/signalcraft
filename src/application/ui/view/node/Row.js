@@ -3,7 +3,7 @@ import Component from "./Component.js";
 
 export default class Row extends Component {
 	setup() {
-		this.el.Row = svg.rect({ class: 'panel-line', ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
+		this.el.Row = svg.rect({ class: 'pod-row', ry: this.radius, width: this.width, x: this.x, y: this.y, height: this.height });
 
 		this.children.map(child => child.setup())
 

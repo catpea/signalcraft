@@ -1,6 +1,8 @@
+import startCase from 'lodash/startCase';
+
 import Component from "./Component.js";
 
-import { JSONReader, JSONWriter } from "domek";
+import { html } from "domek";
 
 
 export default class Dropdown extends Component {
@@ -10,13 +12,8 @@ export default class Dropdown extends Component {
 	}
 	setup() {
 
-		const {Api} = this.view.application;
-
-
-
 		this.el.navItemDropdown = document.createElement('li');
 		this.el.navItemDropdown.setAttribute('class', 'nav-item dropdown');
-
 
 		const navLinkDropdownToggle = document.createElement('a');
 		navLinkDropdownToggle.setAttribute('class', 'nav-link dropdown-toggle');
@@ -29,71 +26,50 @@ export default class Dropdown extends Component {
 		const text = document.createTextNode(this.name);
 		navLinkDropdownToggle.appendChild(text);
 
-		const dropdownMenu = document.createElement('ul');
-		dropdownMenu.setAttribute('class', 'dropdown-menu');
-		this.el.navItemDropdown.appendChild(dropdownMenu);
+		this.el.dropdownMenu = document.createElement('ul');
+		this.el.dropdownMenu.setAttribute('class', 'dropdown-menu');
+		this.el.navItemDropdown.appendChild(this.el.dropdownMenu);
 
-
-
-
-
-		const data = [
-			{
-				caption: 'Open File...',
-				program: async ()=>Api.load(await JSONReader()),
-			},
-			{
-				caption: 'Save As...',
-				program: ()=>JSONWriter(JSON.stringify(Api.save(), null, 2)),
-			},
-		];
-
-
-		data.forEach(menuItem=>{
-
-      const listItem = document.createElement('li');
-  		dropdownMenu.appendChild(listItem);
-
-  		const dropdownItem = document.createElement('div');
-  		dropdownItem.setAttribute('class', 'dropdown-item');
-  		listItem.appendChild(dropdownItem);
-
-  		const text2 = document.createTextNode(menuItem.caption);
-  		dropdownItem.appendChild(text2);
-
-      dropdownItem.addEventListener('click', ()=>menuItem.program());
-
-		})
-
-		// this.view.application.Archetypes.forEach(typeObject=>{
-		//
-		//
-    //   const listItem = document.createElement('li');
-  	// 	dropdownMenu.appendChild(listItem);
-		//
-  	// 	const dropdownItem = document.createElement('div');
-  	// 	dropdownItem.setAttribute('class', 'dropdown-item');
-  	// 	listItem.appendChild(dropdownItem);
-		//
-  	// 	const text2 = document.createTextNode(typeObject.type);
-  	// 	dropdownItem.appendChild(text2);
-		//
-    //   dropdownItem.addEventListener('click', ()=>{
-		//     this.view.application.Api.addNode(typeObject.type);
-		//   });
-		//
-		//
-		// })
-
-
-
+		this.update();
 
 	}
+
 	render(container) {
 		container.appendChild(this.el.navItemDropdown);
+	}
 
-		// render dropdowns into navbarNavContainer
-		// this.children.filter(instance => instance instanceof Dropdown).map(child => child.render(this.el.navbarNavContainer))
+	update(){
+		this.el.dropdownMenu.replaceChildren();
+
+		this.data.forEach(menuItem=>{
+
+			if(typeof menuItem === 'string') {
+
+				const listItem = html.li();
+				this.el.dropdownMenu.appendChild(listItem);
+
+				const dropdownDivider = html.hr({class:'dropdown-divider'});
+				listItem.appendChild(dropdownDivider);
+
+				return;
+			}
+
+			const listItem = document.createElement('li');
+			this.el.dropdownMenu.appendChild(listItem);
+
+			const dropdownItem = document.createElement('div');
+
+			dropdownItem.classList.add('dropdown-item');
+			if(menuItem.selected) dropdownItem.classList.add('active');
+
+			listItem.appendChild(dropdownItem);
+
+			const text2 = document.createTextNode(menuItem.caption);
+			dropdownItem.appendChild(text2);
+
+			dropdownItem.addEventListener('click', ()=>menuItem.program());
+
+		})
 	}
 
 }

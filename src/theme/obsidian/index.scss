@@ -1,0 +1,209 @@
+
+
+// -------------------
+
+$start: 220;
+$slice: calc(360/6);
+$saturation: 30%;
+$shadows: true;
+$glows: false;
+$yin: hsl($start, $saturation, 40%);
+$yang: hsl($start+$slice, $saturation+5%, 40%);
+
+$primary-color: $yin;
+$primary-background: mix($primary-color, black, 20%);
+$primary-border: lighten(saturate($primary-background, 80%), 10%);
+$primary-line: saturate($primary-color, 3%);
+$primary-glow: adjust-hue(saturate($primary-color, 10%), 20deg);
+
+$selected-color: $yang;
+$selected-background: mix($selected-color, black, 20%);
+$selected-border: lighten(saturate($selected-background, 80%), 40%);
+$selected-line: saturate($selected-color, 40%);
+$selected-glow: adjust-hue(saturate($selected-color, 10%), 60deg);
+
+$dark: hsl($start, $saturation, 5%);
+$darker: hsl($start, $saturation, 4%);
+$darkest: hsl($start, $saturation, 1%);
+
+[data-ui-theme=obsidian] {
+
+  svg.editor-interface {
+    outline: none;
+    background-color: black;
+  }
+
+  .interface-background {
+    fill: $dark;
+  }
+
+  // Node is the main thing that contains caption ports, etc..
+
+  .node-container {
+    fill: $primary-background;
+    stroke: $primary-border;
+    @if $shadows { filter: drop-shadow(3px 6px 10px $darkest); }
+  }
+
+  .node-container.selected {
+    fill: $selected-background;
+    stroke: $selected-border;
+    @if $glows { filter: drop-shadow(0px 0px 10px $selected-glow); }
+  }
+
+
+
+
+
+
+
+  .node-caption {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+  .node-caption.selected {
+    fill: transparent;
+  }
+
+  .node-caption.caption-text {
+    fill: $primary-color;
+  }
+
+  .node-caption.caption-text.selected {
+    fill: $selected-color;
+  }
+
+
+
+
+
+
+  .node-pod {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+
+
+
+
+
+
+
+
+  .pod-row {
+    fill: transparent;
+    stroke: transparent;
+
+  }
+  .pod-row.selected {
+    fill: transparent;
+    stroke: transparent;
+  }
+
+
+
+
+
+
+
+
+
+
+
+  .node-port {
+    fill: $primary-color;
+  }
+  .node-port.selected {
+    fill: $selected-color;
+  }
+  .node-port.input-port {
+    // fill: green;
+  }
+  .node-port.output-port {
+    // fill: sienna;
+  }
+
+  .port-text {
+    fill: $primary-color;
+  }
+  .port-text.selected {
+    fill: $selected-color;
+  }
+
+
+  .editor-control  {
+    background-color: hsl(186, 85%, 8%);
+  }
+
+  .editor-control.textarea {
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;
+    border-bottom-style: dotted;
+    outline: none;
+  }
+
+  // .panel-line-text.selected {
+  //   fill: hsl(40, 53%, 52%);
+  // }
+  //
+  // .panel-line-port {
+  //   fill: magenta;
+  //   stroke: $dark;
+  //   stroke-width: 0;
+  // }
+  //
+  // .panel-line-port.selected {
+  //   fill: #ffbf00;
+  //   stroke:  #cd7308;
+  //   stroke-width: 2;
+  //
+  // }
+
+
+
+  .cable-line {
+    stroke: $primary-line;
+    stroke-width: 2;
+  }
+  .cable-line-zone {
+    stroke: rgba(255, 251, 0, 0.001);
+    stroke-width: 16;
+  }
+  .cable-line-zone.selected {
+
+  }
+  .cable-line.selected {
+    stroke: $selected-line;
+  }
+  .cable-line-indicator {
+    stroke: saturate($selected-line, 33%);
+    stroke-width: 2;
+  }
+
+
+
+
+
+  .junction-caption {
+    fill: $primary-color;
+    stroke: $primary-border;
+    @if $glows { filter: drop-shadow(0px 0px 5px $primary-glow); }
+  }
+  .junction-caption.selected {
+    fill: $selected-color;
+    stroke: $selected-border;
+    @if $glows { filter: drop-shadow(0px 0px 5px $selected-glow); }
+  }
+
+  .junction-port {
+    fill: $primary-color;
+    stroke: $darkest;
+  }
+  .junction-port.selected {
+    fill: $selected-color
+  }
+
+}

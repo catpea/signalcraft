@@ -8,13 +8,16 @@ export default class Link extends Base {
   start({link, view }){
     const {Shortcuts, Api, Nodes, Junctions, Selection, Cable} = view.application;
 
-    console.log({link});
 
     const sourceNode = (link.sourceType=='Junction'?Junctions:Nodes) .get(link.sourceNode);
     const targetNode = (link.targetType=='Junction'?Junctions:Nodes) .get(link.targetNode);
 
     const sourcePort = sourceNode.Output       .get(link.sourcePort);
     const targetPort = targetNode.Input        .get(link.targetPort);
+
+    if([sourceNode,targetNode,sourcePort,targetPort].some(o=>o==undefined)) {
+      console.log('MISSING DATA', {sourceNode,targetNode,sourcePort,targetPort});
+    }
 
     let x1 = sourceNode.x + sourcePort.x;
     let y1 = sourceNode.y + sourcePort.y;
@@ -30,7 +33,7 @@ export default class Link extends Base {
 
     this.el.Cable = svg.line({
       class:'cable-line',
-      // class:'cable-line line-ant-trail',
+      style:'pointer-events: none;', // NOTE: we must disable this line, to let CableZone fully take over
       x1, y1, x2, y2,
       // stroke: "white",
       // fill: 'red',

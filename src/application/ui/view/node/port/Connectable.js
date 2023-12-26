@@ -65,8 +65,8 @@ export class Connectable {
 		};
 		this.#mouseUpHandler = (e) => {
 
-			const isOverAnotherPort = this.#dragging && e.target && (e.target.classList.contains('panel-line-port')||e.target.classList.contains('junction-port'));
-			const isOverBackground = this.#dragging && e.target && e.target.classList.contains('view-scene-background');
+			const isOverAnotherPort = this.#dragging && e.target && (e.target.classList.contains('node-port')||e.target.classList.contains('junction-port'));
+			const isOverBackground = this.#dragging && e.target && e.target.classList.contains('interface-background');
 
 			if(isOverAnotherPort) {
 				const portAddress = e.target.dataset.portAddress;

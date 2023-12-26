@@ -10,6 +10,14 @@ CTRL+Click on caption or cable will select it.
 
 ## TODO
 
+- Connectors are not removed from COnnectors array
+- Starter Templates
+  - Project 23
+  - Global Thermonuclear War
+
+, https://youtu.be/utrxk5_PeEY?t=104
+
+
 - add boolean math for this.el.EditorValue to hide text overflow, currently substr is in place
 - give view/menu/Dropdown.js .setData() support and make it generic
 - finish load() in API

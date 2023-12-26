@@ -12,7 +12,6 @@ export default function transform(html, parentName = 'PARENT') {
 
     const numbers = {};
     function getNumber(tagName){
-      console.log(numbers);
       if(!numbers[tagName]){
         numbers[tagName] = 1;
         return ""; // first time we do not use a number at all;

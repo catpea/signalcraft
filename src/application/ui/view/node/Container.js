@@ -6,7 +6,7 @@ export default class Container extends Component {
 
   setup(){
     this.el.Panel = svg.rect({
-      class: 'panel-container',
+      class: 'node-container',
       ry: this.radius,
       width:this.width,
       x:this.x,

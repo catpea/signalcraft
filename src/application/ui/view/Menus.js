@@ -1,5 +1,7 @@
+import startCase from 'lodash/startCase';
+
 import oneOf from "oneof";
-import { html, svg, text, list, update } from "domek";
+import { html, svg, text, list, update, JSONWriter, JSONReader } from "domek";
 
 import Base from './Base.js';
 
@@ -11,11 +13,47 @@ export default class Menus extends Base {
 
   start(view){
 
+    const {Api, Themes} = view.application;
+
+
       const navbar = new Navbar(view.name);
       navbar.setView(view);
 
-      const file = new Dropdown(`File`);
-      navbar.add(file);
+      const fileMenu = new Dropdown(`File`);
+      fileMenu.setData([
+        {
+          caption: 'Open File...',
+          program: async ()=>Api.load(await JSONReader()),
+        },
+        {
+          caption: 'Save As...',
+          program: ()=>JSONWriter(JSON.stringify(Api.save(), null, 2)),
+        },
+        '---------------------------------------------------------------',
+        {
+          caption: 'Basic Example',
+          program: async ()=>Api.load( await (await fetch("./templates/hello-world.json")).json() ),
+        },
+
+      ])
+      navbar.add(fileMenu);
+
+
+
+
+      const themeMenu = new Dropdown(`Theme`);
+      const themes =()=>Themes.map(theme=>({caption: startCase(theme.name), selected: theme.name==Api.selectedTheme(), program: ()=>Api.selectTheme(theme.name)}));
+
+      console.log(Themes.content);
+      console.log(themes());
+      themeMenu.setData(themes())
+
+      view.application.Setup.observe('theme', (v)=>{
+        themeMenu.setData(Themes.map(theme=>({caption: startCase(theme.name), selected: theme.name==Api.selectedTheme(), program: ()=>Api.selectTheme(theme.name)})))
+        themeMenu.update()
+      }, false)
+
+      navbar.add(themeMenu);
 
       // const dropdown = new Dropdown(`Add`);
       // navbar.add(dropdown);

@@ -1,7 +1,7 @@
 import { svg, dataset } from "domek";
 
 import Component from "./Component.js";
-import { Connectable } from './line/Connectable.js';
+import { Connectable } from './port/Connectable.js';
 
 
 export default class Port extends Component {
@@ -19,24 +19,35 @@ export default class Port extends Component {
 		if(this.data.port.direction == 'input') {
 			const x = this.x - moveHorizontally;
 			const y = this.y + moveDown;
-      this.el.PortCaption = svg.text({ class: `panel-line-text`, x: this.x + this.bounds.space, y: this.y + (this.height - (this.height / 3))  }, this.data.port.name );
-			this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+      this.el.PortCaption = svg.text({ class: `port-text`, style:'pointer-events: none; user-select: none;', x: this.x + this.bounds.space, y: this.y + (this.height - (this.height / 3))  }, this.data.port.id );
+			this.el.Port = svg.circle({ class: `node-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
 			this.data.port.x = x; // IMPORTANT: the geometric component sets wire coordinates here
 			this.data.port.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		} else {
 			const x = this.x + this.width + moveHorizontally;
 			const y = this.y + moveDown;
       this.el.PortCaption = svg.text({
-        class: `panel-line-text border border-info`,
+        class: `port-text`,
+        style:'pointer-events: none; user-select: none;',
         textAnchor: 'end',
         x: this.width - this.bounds.space,
         y: this.y + (this.height - (this.height / 3)),
         width: this.width,
-      }, this.data.port.name );
-			this.el.Port = svg.circle({ class: `panel-line-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
+      }, this.data.port.id );
+			this.el.Port = svg.circle({ class: `node-port ${this.data.port.direction}-port`, cx: x, cy: y, r: this.bounds.radius, height: this.height / 3 });
 			this.data.port.x = x; // IMPORTANT: the geometric component sets wire coordinates here
 			this.data.port.y = y; // IMPORTANT: the geometric component sets wire coordinates here
 		}
+
+    //TODO: meh, port selection may need to be on click
+    this.cleanup( this.view.application.Selection.observe('changed', ({data}) => {
+      if(data.has(this.data.node.id)){
+        Object.values(this.el).map(el=>el.classList.add('selected'))
+      }else{
+        Object.values(this.el).map(el=>el.classList.remove('selected'))
+      }
+    }))
+
 
 		//NOTE: all ports must have an address consisting of node.id:port:id, used in Cable connecting
     dataset(this.el.Port, {
@@ -57,8 +68,7 @@ export default class Port extends Component {
     if(this.behavior.showCaption) this.group.appendChild(this.el.PortCaption);
     this.group.appendChild( this.el.Port );
 
-    console.log(this.data.port.direction);
-    if(this.data.port.direction == 'reply') {
+    if(this.data.port.direction == 'output') {
 			const connectable = new Connectable({
 				container: window, // <g> element representing an SVG scene
 				handle: this.el.Port,

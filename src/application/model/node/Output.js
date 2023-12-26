@@ -17,7 +17,7 @@ export default class Output extends ReactiveObject {
     const defaults = {
       id:uuid(),
       name:'unnamed',
-      direction: "reply",
+      direction: "output",
       type:'string',
       description:"none",
       x:0,
@@ -25,6 +25,7 @@ export default class Output extends ReactiveObject {
       generator: ()=>({}),
     };
     this.#setup = Object.assign({}, defaults, configuration);
+    console.log(this.#setup);
     Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     // this.monitor( (...arg)=>console.log('MONITOR', arg) )
   }

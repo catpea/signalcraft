@@ -13,7 +13,14 @@ export default class Api {
   }
 
 
-
+  selectTheme(name){
+    this.application.Setup.theme = name;
+    document.querySelector('html').dataset.uiTheme = name;
+  }
+  selectedTheme(name){
+    return this.application.Setup.theme;
+    // return document.querySelector('html').dataset.uiTheme;
+  }
 
 
 
@@ -52,7 +59,7 @@ export default class Api {
 
   addNode(archetype, properties){
     // Procedure Step 1: create a node of the desired type in the reactive collection
-    const node = this.application.Nodes.create({type: archetype, properties});
+    const node = this.application.Nodes.create({type: archetype, ...properties});
     this.deselectAll();
     this.select(node);
     return node;
@@ -68,7 +75,7 @@ export default class Api {
     return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id, });
   }
 
-  
+
 
 
 
@@ -77,7 +84,7 @@ export default class Api {
   async execute(node, port='output'){
     if(!node) throw new Error('you must specify which node to execute');
     const output = await node.Execute.run(port);
-    console.log(`Output on port ${port} of node ${node.id}`, output)
+    // console.log(`Output on port ${port} of node ${node.id}`, output)
     return output;
   }
 
@@ -90,11 +97,16 @@ export default class Api {
 
 
   load(data){
-    console.log('load got data', data);
+   for (const collectionName in data) {
+      this.application[collectionName].clear(true)
+      data[collectionName].forEach(item=>this.application[collectionName].create(item))
+   }
+
   }
 
   save(){
     const content = {
+      // Archetypes: this.application.Archetypes.content,
       Nodes: this.application.Nodes.content.map(o=>o.content),
       Connectors: this.application.Connectors.content.map(o=>o.content),
       Junctions: this.application.Junctions.content.map(o=>o.content),
