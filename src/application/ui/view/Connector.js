@@ -8,9 +8,13 @@ export default class Link extends Base {
   start({link, view }){
     const {Shortcuts, Api, Nodes, Junctions, Selection, Cable} = view.application;
 
+    console.log('LINK', link.content);
 
     const sourceNode = (link.sourceType=='Junction'?Junctions:Nodes) .get(link.sourceNode);
     const targetNode = (link.targetType=='Junction'?Junctions:Nodes) .get(link.targetNode);
+
+    if(!sourceNode) return console.error('sourceNode (${link.sourceType}) not found, datafile may contain links to nodes that have neen deleted');
+    if(!targetNode) return console.error('targetNode (${link.targetType}) not found, datafile may contain links to nodes that have neen deleted');
 
     const sourcePort = sourceNode.Output       .get(link.sourcePort);
     const targetPort = targetNode.Input        .get(link.targetPort);

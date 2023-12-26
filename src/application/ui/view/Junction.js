@@ -21,7 +21,6 @@ export default class Junction extends Base {
     this.el.Junction = svg.circle({ class: 'junction-caption', cx: 0, cy: 0, r: 24 });
     this.el.OmniPort = svg.circle({ class: 'junction-port', cx: 0, cy: 0, r: 8 });
 
-    console.log({junction}, junction.port('input'));
 
     this.el.OmniPort.dataset.portAddress = [junction.port('input').kind, 'Junction', junction.id, junction.port('input').id].join(':');
 

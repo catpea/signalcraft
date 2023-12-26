@@ -44,8 +44,8 @@ export default class Menus extends Base {
       const themeMenu = new Dropdown(`Theme`);
       const themes =()=>Themes.map(theme=>({caption: startCase(theme.name), selected: theme.name==Api.selectedTheme(), program: ()=>Api.selectTheme(theme.name)}));
 
-      console.log(Themes.content);
-      console.log(themes());
+      //console.log(Themes.content);
+      //console.log(themes());
       themeMenu.setData(themes())
 
       view.application.Setup.observe('theme', (v)=>{

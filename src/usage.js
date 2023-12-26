@@ -19,25 +19,25 @@ export default async function(api){
   const DEBUG = 0;
   if(!DEBUG){
   // define your components
-  const primaryPromptText1 = api.addNode("text/string", {string: "Nostromo", x:100, y:100});
-  const primaryPromptText2 = api.addNode("text/string", {string: "Project 23", x:100, y:300});
-  const secondaryPromptText = api.addNode("text/string", {string: "USS Enterprise NCC-1701", x:100, y:600});
+  const primaryPromptText1 = api.addNode("text/string", {id:'primaryPromptText1', string: "Nostromo", x:100, y:100});
+  const primaryPromptText2 = api.addNode("text/string", {id:'primaryPromptText2', string: "Project 23", x:100, y:300});
+  const secondaryPromptText = api.addNode("text/string", {id:'secondaryPromptText', string: "USS Enterprise NCC-1701", x:100, y:600});
 
-  const stringC = api.addNode("text/string", {string: "Meow!", x:100, y:800});
+  const stringC = api.addNode("text/string", {id:'stringC', string: "Meow!", x:100, y:800});
 
-  const midjourneyPrompt = api.addNode("midjourney/prompt", {weird: 10, x:500, y:300});
-  const domWrite = api.addNode("dom/write", {weird: 10, x:800, y:300});
-  const linkOutput = api.linkPorts(midjourneyPrompt, domWrite);
+  const midjourneyPrompt = api.addNode("midjourney/prompt", {id:'midjourneyPrompt', weird: 10, x:500, y:300});
+
+  const domWrite = api.addNode("dom/write", {id:'domWrite', x:800, y:300});
 
   // create a flow between compoents
-  const linkA1 = api.linkPorts(primaryPromptText1, midjourneyPrompt);
-  const linkA2 = api.linkPorts(primaryPromptText2, midjourneyPrompt);
-  const linkB  = api.linkPorts(secondaryPromptText, midjourneyPrompt, {input:'secondary'});
-
+  api.linkPorts(primaryPromptText1, midjourneyPrompt);
+  api.linkPorts(primaryPromptText2, midjourneyPrompt);
+  api.linkPorts(secondaryPromptText, midjourneyPrompt, {input:'secondary'});
+  api.linkPorts(midjourneyPrompt, domWrite);
 
 
   // execute your program;
-  const result = await api.execute(midjourneyPrompt);
+  const result = await api.execute(domWrite);
   console.log('usage.js api.execute said: ', domWrite);
 
   // tst
@@ -52,8 +52,8 @@ export default async function(api){
   }
   //app.Nodes.forEach(o=>o.monitor(()=>rerun()));
 
-  app.Connectors.observe('created', rerun)
-  app.Connectors.observe('removed', rerun)
+  app.Connectors.observe('created', rerun, false)
+  app.Connectors.observe('removed', rerun, false)
 
   }else{
     // const testJunction = api.addJunction({x:50, y:50});

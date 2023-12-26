@@ -64,7 +64,9 @@ export default class ReactiveArray {
       console.log('ITEM NOT FOUND', id);
     }
 
-    if(hard) this.#content = this.#content.filter(o => o.id!==id);
+    if(hard){
+       this.#content = this.#content.filter(o => o.id!==id);
+     }
 
   }
 

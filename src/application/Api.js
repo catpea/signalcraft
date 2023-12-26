@@ -45,12 +45,13 @@ export default class Api {
   removeSelected(){
     const { Selection, Nodes, Connectors, Junctions } = this.application;
 
-    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id), true);
-    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id), true);
+    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id, true));
+    Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id, true));
     Selection.filter(item=>item.kind=='Junction').forEach(({id})=>Junctions.remove(id, true));
 
-    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id), true);
-    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id), true);
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.sourceNode==id, true));
+    Selection.filter(item=>item.kind=='Node').forEach(({id})=>Connectors.destroy(link=>link.targetNode==id, true));
+
     Selection.filter(item=>item.kind=='Node').forEach(({id})=>Nodes.remove(id, true));
 
     Selection.filter(item=>item.kind=='Connector').forEach(({id})=>Connectors.remove(id, true));
@@ -66,13 +67,15 @@ export default class Api {
   }
 
   addJunction(properties){
-    const junction = this.application.Junctions.create({properties});
+    const junction = this.application.Junctions.create(properties);
     return junction;
   }
 
   linkPorts(sourceNode, targetNode, options = {}){
     const { output:outputPort, input:inputPort } = Object.assign({output:'output', input:'input'}, options);
-    return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id, });
+    const connector = { sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: outputPort, targetPort: inputPort };
+    console.log({connector});
+    return this.application.Connectors.create(connector);
   }
 
 
@@ -106,10 +109,10 @@ export default class Api {
 
   save(){
     const content = {
-      // Archetypes: this.application.Archetypes.content,
-      Nodes: this.application.Nodes.content.map(o=>o.content),
-      Connectors: this.application.Connectors.content.map(o=>o.content),
       Junctions: this.application.Junctions.content.map(o=>o.content),
+      Nodes: this.application.Nodes.content.map(o=>o.content),
+      //TODO: Order is significant atm, connectors must be last
+      Connectors: this.application.Connectors.content.map(o=>o.content),
     }
     return content;
   }

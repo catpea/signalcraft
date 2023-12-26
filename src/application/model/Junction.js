@@ -20,24 +20,24 @@ export default class Junction extends ReactiveObject {
   Output;
   Execute;
 
-  constructor({id, properties, application}){
+  constructor(x){
     super();
-    this.#application = application;
+    this.#application = x.application;
 
     this.values = {};
 
     this.Execute = new Standard(this);
 
-    this.Input = new ReactiveArray({application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
-    this.Output = new ReactiveArray({application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
+    this.Input = new ReactiveArray({application: x.application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
+    this.Output = new ReactiveArray({application: x.application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
 
     this.Input.create({id:"input"});
-    this.Output.create({id:"output", generator:({input}) => input });
+    this.Output.create({id:"output", program:({input}) => input });
 
     const props = {
-      id: id||uuid(),
-      x:properties.x||0,
-      y:properties.y||0,
+      id: x.id||uuid(),
+      x:x.x||0,
+      y:x.y||0,
     };
 
     Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));

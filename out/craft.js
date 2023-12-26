@@ -4495,8 +4495,9 @@
       } else {
         console.log("ITEM NOT FOUND", id2);
       }
-      if (hard)
+      if (hard) {
         this.#content = this.#content.filter((o) => o.id !== id2);
+      }
     }
     removeDeleted() {
       this.#content = this.#content.filter((item) => !item.deleted);
@@ -4713,11 +4714,11 @@
     }
     removeSelected() {
       const { Selection, Nodes, Connectors, Junctions } = this.application;
-      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2), true);
-      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2), true);
+      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2, true));
+      Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2, true));
       Selection.filter((item) => item.kind == "Junction").forEach(({ id: id2 }) => Junctions.remove(id2, true));
-      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2), true);
-      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2), true);
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.sourceNode == id2, true));
+      Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Connectors.destroy((link) => link.targetNode == id2, true));
       Selection.filter((item) => item.kind == "Node").forEach(({ id: id2 }) => Nodes.remove(id2, true));
       Selection.filter((item) => item.kind == "Connector").forEach(({ id: id2 }) => Connectors.remove(id2, true));
       Selection.clear(true);
@@ -4729,12 +4730,14 @@
       return node;
     }
     addJunction(properties) {
-      const junction = this.application.Junctions.create({ properties });
+      const junction = this.application.Junctions.create(properties);
       return junction;
     }
     linkPorts(sourceNode, targetNode, options = {}) {
       const { output: outputPort, input: inputPort } = Object.assign({ output: "output", input: "input" }, options);
-      return this.application.Connectors.create({ sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: sourceNode.port(outputPort).id, targetPort: targetNode.port(inputPort).id });
+      const connector = { sourceNode: sourceNode.id, targetNode: targetNode.id, sourcePort: outputPort, targetPort: inputPort };
+      console.log({ connector });
+      return this.application.Connectors.create(connector);
     }
     async execute(node, port = "output") {
       if (!node)
@@ -4750,10 +4753,10 @@
     }
     save() {
       const content = {
-        // Archetypes: this.application.Archetypes.content,
+        Junctions: this.application.Junctions.content.map((o) => o.content),
         Nodes: this.application.Nodes.content.map((o) => o.content),
-        Connectors: this.application.Connectors.content.map((o) => o.content),
-        Junctions: this.application.Junctions.content.map((o) => o.content)
+        //TODO: Order is significant atm, connectors must be last
+        Connectors: this.application.Connectors.content.map((o) => o.content)
       };
       return content;
     }
@@ -4792,33 +4795,37 @@
       this.node = node;
       this.application = node.application;
     }
-    async #upstream() {
+    async resolve() {
       const response = {};
       for (const localPort of this.node.Input) {
-        response[localPort.name] = [];
-        const incomingConnectors = this.application.Connectors.filter((remoteConnector) => remoteConnector.targetPort == localPort.id);
+        response[localPort.id] = [];
+        const incomingConnectors = this.application.Connectors.filter((remoteConnector) => remoteConnector.targetNode == this.node.id && remoteConnector.targetPort == localPort.id);
         const nothingConnected = incomingConnectors.length == 0;
         if (nothingConnected) {
           let currentValue = localPort.value;
-          if (this.node[localPort.name])
-            currentValue = this.node[localPort.name];
-          response[localPort.name].push(currentValue);
+          if (this.node[localPort.id])
+            currentValue = this.node[localPort.id];
+          response[localPort.id].push(currentValue);
         } else {
           for (const incomingConnector of incomingConnectors) {
             const parentNode = (incomingConnector.sourceType == "Junction" ? this.application.Junctions : this.application.Nodes).find((node) => node.id == incomingConnector.sourceNode);
+            if (!parentNode)
+              continue;
             const connectedPort = parentNode.Output.find((item) => item.id == incomingConnector.sourcePort);
-            const result = await parentNode.Execute.run(connectedPort.name);
-            response[localPort.name].push(result);
+            let result;
+            result = await parentNode.Execute.run(connectedPort.id);
+            response[localPort.id].push(result);
           }
         }
       }
       return response;
     }
-    async run(port) {
-      const outputPort = this.node.Output.find((item) => item.id == port);
+    async run(outputPortId) {
+      console.log(`${this.infiniteLoop}: Execute Upstream starting with ${this.node.id}/${outputPortId}`);
+      const outputPort = this.node.Output.find((item) => item.id == outputPortId);
       if (!outputPort)
-        throw new Error(`Port id ${port} was not found on node of type ${this.node.type}`);
-      const response = {};
+        throw new Error(`Port id ${outputPortId} was not found on node of type ${this.node.type}`);
+      const response = await outputPort.program({ ...await this.resolve(), value: outputPort.value });
       return response;
     }
   };
@@ -4881,7 +4888,6 @@
         generator: () => ({})
       };
       this.#setup = Object.assign({}, defaults, configuration);
-      console.log(this.#setup);
       Object.entries(this.#setup).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     get configuration() {
@@ -5011,19 +5017,19 @@
     Input;
     Output;
     Execute;
-    constructor({ id: id2, properties, application: application2 }) {
+    constructor(x) {
       super();
-      this.#application = application2;
+      this.#application = x.application;
       this.values = {};
       this.Execute = new Standard(this);
-      this.Input = new ReactiveArray({ application: application2, parent: this, Item: Input, auto: true });
-      this.Output = new ReactiveArray({ application: application2, parent: this, Item: Output, auto: true });
+      this.Input = new ReactiveArray({ application: x.application, parent: this, Item: Input, auto: true });
+      this.Output = new ReactiveArray({ application: x.application, parent: this, Item: Output, auto: true });
       this.Input.create({ id: "input" });
-      this.Output.create({ id: "output", generator: ({ input }) => input });
+      this.Output.create({ id: "output", program: ({ input }) => input });
       const props = {
-        id: id2 || v4_default(),
-        x: properties.x || 0,
-        y: properties.y || 0
+        id: x.id || v4_default(),
+        x: x.x || 0,
+        y: x.y || 0
       };
       Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
@@ -5924,8 +5930,13 @@
   var Link = class extends Base {
     start({ link, view }) {
       const { Shortcuts, Api: Api2, Nodes, Junctions, Selection, Cable } = view.application;
+      console.log("LINK", link.content);
       const sourceNode = (link.sourceType == "Junction" ? Junctions : Nodes).get(link.sourceNode);
       const targetNode = (link.targetType == "Junction" ? Junctions : Nodes).get(link.targetNode);
+      if (!sourceNode)
+        return console.error("sourceNode (${link.sourceType}) not found, datafile may contain links to nodes that have neen deleted");
+      if (!targetNode)
+        return console.error("targetNode (${link.targetType}) not found, datafile may contain links to nodes that have neen deleted");
       const sourcePort = sourceNode.Output.get(link.sourcePort);
       const targetPort = targetNode.Input.get(link.targetPort);
       if ([sourceNode, targetNode, sourcePort, targetPort].some((o) => o == void 0)) {
@@ -6116,7 +6127,6 @@
       this.cleanup(junction.observe("y", (v) => update2(this.el.Group, { "transform": `translate(${junction.x},${v})` })));
       this.el.Junction = svg.circle({ class: "junction-caption", cx: 0, cy: 0, r: 24 });
       this.el.OmniPort = svg.circle({ class: "junction-port", cx: 0, cy: 0, r: 8 });
-      console.log({ junction }, junction.port("input"));
       this.el.OmniPort.dataset.portAddress = [junction.port("input").kind, "Junction", junction.id, junction.port("input").id].join(":");
       this.el.Group.appendChild(this.el.Junction);
       this.el.Group.appendChild(this.el.OmniPort);
@@ -6447,8 +6457,6 @@
       navbar.add(fileMenu);
       const themeMenu = new Dropdown(`Theme`);
       const themes = () => Themes.map((theme) => ({ caption: (0, import_startCase2.default)(theme.name), selected: theme.name == Api2.selectedTheme(), program: () => Api2.selectTheme(theme.name) }));
-      console.log(Themes.content);
-      console.log(themes());
       themeMenu.setData(themes());
       view.application.Setup.observe("theme", (v) => {
         themeMenu.setData(Themes.map((theme) => ({ caption: (0, import_startCase2.default)(theme.name), selected: theme.name == Api2.selectedTheme(), program: () => Api2.selectTheme(theme.name) })));
@@ -6829,34 +6837,34 @@
     application2.Themes.create({ name: "nostromo", theme: MyTheme });
     application2.Themes.create({ name: "obsidian", theme: MyTheme2 });
     {
-      const type = application2.Archetypes.create({ type: "test/layout" });
-      type.output.push({ id: "output1", generator: ({ value, string }) => {
+      const testLayout = application2.Archetypes.create({ type: "test/layout" });
+      testLayout.output.push({ id: "output1", program: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ id: "output2", generator: ({ value, string }) => {
+      testLayout.output.push({ id: "output2", program: ({ value, string }) => {
         return string;
       } });
-      type.input.push({ id: "string1", type: "string", description: "a string of letters", value: "default value" });
-      type.input.push({ id: "string2", type: "string", description: "a string of letters", value: "default value" });
-      type.input.push({ id: "string3", type: "string", description: "a string of letters", value: "default value" });
+      testLayout.input.push({ id: "string1", type: "string", description: "a string of letters", value: "default value" });
+      testLayout.input.push({ id: "string2", type: "string", description: "a string of letters", value: "default value" });
+      testLayout.input.push({ id: "string3", type: "string", description: "a string of letters", value: "default value" });
     }
     const textType = application2.Archetypes.create({ type: "text/string" });
-    textType.output.push({ id: "output", generator: ({ value, string }) => {
+    textType.output.push({ id: "output", program: ({ value, string }) => {
       return string;
     } });
     textType.input.push({ id: "string", type: "string", description: "a string of letters", value: "default value long thing" });
     const colorType = application2.Archetypes.create({ type: "text/color" });
-    colorType.output.push({ id: "output", generator: () => {
+    colorType.output.push({ id: "output", program: () => {
       return "TODO";
     } });
     colorType.input.push({ id: "color", type: "string", description: "color" });
     colorType.input.push({ id: "model", type: "string", description: "preferred model" });
     colorType.input.push({ id: "description", type: "string", description: "description" });
     const uppercaseType = application2.Archetypes.create({ type: "text/case" });
-    uppercaseType.output.push({ id: "upper", generator: () => {
+    uppercaseType.output.push({ id: "upper", program: () => {
       return "TODO";
     } });
-    uppercaseType.output.push({ id: "lower", generator: () => {
+    uppercaseType.output.push({ id: "lower", program: () => {
       return "TODO";
     } });
     uppercaseType.input.push({ id: "input" });
@@ -6865,7 +6873,7 @@
     const arrayJoinType = application2.Archetypes.create({ type: "array/join" });
     arrayJoinType.output.push({
       id: "output",
-      generator: ({ input, separator }) => {
+      program: ({ input, separator }) => {
         return (0, import_flattenDeep.default)(input);
       }
     });
@@ -6873,10 +6881,10 @@
     arrayJoinType.input.push({ id: "separator", type: "string", description: "separator to use" });
     arrayJoinType.input.push({ id: "duck", type: "string", description: "separator to use" });
     {
-      const type = application2.Archetypes.create({ type: "dom/write" });
-      type.output.push({
+      const domWrite = application2.Archetypes.create({ type: "dom/write" });
+      domWrite.output.push({
         id: "output",
-        generator: ({ input, target }) => {
+        program: ({ input, target }) => {
           const data = (0, import_flattenDeep.default)(input).join(", ");
           const targetId = (0, import_head.default)((0, import_flattenDeep.default)(target));
           const elem = document.getElementById(targetId);
@@ -6884,36 +6892,36 @@
           return (0, import_flattenDeep.default)(input);
         }
       });
-      type.input.push({ id: "input", type: "*", description: "data to join" });
-      type.input.push({ id: "target", type: "*", value: "output", description: "data to join" });
+      domWrite.input.push({ id: "input", type: "*", description: "data to join" });
+      domWrite.input.push({ id: "target", type: "*", value: "output", description: "data to join" });
     }
     {
-      const type = application2.Archetypes.create({ type: "midjourney/prompt" });
-      type.output.push({
+      const midjourneyPrompt = application2.Archetypes.create({ type: "midjourney/prompt" });
+      midjourneyPrompt.output.push({
         id: "output",
-        generator: ({ input, secondary, separator }) => {
+        program: ({ input, secondary, separator }) => {
           return (0, import_flattenDeep.default)([input, secondary]);
         }
       });
-      type.output.push({ id: "JSON", generator: ({ value, string }) => {
+      midjourneyPrompt.output.push({ id: "JSON", program: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ id: "debug", generator: ({ value, string }) => {
+      midjourneyPrompt.output.push({ id: "debug", program: ({ value, string }) => {
         return string;
       } });
-      type.output.push({ id: "log", generator: ({ value, string }) => {
+      midjourneyPrompt.output.push({ id: "log", program: ({ value, string }) => {
         return string;
       } });
-      type.input.push({ id: "input", type: "*", description: "data to join" });
-      type.input.push({ id: "template", type: "*", description: "base template" });
-      type.input.push({ id: "secondary", type: "*", description: "secondary characteristics" });
-      type.input.push({ id: "styles", type: "string", description: "styles" });
-      type.input.push({ id: "authors", type: "string", description: "authors", value: "michael vrubel, valentin serov, kustodiev boris" });
-      type.input.push({ id: "chaos", type: "string", description: "chaos" });
-      type.input.push({ id: "aspectRatio", type: "string", description: "aspect-ratio" });
-      type.input.push({ id: "style", type: "string", description: "style" });
-      type.input.push({ id: "weird", type: "string", description: "weird" });
-      type.input.push({ id: "version", type: "string", description: "version", value: "5.2" });
+      midjourneyPrompt.input.push({ id: "input", type: "*", description: "data to join" });
+      midjourneyPrompt.input.push({ id: "template", type: "*", description: "base template" });
+      midjourneyPrompt.input.push({ id: "secondary", type: "*", description: "secondary characteristics" });
+      midjourneyPrompt.input.push({ id: "styles", type: "string", description: "styles" });
+      midjourneyPrompt.input.push({ id: "authors", type: "string", description: "authors", value: "michael vrubel, valentin serov, kustodiev boris" });
+      midjourneyPrompt.input.push({ id: "chaos", type: "string", description: "chaos" });
+      midjourneyPrompt.input.push({ id: "aspectRatio", type: "string", description: "aspect-ratio" });
+      midjourneyPrompt.input.push({ id: "style", type: "string", description: "style" });
+      midjourneyPrompt.input.push({ id: "weird", type: "string", description: "weird" });
+      midjourneyPrompt.input.push({ id: "version", type: "string", description: "version", value: "5.2" });
     }
   }
 
@@ -6923,17 +6931,17 @@
     api2.selectTheme("obsidian");
     const DEBUG = 0;
     if (!DEBUG) {
-      const primaryPromptText1 = api2.addNode("text/string", { string: "Nostromo", x: 100, y: 100 });
-      const primaryPromptText2 = api2.addNode("text/string", { string: "Project 23", x: 100, y: 300 });
-      const secondaryPromptText = api2.addNode("text/string", { string: "USS Enterprise NCC-1701", x: 100, y: 600 });
-      const stringC = api2.addNode("text/string", { string: "Meow!", x: 100, y: 800 });
-      const midjourneyPrompt = api2.addNode("midjourney/prompt", { weird: 10, x: 500, y: 300 });
-      const domWrite = api2.addNode("dom/write", { weird: 10, x: 800, y: 300 });
-      const linkOutput = api2.linkPorts(midjourneyPrompt, domWrite);
-      const linkA1 = api2.linkPorts(primaryPromptText1, midjourneyPrompt);
-      const linkA2 = api2.linkPorts(primaryPromptText2, midjourneyPrompt);
-      const linkB = api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
-      const result = await api2.execute(midjourneyPrompt);
+      const primaryPromptText1 = api2.addNode("text/string", { id: "primaryPromptText1", string: "Nostromo", x: 100, y: 100 });
+      const primaryPromptText2 = api2.addNode("text/string", { id: "primaryPromptText2", string: "Project 23", x: 100, y: 300 });
+      const secondaryPromptText = api2.addNode("text/string", { id: "secondaryPromptText", string: "USS Enterprise NCC-1701", x: 100, y: 600 });
+      const stringC = api2.addNode("text/string", { id: "stringC", string: "Meow!", x: 100, y: 800 });
+      const midjourneyPrompt = api2.addNode("midjourney/prompt", { id: "midjourneyPrompt", weird: 10, x: 500, y: 300 });
+      const domWrite = api2.addNode("dom/write", { id: "domWrite", x: 800, y: 300 });
+      api2.linkPorts(primaryPromptText1, midjourneyPrompt);
+      api2.linkPorts(primaryPromptText2, midjourneyPrompt);
+      api2.linkPorts(secondaryPromptText, midjourneyPrompt, { input: "secondary" });
+      api2.linkPorts(midjourneyPrompt, domWrite);
+      const result = await api2.execute(domWrite);
       console.log("usage.js api.execute said: ", domWrite);
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
@@ -6941,8 +6949,8 @@
         const result2 = await api2.execute(domWrite);
         console.log("usage.js RERUN api.execute said: ", result2);
       };
-      app.Connectors.observe("created", rerun);
-      app.Connectors.observe("removed", rerun);
+      app.Connectors.observe("created", rerun, false);
+      app.Connectors.observe("removed", rerun, false);
     } else {
       const stringA = api2.addNode("text/string", { string: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
     }
