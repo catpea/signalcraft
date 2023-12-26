@@ -100,6 +100,7 @@ export default class Api {
 
 
   load(data){
+    this.deselectAll();
    for (const collectionName in data) {
       this.application[collectionName].clear(true)
       data[collectionName].forEach(item=>this.application[collectionName].create(item))

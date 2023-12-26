@@ -4746,6 +4746,7 @@
       return output2;
     }
     load(data) {
+      this.deselectAll();
       for (const collectionName in data) {
         this.application[collectionName].clear(true);
         data[collectionName].forEach((item) => this.application[collectionName].create(item));
@@ -4803,14 +4804,18 @@
         const nothingConnected = incomingConnectors.length == 0;
         if (nothingConnected) {
           let currentValue = localPort.value;
+          console.log(this.node.id, localPort.id, localPort.value);
           if (this.node[localPort.id])
             currentValue = this.node[localPort.id];
+          console.log(this.node.id, localPort.id, this.node[localPort.id], `"${localPort.value}" => "${currentValue}"`, this.node.content);
           response[localPort.id].push(currentValue);
         } else {
           for (const incomingConnector of incomingConnectors) {
             const parentNode = (incomingConnector.sourceType == "Junction" ? this.application.Junctions : this.application.Nodes).find((node) => node.id == incomingConnector.sourceNode);
-            if (!parentNode)
+            if (!parentNode) {
+              console.log("Unable to locate parent node, could be an undeleted link in data file");
               continue;
+            }
             const connectedPort = parentNode.Output.find((item) => item.id == incomingConnector.sourcePort);
             let result;
             result = await parentNode.Execute.run(connectedPort.id);
@@ -4822,10 +4827,11 @@
     }
     async run(outputPortId) {
       console.log(`${this.infiniteLoop}: Execute Upstream starting with ${this.node.id}/${outputPortId}`);
+      console.log(this.node.content);
       const outputPort = this.node.Output.find((item) => item.id == outputPortId);
       if (!outputPort)
         throw new Error(`Port id ${outputPortId} was not found on node of type ${this.node.type}`);
-      const response = await outputPort.program({ ...await this.resolve(), value: outputPort.value });
+      const response = await outputPort.program({ ...await this.resolve() });
       return response;
     }
   };
@@ -4905,7 +4911,6 @@
     #kind = "Node";
     #application;
     #unsubscribe = [];
-    values;
     Input;
     Output;
     Execute;
@@ -4933,8 +4938,13 @@
         type
       };
       const payload = { ...{ x: 0, y: 0 }, ...archetypeDefaults, ...x, ...options };
+      console.log("PAYLOAD", payload.id, payload);
       delete payload.application;
       Object.entries(payload).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      if (this.separator)
+        this.observe("separator", (v) => console.log("SEPARATOR CHANGED TO:", v));
+      if (this.separator)
+        console.log("this.separator", this.separator);
     }
     start() {
     }
@@ -4990,7 +5000,7 @@
         targetType,
         targetNode,
         targetPort
-        // 
+        //
         // x1:0,
         // y1:0,
         // x2:0,
@@ -5026,12 +5036,11 @@
       this.Output = new ReactiveArray({ application: x.application, parent: this, Item: Output, auto: true });
       this.Input.create({ id: "input" });
       this.Output.create({ id: "output", program: ({ input }) => input });
-      const props = {
-        id: x.id || v4_default(),
-        x: x.x || 0,
-        y: x.y || 0
-      };
-      Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+      const data = { ...x };
+      delete data.application;
+      if (!data.id)
+        data.id = v4_default();
+      Object.entries(data).forEach(([key, val]) => this.defineReactiveProperty(key, val));
     }
     start() {
     }
@@ -5730,7 +5739,7 @@
           port: this.data.port,
           createConnector: ({ targetType, sourceNode, sourcePort, targetNode, targetPort }) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
           createJunction: ({ x, y, sourceNode, sourcePort }) => {
-            const junction = this.view.application.Junctions.create({ properties: { x, y } });
+            const junction = this.view.application.Junctions.create({ x, y });
             const targetNode = junction.id;
             const targetPort = junction.port("input").id;
             this.view.application.Connectors.create({ targetType: "Junction", sourceNode, sourcePort, targetNode, targetPort });
@@ -5837,6 +5846,7 @@
         this.el.Textarea.addEventListener("focusout", () => {
           hiddenables.map((o) => o.style.opacity = 1);
           this.data.node[this.data.port.id] = this.el.Textarea.value;
+          console.log(this.data.node, this.data.port.id, this.data.node[this.data.port.id]);
           this.el.TextareaForeignObject.remove();
         });
       }));
@@ -6181,7 +6191,7 @@
             view.application.Connectors.create({ sourceType: "Junction", targetType, sourceNode, sourcePort, targetNode, targetPort });
         },
         createJunction: ({ x, y, sourceNode, sourcePort }) => {
-          const junction2 = view.application.Junctions.create({ properties: { x, y } });
+          const junction2 = view.application.Junctions.create({ x, y });
           const targetNode = junction2.id;
           const targetPort = junction2.port("input").id;
           view.application.Connectors.create({ sourceType: "Junction", targetType: "Junction", sourceNode, sourcePort, targetNode, targetPort });
@@ -6291,8 +6301,13 @@
         if (typeof menuItem === "string") {
           const listItem2 = html.li();
           this.el.dropdownMenu.appendChild(listItem2);
-          const dropdownDivider = html.hr({ class: "dropdown-divider" });
-          listItem2.appendChild(dropdownDivider);
+          if (menuItem.startsWith("-")) {
+            const dropdownDivider = html.hr({ class: "dropdown-divider" });
+            listItem2.appendChild(dropdownDivider);
+          } else {
+            const dropdownHeader = html.h6({ class: "dropdown-header" }, menuItem);
+            listItem2.appendChild(dropdownHeader);
+          }
           return;
         }
         const listItem = document.createElement("li");
@@ -6448,10 +6463,15 @@
           caption: "Save As...",
           program: () => JSONWriter(JSON.stringify(Api2.save(), null, 2))
         },
-        "---------------------------------------------------------------",
+        // '---------------------------------------------------------------',
+        "Project Templates",
         {
-          caption: "Basic Example",
+          caption: "Hello World",
           program: async () => Api2.load(await (await fetch("./templates/hello-world.json")).json())
+        },
+        {
+          caption: "Nostromo",
+          program: async () => Api2.load(await (await fetch("./templates/nostromo.json")).json())
         }
       ]);
       navbar.add(fileMenu);
@@ -6884,8 +6904,8 @@
       const domWrite = application2.Archetypes.create({ type: "dom/write" });
       domWrite.output.push({
         id: "output",
-        program: ({ input, target }) => {
-          const data = (0, import_flattenDeep.default)(input).join(", ");
+        program: ({ input, target, separator }) => {
+          const data = (0, import_flattenDeep.default)(input).join(separator);
           const targetId = (0, import_head.default)((0, import_flattenDeep.default)(target));
           const elem = document.getElementById(targetId);
           elem.innerText = data;
@@ -6894,6 +6914,7 @@
       });
       domWrite.input.push({ id: "input", type: "*", description: "data to join" });
       domWrite.input.push({ id: "target", type: "*", value: "output", description: "data to join" });
+      domWrite.input.push({ id: "separator", type: "*", value: ", ", description: "data to join" });
     }
     {
       const midjourneyPrompt = application2.Archetypes.create({ type: "midjourney/prompt" });
@@ -6946,11 +6967,18 @@
       const actual = JSON.stringify(result);
       const expect = JSON.stringify(["Hello", "World"]);
       const rerun = async function() {
-        const result2 = await api2.execute(domWrite);
-        console.log("usage.js RERUN api.execute said: ", result2);
+        if (app.Selection.size() == 0) {
+          alert("Select a node to execute");
+        }
+        app.Selection.filter((item) => item.kind == "Node").forEach(async ({ id: id2 }) => {
+          const node = app.Nodes.get(id2);
+          const result2 = await api2.execute(node);
+          console.log("usage.js RERUN api.execute said: ", result2);
+          console.log(api2.save());
+        });
       };
-      app.Connectors.observe("created", rerun, false);
-      app.Connectors.observe("removed", rerun, false);
+      const button = document.getElementById("rerun");
+      button.addEventListener("click", () => rerun());
     } else {
       const stringA = api2.addNode("text/string", { string: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
     }

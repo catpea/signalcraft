@@ -1,0 +1,78 @@
+{
+  "Nodes": [
+    {
+      "x": 128,
+      "y": 110,
+      "string": "Nostromo",
+      "type": "text/string",
+      "id": "primaryPromptText1"
+    },
+    {
+      "x": 591,
+      "y": 136,
+      "target": "output",
+      "type": "dom/write",
+      "id": "domWrite"
+    }
+  ],
+
+  "Junctions": [
+    {
+      "id": "da96eec6-f298-43fd-be9f-7c95df026509",
+      "x": 470,
+      "y": 77
+    },
+    {
+      "id": "9c6e4274-ff56-46fa-90b8-e5024c37cf09",
+      "x": 479,
+      "y": 310
+    }
+  ],
+
+
+
+  "Connectors": [
+    {
+      "id": "8a9a80dc-1dfd-4eba-a5b5-4328faced151",
+      "sourceNode": "primaryPromptText1",
+      "sourcePort": "output",
+      "targetType": "Node",
+      "targetNode": "domWrite",
+      "targetPort": "input"
+    },
+    {
+      "id": "97b4c06c-1141-4e18-9d1d-cc9933e32fce",
+      "sourceNode": "primaryPromptText1",
+      "sourcePort": "output",
+      "targetType": "Junction",
+      "targetNode": "da96eec6-f298-43fd-be9f-7c95df026509",
+      "targetPort": "input"
+    },
+    {
+      "id": "f11bb9fe-7a59-40c9-9992-59bbe10ee018",
+      "sourceType": "Junction",
+      "sourceNode": "da96eec6-f298-43fd-be9f-7c95df026509",
+      "sourcePort": "output",
+      "targetType": "Node",
+      "targetNode": "domWrite",
+      "targetPort": "input"
+    },
+    {
+      "id": "8caf9eaa-3a4b-4ecb-92f2-e423f2abdaca",
+      "sourceNode": "primaryPromptText1",
+      "sourcePort": "output",
+      "targetType": "Junction",
+      "targetNode": "9c6e4274-ff56-46fa-90b8-e5024c37cf09",
+      "targetPort": "input"
+    },
+    {
+      "id": "a48d0421-6319-417a-9ef4-d0a35da096b4",
+      "sourceType": "Junction",
+      "sourceNode": "9c6e4274-ff56-46fa-90b8-e5024c37cf09",
+      "sourcePort": "output",
+      "targetType": "Node",
+      "targetNode": "domWrite",
+      "targetPort": "input"
+    }
+  ]
+}

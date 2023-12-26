@@ -34,13 +34,17 @@ export default class Junction extends ReactiveObject {
     this.Input.create({id:"input"});
     this.Output.create({id:"output", program:({input}) => input });
 
-    const props = {
-      id: x.id||uuid(),
-      x:x.x||0,
-      y:x.y||0,
-    };
+    // const props = {
+    //   id: x.id||uuid(),
+    //   x:x.x||0,
+    //   y:x.y||0,
+    // };
 
-    Object.entries(props).forEach(([key, val]) => this.defineReactiveProperty(key, val));
+    const data = {...x};
+    delete data.application;
+    if(!data.id) data.id = uuid();
+
+    Object.entries(data).forEach(([key, val]) => this.defineReactiveProperty(key, val));
 
   }
 

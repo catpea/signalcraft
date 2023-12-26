@@ -47,13 +47,29 @@ export default async function(api){
 
 
   const rerun = async function(){
-    const result = await api.execute(domWrite);
-    console.log('usage.js RERUN api.execute said: ', result);
-  }
-  //app.Nodes.forEach(o=>o.monitor(()=>rerun()));
 
-  app.Connectors.observe('created', rerun, false)
-  app.Connectors.observe('removed', rerun, false)
+    if(app.Selection.size() == 0){
+      alert('Select a node to execute')
+    }
+
+    app.Selection.filter(item=>item.kind=='Node').forEach(async ({id})=>{
+      const node = app.Nodes.get(id);
+      const result = await api.execute(node);
+      console.log('usage.js RERUN api.execute said: ', result);
+      console.log( api.save() );
+    });
+
+
+
+
+  }
+  const button = document.getElementById('rerun');
+  button.addEventListener('click', ()=>rerun())
+
+  // app.Nodes.forEach(o=>o.monitor(()=>rerun()));
+
+  // app.Connectors.observe('created', rerun, false)
+  // app.Connectors.observe('removed', rerun, false)
 
   }else{
     // const testJunction = api.addJunction({x:50, y:50});
@@ -61,5 +77,4 @@ export default async function(api){
   }
 
 
-  // console.log( api.save() );
 }

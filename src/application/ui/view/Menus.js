@@ -29,10 +29,15 @@ export default class Menus extends Base {
           caption: 'Save As...',
           program: ()=>JSONWriter(JSON.stringify(Api.save(), null, 2)),
         },
-        '---------------------------------------------------------------',
+        // '---------------------------------------------------------------',
+        'Project Templates',
         {
-          caption: 'Basic Example',
+          caption: 'Hello World',
           program: async ()=>Api.load( await (await fetch("./templates/hello-world.json")).json() ),
+        },
+        {
+          caption: 'Nostromo',
+          program: async ()=>Api.load( await (await fetch("./templates/nostromo.json")).json() ),
         },
 
       ])

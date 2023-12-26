@@ -53,8 +53,8 @@ export default function(application) {
 		const domWrite = application.Archetypes.create({ type: 'dom/write' });
 		domWrite.output.push({
 			id: "output",
-			program: ({ input, target, }) => {
-				const data = flattenDeep(input).join(', ');
+			program: ({ input, target, separator}) => {
+				const data = flattenDeep(input).join(separator);
 				const targetId = head(flattenDeep(target));
 				const elem = document.getElementById(targetId);
 				elem.innerText = data;
@@ -63,6 +63,7 @@ export default function(application) {
 		});
 		domWrite.input.push({ id: "input", type: "*", description: "data to join" });
 		domWrite.input.push({ id: "target", type: "*", value: "output", description: "data to join" });
+		domWrite.input.push({ id: "separator", type: "*", value: ", ", description: "data to join" });
 	}
 
 

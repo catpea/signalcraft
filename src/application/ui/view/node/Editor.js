@@ -136,6 +136,7 @@ export default class Editor extends Component {
           this.el.Textarea.addEventListener("focusout", ()=>{
             hiddenables.map(o=>o.style.opacity = 1); //WARN: show everything before making assignment and thus causing measurements
             this.data.node[this.data.port.id] = this.el.Textarea.value;
+						console.log( this.data.node, this.data.port.id, this.data.node[this.data.port.id])
             this.el.TextareaForeignObject.remove();
           });
         }));

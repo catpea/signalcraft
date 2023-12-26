@@ -84,7 +84,7 @@ export default class Junction extends Base {
 
       },
       createJunction: ({x,y,  sourceNode, sourcePort}) => {
-        const junction = view.application.Junctions.create({properties:{ x,y }});
+        const junction = view.application.Junctions.create({  x,y });
         const targetNode = junction.id;
         const targetPort = junction.port('input').id;
         view.application.Connectors.create({ sourceType:'Junction', targetType:'Junction' ,sourceNode, sourcePort, targetNode, targetPort });

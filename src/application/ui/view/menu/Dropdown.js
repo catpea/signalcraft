@@ -44,13 +44,16 @@ export default class Dropdown extends Component {
 		this.data.forEach(menuItem=>{
 
 			if(typeof menuItem === 'string') {
-
 				const listItem = html.li();
 				this.el.dropdownMenu.appendChild(listItem);
 
-				const dropdownDivider = html.hr({class:'dropdown-divider'});
-				listItem.appendChild(dropdownDivider);
-
+				if(menuItem.startsWith('-')){
+					const dropdownDivider = html.hr({class:'dropdown-divider'});
+					listItem.appendChild(dropdownDivider);
+				}else{
+					const dropdownHeader = html.h6({class:'dropdown-header'}, menuItem);
+					listItem.appendChild(dropdownHeader);
+				}
 				return;
 			}
 

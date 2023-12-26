@@ -14,8 +14,6 @@ export default class Node extends ReactiveObject {
   #application;
   #unsubscribe = [];
 
-  values;
-
   Input;
   Output;
   Execute;
@@ -28,9 +26,9 @@ export default class Node extends ReactiveObject {
     if(!type) throw new Error('You must initialize a node with a known type, type was not specified');
 
     this.Execute = new Standard(this);
-
     this.Input = new ReactiveArray({application:this.application, parent:this, Item:Input, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
     this.Output = new ReactiveArray({application:this.application, parent:this, Item:Output, auto:true }); // this is populated at instantiation of node by copying information from the pertinent type
+
 
     //NOTE: archetype is not a reactive object, same for archetype's .input and .reply
     const archetype = this.application.Archetypes.find(o=>o.type==type);
@@ -46,9 +44,13 @@ export default class Node extends ReactiveObject {
       type ,
     };
     const payload = {...{x:0, y:0}, ...archetypeDefaults, ...x, ...options};
+
+    console.log('PAYLOAD', payload.id, payload);
+
     delete payload.application
     Object.entries(payload).forEach(([key, val]) => this.defineReactiveProperty(key, val));
-
+    if(this.separator) this.observe('separator', (v)=>console.log('SEPARATOR CHANGED TO:', v))
+    if(this.separator) console.log('this.separator',this.separator);
   }
 
   start(){

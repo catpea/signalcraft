@@ -78,7 +78,7 @@ export default class Port extends Component {
 				createConnector: ({targetType, sourceNode, sourcePort, targetNode, targetPort}) => this.view.application.Connectors.create({ targetType, sourceNode, sourcePort, targetNode, targetPort }),
 				createJunction: ({x,y,  sourceNode, sourcePort}) => {
 					// first create target junction
-					const junction = this.view.application.Junctions.create({properties:{ x,y }});
+					const junction = this.view.application.Junctions.create({  x,y });
 					const targetNode = junction.id;
 					const targetPort = junction.port('input').id;
 					// now create this node to the junction

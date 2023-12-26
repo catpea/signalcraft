@@ -10,10 +10,8 @@ CTRL+Click on caption or cable will select it.
 
 ## TODO
 
+- LOL, set primary button correctly for after JSON is loaded, default value ovveriding node value stored in json investigate
 - Connectors are not removed from COnnectors array
-- Starter Templates
-  - Project 23
-  - Global Thermonuclear War
 
 , https://youtu.be/utrxk5_PeEY?t=104
 

@@ -24,7 +24,7 @@ export default class Connector extends ReactiveObject {
       targetType,
       targetNode,
       targetPort,
-      // 
+      //
       // x1:0,
       // y1:0,
       // x2:0,
